@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.mm.v2</groupId>
-  <artifactId>musicmirror</artifactId>
+  <artifactId>recommender</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <name>musicmirror</name>
