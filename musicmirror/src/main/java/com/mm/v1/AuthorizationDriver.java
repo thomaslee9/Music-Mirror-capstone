@@ -24,8 +24,8 @@ public class AuthorizationDriver {
     private String client_id = "7cbd084df6f043f1addef58bc5057f7a";
     private String redirect_uri = "http://localhost:8080/spotify";
     private String scopes = "user-read-currently-playing user-read-playback-state";
-    private String username = "maroldaluke@gmail.com";
-    private String password = "MrLvm2002!";
+    private String username = "XXXXXXXXXXX";
+    private String password = "XXXXXXXXXXX";
 
     public void authorize()  {
 
