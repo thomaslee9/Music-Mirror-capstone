@@ -1,0 +1,3 @@
+[submodule "spring-boot-websocket-chat-app"]
+	path = spring-boot-websocket-chat-app
+	url = https://github.com/ali-bouali/spring-boot-websocket-chat-app.git
