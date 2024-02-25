@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.Scanner;
 
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 
 import com.mm.v1.requests.AuthorizationRequest;
 
@@ -25,7 +26,7 @@ public class AuthorizationDriver {
     private String redirect_uri = "http://localhost:8080/spotify";
     private String scopes = "user-read-currently-playing user-read-playback-state";
     private String username = "maroldaluke@gmail.com";
-    private String password = "MrLvm2002!";
+    private String password = "guwxa8-syhcar-kAzhef";
 
     public void authorize()  {
 
@@ -44,12 +45,28 @@ public class AuthorizationDriver {
         // fill in login credentials if necessary
         driver.findElement(By.id("login-username")).sendKeys(username);
         driver.findElement(By.id("login-password")).sendKeys(password);
+
         driver.findElement(By.id("login-button")).click();
 
         /** TODO: may have to add an additional button click */
 
+        boolean retry = false;
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("login-button")));
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("login-button")));
+        } catch (TimeoutException e)    {
+            System.out.println("Exception: Login button click failed. Trying again");
+            retry = true;
+        }
+
+        if (retry)  {
+            driver.findElement(By.id("login-button")).click();
+            try {
+                wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("login-button")));
+            } catch (TimeoutException e)    {
+                System.out.println("Exception: Login button click failed. Fatal.");
+            }
+        }
 
         // close the browser
         driver.quit();

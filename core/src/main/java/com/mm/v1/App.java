@@ -66,7 +66,14 @@ public class App extends NanoHTTPD {
 
             System.out.println("Spotify Access Token: " + access_token);
 
-            String seed = "seed_artists=3WrFJ7ztbogyGnTHbHJFl2&seed_genres=rock&seed_tracks=2hOC9qItvmSkgMnxRjgPSr";
+            SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
+            builder.addMinAcousticness("0.1");
+            builder.addMinPopularity("75");
+            builder.addMaxDanceability("0.5");
+
+            String seed = builder.getSeed();
+
+            System.out.println(seed);
 
             RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
 
