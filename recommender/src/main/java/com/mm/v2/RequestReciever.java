@@ -32,6 +32,11 @@ public class RequestReciever extends WebSocketServer {
         ex.printStackTrace();
     }
 
+    @Override
+    public void onStart() {
+        System.out.println("Server started!");
+    }
+
     public static void main(String[] args) {
         String host = "0.0.0.0"; // Bind to all interfaces
         int port = 8080; // Specify your desired port
