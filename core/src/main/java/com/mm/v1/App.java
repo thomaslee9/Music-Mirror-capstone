@@ -3,10 +3,13 @@ package com.mm.v1;
 import java.io.IOException;
 import java.util.Map;
 
+import com.mm.v1.device.DeviceObject;
 import com.mm.v1.requests.AccessTokenRequest;
 import com.mm.v1.requests.AuthorizationRequest;
+import com.mm.v1.requests.AvailableDevicesRequest;
 import com.mm.v1.requests.RecommendationRequest;
 import com.mm.v1.responses.AccessTokenResponse;
+import com.mm.v1.responses.AvailableDevicesResponse;
 import com.mm.v1.responses.RecommendationResponse;
 import com.mm.v1.song.TrackObject;
 
@@ -66,20 +69,28 @@ public class App extends NanoHTTPD {
 
             System.out.println("Spotify Access Token: " + access_token);
 
-            SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
-            builder.addMinAcousticness("0.1");
-            builder.addMinPopularity("75");
-            builder.addMaxDanceability("0.5");
+            AvailableDevicesResponse r = new AvailableDevicesRequest().getAvailableDevices(access_token);
 
-            String seed = builder.getSeed();
+            String id = "6d2cc0b8-d82d-4e8a-9d60-b209e54ca960_amzn_1";
 
-            System.out.println(seed);
-
-            RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
-
-            for (TrackObject track : rec.getTracks())  {
-                System.out.println(track.getName());
+            for (DeviceObject d : r.getDevices())   {
+                System.out.println(d.getName());
             }
+            
+            //SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
+            //builder.addMinAcousticness("0.1");
+            //builder.addMinPopularity("75");
+            //builder.addMaxDanceability("0.5");
+
+            //String seed = builder.getSeed();
+
+            //System.out.println(seed);
+
+            //RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
+
+            //for (TrackObject track : rec.getTracks())  {
+            //    System.out.println(track.getName());
+            //}
 
 
         }
