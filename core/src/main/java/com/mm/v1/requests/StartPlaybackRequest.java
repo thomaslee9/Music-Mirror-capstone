@@ -13,15 +13,16 @@ import com.mm.v1.responses.AvailableDevicesResponse;
 
 public class StartPlaybackRequest {
 
-    public AvailableDevicesResponse getAvailableDevices(String access_token)    {
+    public AvailableDevicesResponse getAvailableDevices(String access_token, String device_id)    {
 
         URL url = null;
         HttpURLConnection con = null;
         AvailableDevicesResponse response = null;
 
+        String d = "device_id=" + device_id;
         // first create the URL and open a connection
         try {
-            url = new URL("https://api.spotify.com/v1/me/player/play");
+            url = new URL("https://api.spotify.com/v1/me/player/play?" + d);
             con = (HttpURLConnection) url.openConnection();
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -37,7 +38,6 @@ public class StartPlaybackRequest {
             con.setRequestMethod("PUT");
             con.setRequestProperty("Content-Type", "application/json");
             con.setRequestProperty("Authorization", "Bearer " + access_token);
-            con.setRequestProperty
         } catch (ProtocolException e) {
             e.printStackTrace();
         }
