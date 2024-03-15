@@ -1,45 +1,63 @@
 package com.mm.v1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.mm.v1.semanticmatch.SemanticMatch;
 
 public class SemanticMatchTest {
 
+
     public static void main(String[] args) {
 
-        String input, output;
+        List<String[]> tests = getTests();
 
-        input = "Come Together (Remastered) The Beatles Abbey Road";
-        output = "Come Together The Beatles Abbey Road (20th Anniversary Edition)";
-        testMatch(input, output);
+        for (String[] test : tests) {
 
-        input = "Band on the Run Wings & Paul McCartney Band on the Run";
-        output = "Band on the Run Wings Band on the Run";
-        testMatch(input, output);
+            String input = test[0];
+            String output = test[1];
 
-        input = "Purple Rain Prince Best of Prince";
-        output = "Purple Rain Prince Purple Rain";
-        testMatch(input, output);
+            testMatch(input, output);
 
-        input = "Yesterday J Dilla";
-        output = "Yesterday The Beatles";
-        testMatch(input, output);
+        }
 
-        input = "Live and Let Die Wings Red Rose Speedway";
-        output = "Live and Let Die Wings Best of Wings";
-        testMatch(input, output);
+    }
 
-        input = "Mack Game Totally Insane Direct From The Backstreet";
-        output = "mack GAME ToTaLLy insane DIRECT From The backstreet";
-        testMatch(input, output);
+    private static List<String[]> getTests()    {
 
-        input = "Light mr Fire The Dors Te Doors";
-        output = "Light My Fire The Doors The Doors";
-        testMatch(input, output);
+        List<String[]> tests = new ArrayList<String[]>();
 
-        /** WARNING: need to improve, this should be more similar */
-        input = "Esate Joa Gilberto Amorosoo";
-        output = "Estate Joao Gilberto Amoroso";
-        testMatch(input, output);
+        String[] test1 = new String[] {"Come Together (Remastered) The Beatles", "Come Together The Beatles"};
+        tests.add(test1);
+
+        String[] test2 = new String[] {"Purple Rain Prince", "Purple Rain Prince and the Revolution"};
+        tests.add(test2);
+
+        String[] test3 = new String[] {"Mack Game Totally Insane", "mack GAME ToTaLLy insane"};
+        tests.add(test3);
+
+        String[] test4 = new String[] {"Esate Joa Gilberto", "Estate Joao Gilberto"};
+        tests.add(test4);
+
+        String[] test5 = new String[] {"Mo Bambo Sheck Wis", "Mo Bomba Sheck Wes"};
+        tests.add(test5);
+
+        String[] test6 = new String[] {"Yesterday J Dilla", "Yesterday The Beatles"};
+        tests.add(test6);
+
+        String[] test7 = new String[] {"Let it Be The Beatles", "Let it Be The Replacements"};
+        tests.add(test7);
+
+        String[] test8 = new String[] {"Ellie's Love Theme (Remix) Isaac Hayes", "Ellie's Love Theme Isaac Hayes"};
+        tests.add(test8);
+
+        String[] test9 = new String[] {"1984 David Bowie", "1984 Van Halen"};
+        tests.add(test9);
+
+        String[] test10 = new String[] {"A Thousand Years Toto", "A Thousand Years Sting"};
+        tests.add(test10);
+
+        return tests;
 
     }
 

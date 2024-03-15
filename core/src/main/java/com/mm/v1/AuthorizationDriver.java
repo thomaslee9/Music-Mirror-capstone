@@ -24,14 +24,14 @@ public class AuthorizationDriver {
 
     private String client_id = "7cbd084df6f043f1addef58bc5057f7a";
     private String redirect_uri = "http://localhost:8080/spotify";
-    private String scopes = "user-read-currently-playing user-read-playback-state";
+    private String scopes = "user-read-currently-playing user-read-playback-state user-modify-playback-state";
     private String username = "maroldaluke@gmail.com";
     private String password = "guwxa8-syhcar-kAzhef";
 
     public void authorize()  {
 
         // set the path to the ChromeDriver executable
-        System.setProperty("webdriver.chrome.driver", "capstone/core/bin/chrome/chromedriver");
+        System.setProperty("webdriver.chrome.driver", "core/bin/chrome/chromedriver");
 
         // create a new instance of the ChromeDriver
         WebDriver driver = new ChromeDriver();
@@ -51,7 +51,7 @@ public class AuthorizationDriver {
         /** TODO: may have to add an additional button click */
 
         boolean retry = false;
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
         try {
             wait.until(ExpectedConditions.invisibilityOfElementLocated(By.id("login-button")));
         } catch (TimeoutException e)    {

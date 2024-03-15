@@ -5,9 +5,11 @@ import java.util.Map;
 
 import com.mm.v1.device.DeviceObject;
 import com.mm.v1.requests.AccessTokenRequest;
+import com.mm.v1.requests.AddToPlaybackRequest;
 import com.mm.v1.requests.AuthorizationRequest;
 import com.mm.v1.requests.AvailableDevicesRequest;
 import com.mm.v1.requests.RecommendationRequest;
+import com.mm.v1.requests.StartPlaybackRequest;
 import com.mm.v1.responses.AccessTokenResponse;
 import com.mm.v1.responses.AvailableDevicesResponse;
 import com.mm.v1.responses.RecommendationResponse;
@@ -38,9 +40,45 @@ public class App extends NanoHTTPD {
         System.out.println("\nRunning! Point your browsers to http://localhost:8080/ \n");
 
         AuthorizationDriver auth = new AuthorizationDriver();
-        auth.authorize();
+        // auth.authorize();
 
-        //String access_token = "BQDC1xqx11cya-nWjOZOBqYUH-F_3_kz3uoBLzfQ2fZgFJJwrs7tvxtYAubt-UBsurYGMUUkAILANsmda3QW_uAYQgLQN1DzLHs6r7AZZpxMA4AiOJlv374zQCNrFpN7LkYJuKNqq3g9pEZ1NXmChcT0uKIx593POy8rmYbvxk_tgpZtz7qi8MU";
+        String access_token = "BQA8Kg2_D7f9wGbxCuL5g0kaYyE9RYZRSAJBRcRS3PsoEu63FKpVW2DCgo7eCywwRpzpQo5BJa-V3hZH94gGt-2Kn1B2yLHLcWZLyxtFumXCNik73gLAMTAVtJT124xWx01RTZZLNFIr4g1anOwPaJLKk76Yp4874DO7RQVRBZUIi1uQD3aVYogl4OI4";
+        
+        String device_id = "83e2221a51a366dbca4e16114644ef9a6ad165e9";
+
+        System.out.println("### Getting song recommendations ###");
+
+        // StartPlaybackRequest start_playback = new StartPlaybackRequest();
+        // start_playback.startPlayback(access_token, device_id);
+        
+        SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
+        builder.addMinAcousticness("0.1");
+        builder.addMinPopularity("75");
+        builder.addMaxDanceability("0.5");
+
+        String seed = builder.getSeed();
+        System.out.println(seed);
+
+        RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
+
+        System.out.println("Generated Recommendations:");
+        for (TrackObject track : rec.getTracks())  {
+            System.out.println(track.getName());
+        }
+
+        System.out.println("### Adding song to queue ###");
+
+        String song_id = rec.getTracks()[0].getId();
+
+        System.out.println("### Adding to Queue ###");
+        AddToPlaybackRequest p = new AddToPlaybackRequest();
+        p.addToQueue(access_token, song_id, device_id);
+
+        System.out.println("### Starting Playback ###");
+
+        StartPlaybackRequest playback = new StartPlaybackRequest();
+        playback.skipToNext(access_token);
+        playback.startPlayback2(access_token);
 
 
     }
@@ -69,28 +107,41 @@ public class App extends NanoHTTPD {
 
             System.out.println("Spotify Access Token: " + access_token);
 
-            AvailableDevicesResponse r = new AvailableDevicesRequest().getAvailableDevices(access_token);
+            // AvailableDevicesResponse r = new AvailableDevicesRequest().getAvailableDevices(access_token);
 
-            String id = "6d2cc0b8-d82d-4e8a-9d60-b209e54ca960_amzn_1";
+            String device_id = "83e2221a51a366dbca4e16114644ef9a6ad165e9";
 
-            for (DeviceObject d : r.getDevices())   {
-                System.out.println(d.getName());
-            }
+            System.out.println("### Getting song recommendations ###");
+
+            // StartPlaybackRequest start_playback = new StartPlaybackRequest();
+            // start_playback.startPlayback(access_token, device_id);
             
-            //SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
-            //builder.addMinAcousticness("0.1");
-            //builder.addMinPopularity("75");
-            //builder.addMaxDanceability("0.5");
+            SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
+            builder.addMinAcousticness("0.1");
+            builder.addMinPopularity("75");
+            builder.addMaxDanceability("0.5");
 
-            //String seed = builder.getSeed();
+            String seed = builder.getSeed();
+            System.out.println(seed);
 
-            //System.out.println(seed);
-
-            //RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
+            RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
 
             //for (TrackObject track : rec.getTracks())  {
-            //    System.out.println(track.getName());
+            //    System.out.println(track.getId());
             //}
+
+            System.out.println("### Adding songs to queue ###");
+
+            String song_id = rec.getTracks()[0].getId();
+
+            System.out.println("### Adding to Queue ###");
+            AddToPlaybackRequest p = new AddToPlaybackRequest();
+            p.addToQueue(access_token, song_id, device_id);
+
+            System.out.println("### Starting Playback ###");
+
+            StartPlaybackRequest start_playback = new StartPlaybackRequest();
+            start_playback.startPlayback2(access_token);
 
 
         }
