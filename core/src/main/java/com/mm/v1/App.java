@@ -42,44 +42,14 @@ public class App extends NanoHTTPD {
         AuthorizationDriver auth = new AuthorizationDriver();
         // auth.authorize();
 
-        String access_token = "BQA8Kg2_D7f9wGbxCuL5g0kaYyE9RYZRSAJBRcRS3PsoEu63FKpVW2DCgo7eCywwRpzpQo5BJa-V3hZH94gGt-2Kn1B2yLHLcWZLyxtFumXCNik73gLAMTAVtJT124xWx01RTZZLNFIr4g1anOwPaJLKk76Yp4874DO7RQVRBZUIi1uQD3aVYogl4OI4";
+        String access_token = "BQBUEVAawDc-d8XAKcnMQBifpKuGgL69DPbz-R8FRxl2BJrx5XvoMa1dOn-AudnYov1q9tm_ZcKsK2Js8X74_3JLartAQ9YVyKL6VAMCZTpFou7zBcqpKeS5sJ0Q9OjUXoFVAlY_sHjXOZ443PVdo4iZQyjMX8kowDP_cIslBfyA5WL5SQyBGd4-CPbu";
         
-        String device_id = "83e2221a51a366dbca4e16114644ef9a6ad165e9";
+        SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
-        System.out.println("### Getting song recommendations ###");
+        String song_name = "Highway Star";
+        String artist_name = "Deep Purple";
 
-        // StartPlaybackRequest start_playback = new StartPlaybackRequest();
-        // start_playback.startPlayback(access_token, device_id);
-        
-        SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
-        builder.addMinAcousticness("0.1");
-        builder.addMinPopularity("75");
-        builder.addMaxDanceability("0.5");
-
-        String seed = builder.getSeed();
-        System.out.println(seed);
-
-        RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
-
-        System.out.println("Generated Recommendations:");
-        for (TrackObject track : rec.getTracks())  {
-            System.out.println(track.getName());
-        }
-
-        System.out.println("### Adding song to queue ###");
-
-        String song_id = rec.getTracks()[0].getId();
-
-        System.out.println("### Adding to Queue ###");
-        AddToPlaybackRequest p = new AddToPlaybackRequest();
-        p.addToQueue(access_token, song_id, device_id);
-
-        System.out.println("### Starting Playback ###");
-
-        StartPlaybackRequest playback = new StartPlaybackRequest();
-        playback.skipToNext(access_token);
-        playback.startPlayback2(access_token);
-
+        P.queueSong(song_name, artist_name);
 
     }
 
@@ -141,7 +111,7 @@ public class App extends NanoHTTPD {
             System.out.println("### Starting Playback ###");
 
             StartPlaybackRequest start_playback = new StartPlaybackRequest();
-            start_playback.startPlayback2(access_token);
+            start_playback.startPlayback(access_token);
 
 
         }

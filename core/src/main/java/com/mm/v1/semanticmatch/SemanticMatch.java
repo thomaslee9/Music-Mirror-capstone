@@ -45,7 +45,9 @@ public class SemanticMatch {
     }
 
     
-    public static double computeCosineSimilarityOld(String input, String output, int N) {
+    public static double computeCosineSimilarityOld(String input, String output) {
+
+        int N = 1;
 
         Map<CharSequence, Integer> leftVector = stringToFrequencyMap(input, N);
         Map<CharSequence, Integer> rightVector = stringToFrequencyMap(output, N);

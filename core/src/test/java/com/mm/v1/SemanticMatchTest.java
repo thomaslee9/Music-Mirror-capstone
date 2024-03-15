@@ -63,7 +63,7 @@ public class SemanticMatchTest {
 
     private static void testMatch(String input, String output)   {
 
-        double similarity = SemanticMatch.computeCosineSimilarity(input, output);
+        double similarity = SemanticMatch.computeCosineSimilarityOld(input, output);
 
         System.out.println("## TESTING ##");
         System.out.println("Input: " + input);

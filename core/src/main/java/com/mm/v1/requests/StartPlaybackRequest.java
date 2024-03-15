@@ -18,59 +18,7 @@ import com.mm.v1.responses.AvailableDevicesResponse;
 
 public class StartPlaybackRequest {
 
-    public void startPlayback(String access_token, String device_id)    {
-
-        URL url = null;
-        HttpURLConnection con = null;
-
-        String d = "device_id=" + device_id;
-        // first create the URL and open a connection
-        try {
-            url = new URL("https://api.spotify.com/v1/me/player/play?" + d);
-            con = (HttpURLConnection) url.openConnection();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println("URL:");
-        System.out.println(url.toString());
-
-        // now we can build the request
-        try {
-            con.setRequestMethod("PUT");
-            con.setRequestProperty("Content-Length", "0");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setRequestProperty("Authorization", "Bearer " + access_token);
-            con.setDoOutput(true);
-        } catch (ProtocolException e) {
-            e.printStackTrace();
-        }
-
-        try {
-
-            int status = con.getResponseCode();
-            System.out.println(status);
-
-            BufferedReader in = new BufferedReader(
-            new InputStreamReader(con.getInputStream()));
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            in.close();
-
-            con.disconnect();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
-    public void startPlayback2(String access_token)    {
+    public void startPlayback(String access_token)    {
 
         HttpClient client = HttpClient.newHttpClient();
 

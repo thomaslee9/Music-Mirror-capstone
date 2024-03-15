@@ -16,7 +16,7 @@ import com.mm.v1.responses.SearchResponse;
 public class SearchRequest {
 
     public SearchResponse searchForTrack(String access_token, 
-                                              String song_name, String album_name, String artist_name,
+                                              String song_name, String artist_name,
                                               int encoding_scheme)  {
 
         URL url = null;
@@ -25,10 +25,10 @@ public class SearchRequest {
 
         String q = "";
         if (encoding_scheme == 1)   {
-            q = this.build_search_query(song_name, album_name, artist_name);
+            q = this.build_search_query(song_name, artist_name);
         }
         else if (encoding_scheme == 2)  {
-            q = this.build_search_query_2(song_name, album_name, artist_name);
+            q = this.build_search_query_2(song_name, artist_name);
         }
         // first create the URL and open a connection
         try {
@@ -81,7 +81,7 @@ public class SearchRequest {
 
     }
 
-    private String build_search_query(String song_name, String album_name, String artist_name)  {
+    private String build_search_query(String song_name, String artist_name)  {
 
         String query = "track:" + song_name + " " +
                        "artist:" + artist_name;
@@ -99,7 +99,7 @@ public class SearchRequest {
     }
 
     // ex: q=track%3ADoxy%2520artist%3AMiles%2520Davis
-    private String build_search_query_2(String song_name, String album_name, String artist_name)  {
+    private String build_search_query_2(String song_name, String artist_name)  {
 
         String query = song_name;
         
