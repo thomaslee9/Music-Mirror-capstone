@@ -1,4 +1,4 @@
-// package com.alibou.websocket.chat;
+package com.mirror.queue.queue;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
