@@ -11,7 +11,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 public class QueueController {
 
     @MessageMapping("/queue.sendRequest")
-    @SendTo("/topic/main")
+    @SendTo("/topic/public")
     public Request sendRequest(
         @Payload Request userRequest
     ) {
@@ -20,7 +20,7 @@ public class QueueController {
     }
 
     @MessageMapping("/queue.addUser")
-    @SendTo("/topic/main")
+    @SendTo("/topic/public")
     public Request addUser(
         @Payload Request userRequest,
         SimpMessageHeaderAccessor accessor

@@ -41,7 +41,7 @@ function connect(event) {
 }
 
 function onConnected() {
-    stompClient.subscribe('/topic/main', onMessageReceived);
+    stompClient.subscribe('/topic/public', onMessageReceived);
 
     // Send JOIN Request
     stompClient.send("/app/queue.addUser", 
@@ -90,9 +90,31 @@ function onMessageReceived(payload) {
         message.content = '-->' + message.username + ' left the party';
     } else {
         messageElement.classList.add('chat-message');
-        message.content = 'New Add' + message.username;
+        // message.content = 'New Add' + message.username;
+
+        // Old User Entry Element
+        var avatarElement = document.createElement('i');
+        var avatarText = document.createTextNode(message.username[0]);
+        avatarElement.appendChild(avatarText);
+        avatarElement.style['background-color'] = getAvatarColor(message.username);
+
+        messageElement.appendChild(avatarElement);
+
+        var usernameElement = document.createElement('span');
+        var usernameText = document.createTextNode(message.username);
+        usernameElement.appendChild(usernameText);
+        messageElement.appendChild(usernameElement);
     }
 
+    // Old something else
+    var textElement = document.createElement('p');
+    var messageText = document.createTextNode(message.songName);
+    textElement.appendChild(messageText);
+
+    messageElement.appendChild(textElement);
+
+    queueArea.appendChild(messageElement);
+    queueArea.scrollTop = queueArea.scrollHeight;
 }
 
 
