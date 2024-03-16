@@ -93,6 +93,18 @@ function onMessageReceived(payload) {
 
         console.log("queue: ")
         console.log(message);
+        console.log("NumSongs: ", String(message.queue.length))
+
+        // Clear Old Queue
+        queueArea.innerHTML = '';
+
+        // Build Queue Elements
+        for (var i = 0; i < message.queue.length; i++) {
+            var currSongElement = document.createElement('li');
+            var currSongText = document.createTextNode(message.queue[i].songName);
+            currSongElement.appendChild(currSongText);
+            queueArea.appendChild(currSongElement);
+        }
 
         // Old User Entry Element
         // var avatarElement = document.createElement('i');
