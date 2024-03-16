@@ -39,7 +39,7 @@ public class WebSocketEventListener {
                 .username(username)
                 .build();
 
-            messagingTemplate.convertAndSend("/topic/main", userRequest);   
+            messagingTemplate.convertAndSend("/topic/public", userRequest);   
 
         }
     }
