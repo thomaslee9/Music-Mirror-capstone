@@ -14,17 +14,19 @@ public class QueueController {
 
     @MessageMapping("/queue.sendRequest")
     @SendTo("/topic/public")
-    public Request sendRequest(
+    public SongQueue sendRequest(
         @Payload Request userRequest
     ) {
 
+        var id = "00000";
         // Add song to Queue
-        Song newSong = new Song(userRequest.getSongName(), userRequest.getUser());
+        Song newSong = new Song(userRequest.getSongName(), id, userRequest.getUser());
         sq.push(newSong);
         sq.printQueue();
 
         // Return User Request
-        return userRequest;
+        // return userRequest;
+        return sq;
     }
 
     @MessageMapping("/queue.addUser")
