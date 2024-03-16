@@ -120,6 +120,8 @@ function onMessageReceived(payload) {
             queueArea.appendChild(currSongElement);
         }
     }
+
+    queueArea.appendChild(messageElement);
     queueArea.scrollTop = queueArea.scrollHeight;
 }
 
