@@ -10,11 +10,19 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 @Controller
 public class QueueController {
 
+    private static SongQueue sq = new SongQueue();
+
     @MessageMapping("/queue.sendRequest")
     @SendTo("/topic/public")
     public Request sendRequest(
         @Payload Request userRequest
     ) {
+
+        // Add song to Queue
+        Song newSong = new Song(userRequest.getSongName(), userRequest.getUser());
+        sq.push(newSong);
+        sq.printQueue();
+
         // Return User Request
         return userRequest;
     }
