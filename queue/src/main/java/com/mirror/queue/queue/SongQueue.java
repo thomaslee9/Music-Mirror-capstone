@@ -2,6 +2,15 @@ package com.mirror.queue.queue;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@Builder
 public class SongQueue {
     private ConcurrentLinkedQueue<Song> queue;
 
@@ -47,7 +56,7 @@ public class SongQueue {
         // Continuous Request Acceptor loop
         while (true) {
             
-            Song newSong = new Song("test", "testID_" + i);
+            Song newSong = new Song("test", "testID_" + i, "testUser");
             i++;
 
             // Add New Song to Queue
