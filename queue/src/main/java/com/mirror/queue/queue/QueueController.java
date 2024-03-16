@@ -22,9 +22,9 @@ public class QueueController {
         // Add song to Queue
         Song newSong = new Song(userRequest.getSongName(), id, userRequest.getUser());
         sq.push(newSong);
-        sq.printQueue();
+        // sq.printQueue();
 
-        // Return User Request
+        // Return payload
         // return userRequest;
         return sq;
     }

@@ -91,44 +91,25 @@ function onMessageReceived(payload) {
     } else {
         messageElement.classList.add('chat-message');
 
-        console.log("queue: ")
-        console.log(message);
+        // Debugging Queue Readout
+        console.log("Queue: ")
         console.log("NumSongs: ", String(message.queue.length))
+        console.log(message);
 
         // Clear Old Queue
         queueArea.innerHTML = '';
 
         // Build Queue Elements
         for (var i = 0; i < message.queue.length; i++) {
+            // Basic Queue Song View:
             var currSongElement = document.createElement('li');
-            var currSongText = document.createTextNode(message.queue[i].songName);
+            var currSongText = document.createTextNode("'" + message.queue[i].songName + "' <--- queued by " + message.queue[i].user);
             currSongElement.appendChild(currSongText);
+            currSongElement.style['background-color'] = getAvatarColor(message.queue[i].user);
             queueArea.appendChild(currSongElement);
         }
-
-        // Old User Entry Element
-        // var avatarElement = document.createElement('i');
-        // var avatarText = document.createTextNode(message.username[0]);
-        // avatarElement.appendChild(avatarText);
-        // avatarElement.style['background-color'] = getAvatarColor(message.username);
-
-        // messageElement.appendChild(avatarElement);
-
-        // var usernameElement = document.createElement('span');
-        // var usernameText = document.createTextNode(message.username);
-        // usernameElement.appendChild(usernameText);
-        // messageElement.appendChild(usernameElement);
     }
-
-    // Old something else
-    // var textElement = document.createElement('p');
-    // var messageText = document.createTextNode(message.songName);
-    // textElement.appendChild(messageText);
-
-    // messageElement.appendChild(textElement);
-
-    // queueArea.appendChild(messageElement);
-    // queueArea.scrollTop = queueArea.scrollHeight;
+    queueArea.scrollTop = queueArea.scrollHeight;
 }
 
 
