@@ -49,6 +49,15 @@ function onConnected() {
         JSON.stringify({sender: username, type: 'JOIN'})
     )
 
+    // Forward Current Queue to New User:
+    var userRequest = {
+        username: username,
+        songName: "NULL",
+        type: 'REQUEST'
+    };
+
+    stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));
+
     // Hide Connecting... in progress message
     connectingElement.classList.add('hidden');
 }
@@ -85,9 +94,11 @@ function onMessageReceived(payload) {
     if (message.type === 'JOIN') {
         messageElement.classList.add('event-message');
         message.content = '-->' + message.username + ' joined the party';
+
     } else if (message.type === 'LEAVE') {
         messageElement.classList.add('event-message');
         message.content = '-->' + message.username + ' left the party';
+
     } else {
         messageElement.classList.add('chat-message');
 
