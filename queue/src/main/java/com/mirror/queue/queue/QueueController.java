@@ -18,11 +18,16 @@ public class QueueController {
         @Payload Request userRequest
     ) {
 
+        // Send Queue to New User
+        if (userRequest.getSongName().equals("NULL")) {
+            return sq;
+        }
+        
         var id = "00000";
         // Add song to Queue
         Song newSong = new Song(userRequest.getSongName(), id, userRequest.getUser());
         sq.push(newSong);
-        // sq.printQueue();
+        sq.printQueue();
 
         // Return payload
         // return userRequest;
