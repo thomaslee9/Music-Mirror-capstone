@@ -11,6 +11,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 public class QueueController {
 
     private static SongQueue sq = new SongQueue();
+    private static PiClient pi = new PiClient();
 
     @MessageMapping("/queue.sendRequest")
     @SendTo("/topic/public")
@@ -28,7 +29,7 @@ public class QueueController {
         Song newSong = new Song(userRequest.getSongName(), id, userRequest.getUser());
         sq.push(newSong);
         sq.printQueue();
-
+        pi.sendMessage(userRequest.getSongName());
         // Return payload
         // return userRequest;
         return sq;
