@@ -49,24 +49,24 @@ public class SongQueue {
 
     // Main Method for continually accepting song messages
     public static void main(String[] args) {
-        SongQueue testQueue = new SongQueue();
+        // SongQueue testQueue = new SongQueue();
 
-        int i = 0;
+        // int i = 0;
 
-        // Continuous Request Acceptor loop
-        while (true) {
+        // // Continuous Request Acceptor loop
+        // while (true) {
             
-            Song newSong = new Song("test", "testID_" + i, "testUser");
-            i++;
+        //     Song newSong = new Song("test", "testID_" + i, "testUser");
+        //     i++;
 
-            // Add New Song to Queue
-            testQueue.push(newSong);
-            testQueue.printQueue();
+        //     // Add New Song to Queue
+        //     testQueue.push(newSong);
+        //     testQueue.printQueue();
 
-            if (i >= 10) {
-                break;
-            }
-        }
+        //     if (i >= 10) {
+        //         break;
+        //     }
+        // }
     }
 
 }

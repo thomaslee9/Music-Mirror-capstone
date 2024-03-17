@@ -2,17 +2,23 @@ package com.mirror.queue.queue;
 
 public class Song {
     private String songName;
+    private String songArtist;
     private String id;
     private String username;
 
-    public Song(String songName, String id, String username) {
+    public Song(String songName, String songArtist, String id, String username) {
         this.songName = songName;
+        this.songArtist = songArtist;
         this.id = id;
         this.username = username;
     }
 
     public String getSongName() {
         return songName;
+    }
+
+    public String getSongArtist() {
+        return songArtist;
     }
 
     public String getId() {

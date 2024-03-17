@@ -7,7 +7,11 @@ var queuePage = document.querySelector('#queue-page');
 
 var usernameForm = document.querySelector('#usernameForm');
 var requestForm = document.querySelector('#requestForm');
-var requestInput = document.querySelector('#request');
+
+// var requestInput = document.querySelector('#request');
+var requestName = document.querySelector('#reqName');
+var requestArtist = document.querySelector('#reqArtist');
+
 var queueArea = document.querySelector('#queueArea');
 var connectingElement = document.querySelector('.connecting');
 
@@ -53,6 +57,7 @@ function onConnected() {
     var userRequest = {
         username: username,
         songName: "NULL",
+        songArtist: "NULL",
         type: 'REQUEST'
     };
 
@@ -70,17 +75,22 @@ function onError() {
 
 function sendRequest(event) {
     // Parse User Song Request
-    var requestContent = requestInput.value.trim();
+    // var requestContent = requestInput.value.trim();
+    var hasName = requestName.value.trim();
+    var hasArtist = requestArtist.value.trim();
 
-    if (requestContent && stompClient) {
+    if (hasName && hasArtist && stompClient) {
         var userRequest = {
             username: username,
-            songName: requestInput.value,
+            songName: requestName.value,
+            songArtist: requestArtist.value,
             type: 'REQUEST'
         };
 
         stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));
-        requestInput.value = '';
+        // requestInput.value = '';
+        requestName.value = '';
+        requestArtist.value = '';
     }
 
     event.preventDefault();
@@ -114,7 +124,7 @@ function onMessageReceived(payload) {
         for (var i = 0; i < message.queue.length; i++) {
             // Basic Queue Song View:
             var currSongElement = document.createElement('li');
-            var currSongText = document.createTextNode("'" + message.queue[i].songName + "' <--- queued by " + message.queue[i].user);
+            var currSongText = document.createTextNode("'" + message.queue[i].songName + "' by " + message.queue[i].songArtist + " <--- queued by " + message.queue[i].user);
             currSongElement.appendChild(currSongText);
             currSongElement.style['background-color'] = getAvatarColor(message.queue[i].user);
             queueArea.appendChild(currSongElement);

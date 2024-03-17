@@ -15,6 +15,8 @@ public class Request {
 
     // String Name User input
     private String songName;
+    // String Artist User input
+    private String songArtist;
     // Requesting User
     private String username;
     // Communication Type
@@ -26,5 +28,9 @@ public class Request {
 
     public String getSongName() {
         return songName;
+    }
+
+    public String getSongArtist() {
+        return songArtist;
     }
 }
