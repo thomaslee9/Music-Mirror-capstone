@@ -51,7 +51,7 @@ public class SpotifyPlaybackController {
         System.out.println("### Starting Playback ###");
 
         StartPlaybackRequest playback = new StartPlaybackRequest();
-        playback.skipToNext(access_token);
+        // playback.skipToNext(access_token);
         playback.startPlayback(access_token);
 
         return true;
@@ -68,7 +68,7 @@ public class SpotifyPlaybackController {
         System.out.println("### Starting Playback ###");
 
         StartPlaybackRequest playback = new StartPlaybackRequest();
-        playback.skipToNext(access_token);
+        // playback.skipToNext(access_token);
         playback.startPlayback(access_token);
 
         return true;

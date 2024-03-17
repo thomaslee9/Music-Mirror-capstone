@@ -40,18 +40,18 @@ public class App extends NanoHTTPD {
         System.out.println("\nRunning! Point your browsers to http://localhost:8080/ \n");
 
         AuthorizationDriver auth = new AuthorizationDriver();
-        // auth.authorize();
+        auth.authorize();
 
-        String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
+        //String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
                 
-        SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
+        //SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
-        System.out.println("### Queuing Song ###");
+        //System.out.println("### Queuing Song ###");
 
-        String song_name = "Mo Bamba";
-        String artist_name = "Sheck Wes";
+        //String song_name = "Mo Bamba";
+        //String artist_name = "Sheck Wes";
 
-        P.queueSong(song_name, artist_name);
+        //P.queueSong(song_name, artist_name);
 
     }
 
@@ -78,43 +78,6 @@ public class App extends NanoHTTPD {
             String access_token = resp.getAccessToken();
 
             System.out.println("Spotify Access Token: " + access_token);
-
-
-            // AvailableDevicesResponse r = new AvailableDevicesRequest().getAvailableDevices(access_token);
-
-            String device_id = "83e2221a51a366dbca4e16114644ef9a6ad165e9";
-
-            System.out.println("### Getting song recommendations ###");
-
-            // StartPlaybackRequest start_playback = new StartPlaybackRequest();
-            // start_playback.startPlayback(access_token, device_id);
-            
-            SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
-            builder.addMinAcousticness("0.1");
-            builder.addMinPopularity("75");
-            builder.addMaxDanceability("0.5");
-
-            String seed = builder.getSeed();
-            System.out.println(seed);
-
-            RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
-
-            //for (TrackObject track : rec.getTracks())  {
-            //    System.out.println(track.getId());
-            //}
-
-            System.out.println("### Adding songs to queue ###");
-
-            String song_id = rec.getTracks()[0].getId();
-
-            System.out.println("### Adding to Queue ###");
-            AddToPlaybackRequest p = new AddToPlaybackRequest();
-            p.addToQueue(access_token, song_id, device_id);
-
-            System.out.println("### Starting Playback ###");
-
-            StartPlaybackRequest start_playback = new StartPlaybackRequest();
-            start_playback.startPlayback(access_token);
 
 
         }
