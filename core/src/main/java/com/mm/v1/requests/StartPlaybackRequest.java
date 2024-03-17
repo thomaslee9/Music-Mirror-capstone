@@ -51,6 +51,7 @@ public class StartPlaybackRequest {
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            System.out.println("Response Code: " + response.statusCode());
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

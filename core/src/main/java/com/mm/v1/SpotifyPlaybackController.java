@@ -58,6 +58,23 @@ public class SpotifyPlaybackController {
 
     }
 
+    public boolean queueSong(String song_id)    {
+
+        System.out.println("### Adding to Queue ###");
+
+        AddToPlaybackRequest p = new AddToPlaybackRequest();
+        p.addToQueue(access_token, song_id, device_id);
+
+        System.out.println("### Starting Playback ###");
+
+        StartPlaybackRequest playback = new StartPlaybackRequest();
+        playback.skipToNext(access_token);
+        playback.startPlayback(access_token);
+
+        return true;
+
+    }
+
     private TrackObject searchForTrack(String access_token, String song_name, String artist_name, int encoding_scheme)    {
 
         SearchResponse search_response = new SearchRequest().searchForTrack(access_token, song_name, artist_name, 1);

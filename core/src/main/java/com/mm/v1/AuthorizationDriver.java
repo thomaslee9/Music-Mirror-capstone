@@ -69,7 +69,7 @@ public class AuthorizationDriver {
         }
 
         // close the browser
-        driver.quit();
+        // driver.quit();
 
     }
 

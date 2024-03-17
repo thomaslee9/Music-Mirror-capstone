@@ -42,12 +42,14 @@ public class App extends NanoHTTPD {
         AuthorizationDriver auth = new AuthorizationDriver();
         // auth.authorize();
 
-        String access_token = "BQBUEVAawDc-d8XAKcnMQBifpKuGgL69DPbz-R8FRxl2BJrx5XvoMa1dOn-AudnYov1q9tm_ZcKsK2Js8X74_3JLartAQ9YVyKL6VAMCZTpFou7zBcqpKeS5sJ0Q9OjUXoFVAlY_sHjXOZ443PVdo4iZQyjMX8kowDP_cIslBfyA5WL5SQyBGd4-CPbu";
+        String access_token = "BQCYM4MuqtKV9yFOwnQhRKq3k0TDIY4TlCkkMwzREBtBgjHldhZ3AIc1wefpP9477F9GQcKCrUhtHyEUhAY7pl1jDhOFeyYZgFbUiWNhACqed0KMakm5Z1FD3hOsJQBAU7nSR4YRPBdQPlDXyJ_Vqa60gWHYBchvA97meiaE0vCyFDu8Ev_IMbXhuf59";
         
         SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
-        String song_name = "Highway Star";
-        String artist_name = "Deep Purple";
+        System.out.println("### Queuing Song ###");
+
+        String song_name = "Losing it";
+        String artist_name = "Fisher";
 
         P.queueSong(song_name, artist_name);
 
