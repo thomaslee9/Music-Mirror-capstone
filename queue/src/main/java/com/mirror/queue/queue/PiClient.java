@@ -8,15 +8,27 @@ public class PiClient {
     private PrintWriter out;
 
     // Constructor to establish the connection
-    public Client(String hostname, int port) throws IOException {
-        // Initialize the socket
-        this.socket = new Socket(hostname, port);
-        // Initialize the PrintWriter for sending messages to the server
-        this.out = new PrintWriter(socket.getOutputStream(), true);
+    public PiClient(String hostname, int port) throws IOException {
+        try {
+            // Initialize the socket
+            this.socket = new Socket(hostname, port);
+            // Initialize the PrintWriter for sending messages to the server
+            this.out = new PrintWriter(socket.getOutputStream(), true);
+        } catch (UnknownHostException ex) {
+            System.out.println("Server not found: " + ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println("I/O error: " + ex.getMessage());
+        }
     }
 
     // Method to send a message to the server
-    public void sendMessage(String message) {
+    public void sendMessage(String message) throws IOException{
+        
+        String hostname = "192.168.1.185"; // The IP address of the server
+        int port = 5000;
+        this.socket = new Socket(hostname, port);
+        this.out = new PrintWriter(socket.getOutputStream(), true);
+        
         out.println(message);
         System.out.println("Sent to server: " + message);
     }
@@ -36,11 +48,11 @@ public class PiClient {
     }
 
     public static void main(String[] args) {
-        String hostname = "192.168.200.54"; // The IP address of the server
+        String hostname = "192.168.1.185"; // The IP address of the server
         int port = 5000;
 
         try {
-            Client client = new Client(hostname, port);
+            PiClient client = new PiClient(hostname, port);
             client.sendMessage("Hello from Pi1"); // Send a message
             // You can send more messages here
             client.closeConnection(); // Close the connection when done

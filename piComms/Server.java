@@ -3,8 +3,8 @@ import java.io.*;
 
 public class Server {
     public static void main(String[] args) throws IOException {
-        int portNumber = 18500; // Port number on which the server listens.
-        
+        int portNumber = 18501; // Port number on which the server listens.
+        System.out.println("Trying to start the server");
         try (ServerSocket serverSocket = new ServerSocket(portNumber);
              Socket clientSocket = serverSocket.accept();     
              PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);                   
