@@ -42,14 +42,14 @@ public class App extends NanoHTTPD {
         AuthorizationDriver auth = new AuthorizationDriver();
         // auth.authorize();
 
-        String access_token = "BQCYM4MuqtKV9yFOwnQhRKq3k0TDIY4TlCkkMwzREBtBgjHldhZ3AIc1wefpP9477F9GQcKCrUhtHyEUhAY7pl1jDhOFeyYZgFbUiWNhACqed0KMakm5Z1FD3hOsJQBAU7nSR4YRPBdQPlDXyJ_Vqa60gWHYBchvA97meiaE0vCyFDu8Ev_IMbXhuf59";
-        
+        String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
+                
         SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
         System.out.println("### Queuing Song ###");
 
-        String song_name = "Losing it";
-        String artist_name = "Fisher";
+        String song_name = "Mo Bamba";
+        String artist_name = "Sheck Wes";
 
         P.queueSong(song_name, artist_name);
 
@@ -78,6 +78,7 @@ public class App extends NanoHTTPD {
             String access_token = resp.getAccessToken();
 
             System.out.println("Spotify Access Token: " + access_token);
+
 
             // AvailableDevicesResponse r = new AvailableDevicesRequest().getAvailableDevices(access_token);
 

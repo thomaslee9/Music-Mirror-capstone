@@ -2,6 +2,8 @@ package com.mirror.queue.queue;
 
 import org.springframework.stereotype.Controller;
 
+import java.io.IOException;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;

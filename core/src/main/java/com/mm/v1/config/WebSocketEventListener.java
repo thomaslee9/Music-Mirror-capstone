@@ -1,7 +1,6 @@
 package com.mm.v1.config;
 
 import lombok.RequiredArgsConstructor;
-import lombok.var;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.context.event.EventListener;
@@ -35,7 +34,7 @@ public class WebSocketEventListener {
         if (username != null) {
             log.info("User Disconnected from the Queue: " + username);
 
-            var userRequest = Request.builder()
+            Request userRequest = Request.builder()
                 .type(MessageType.LEAVE)
                 .username(username)
                 .build();

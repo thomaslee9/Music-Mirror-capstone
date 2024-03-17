@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller;
 
 import com.mm.v1.SpotifyPlaybackController;
 
-import lombok.var;
 import java.io.IOException;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -34,13 +33,13 @@ public class QueueController {
                     return sq;
                 }
                 
-                var id = "00000";
+                String id = "00000";
                 // Add song to Queue
                 Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), id, userRequest.getUser());
                 sq.push(newSong);
                 sq.printQueue();
 
-                String access_token = "BQCYM4MuqtKV9yFOwnQhRKq3k0TDIY4TlCkkMwzREBtBgjHldhZ3AIc1wefpP9477F9GQcKCrUhtHyEUhAY7pl1jDhOFeyYZgFbUiWNhACqed0KMakm5Z1FD3hOsJQBAU7nSR4YRPBdQPlDXyJ_Vqa60gWHYBchvA97meiaE0vCyFDu8Ev_IMbXhuf59";
+                String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
                 
                 SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
@@ -67,13 +66,13 @@ public class QueueController {
                 return sq;
             }
             
-            var id = "00000";
+            String id = "00000";
             // Add song to Queue
             Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), id, userRequest.getUser());
             sq.push(newSong);
             sq.printQueue();
 
-            String access_token = "BQCYM4MuqtKV9yFOwnQhRKq3k0TDIY4TlCkkMwzREBtBgjHldhZ3AIc1wefpP9477F9GQcKCrUhtHyEUhAY7pl1jDhOFeyYZgFbUiWNhACqed0KMakm5Z1FD3hOsJQBAU7nSR4YRPBdQPlDXyJ_Vqa60gWHYBchvA97meiaE0vCyFDu8Ev_IMbXhuf59";
+            String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
             
             SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
