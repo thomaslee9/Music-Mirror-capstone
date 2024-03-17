@@ -40,6 +40,7 @@ public class QueueController {
             e.printStackTrace();
             return null;
         }
+    }
 
     @MessageMapping("/queue.addUser")
     @SendTo("/topic/public")
