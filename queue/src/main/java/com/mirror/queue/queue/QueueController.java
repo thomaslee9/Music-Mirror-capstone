@@ -9,8 +9,8 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 
 @Controller
 public class QueueController {
-    private final int PORT = 5000;
-    private final String HOSTNAME = "192.168.1.185";
+    private static final int PORT = 5000;
+    private static final String HOSTNAME = "192.168.1.185";
     private static SongQueue sq = new SongQueue();
     private static PiClient pi = new PiClient(HOSTNAME, PORT);
 
