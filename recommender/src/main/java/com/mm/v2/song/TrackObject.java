@@ -1,14 +1,14 @@
-package com.mm.v1.song;
+package com.mm.v2.song;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mm.v1.album.AlbumObject;
-import com.mm.v1.artist.ArtistObject;
-import com.mm.v1.meta.ExternalIDs;
-import com.mm.v1.meta.ExternalURLs;
-import com.mm.v1.meta.LinkedFrom;
-import com.mm.v1.meta.Restrictions;
+import com.mm.v2.album.AlbumObject;
+import com.mm.v2.artist.ArtistObject;
+import com.mm.v2.meta.ExternalIDs;
+import com.mm.v2.meta.ExternalURLs;
+import com.mm.v2.meta.LinkedFrom;
+import com.mm.v2.meta.Restrictions;
 
 public class TrackObject {
 
@@ -58,27 +58,6 @@ public class TrackObject {
         }
 
         return artist_string;
-
-    }
-
-    // naively get the first genre of the first artist
-    public String[] getGenres()    {
-
-        ArtistObject artist = this.getArtists().get(0);
-        List<String> genres = artist.getGenres();
-
-        String[] array;
-        if (genres != null) { array = genres.toArray(new String[0]); }
-        else { array = new String[0]; }
-
-        return array;
-
-    }
-
-    public String getFirstArtistId()  {
-
-        ArtistObject first_artist = this.artists.get(0);
-        return first_artist.getId();
 
     }
 

@@ -73,7 +73,7 @@ public class QueueController {
                 return sq;
             }
 
-            String access_token = "BQDF57aYkkGIIYLnMPBFaSKI--qhJXW4ZHQ81iufvO9O2f9ePZ9ICraLNdXvsb7D-pbQsGyk2HnsOXxivT9wV0q2o0MeDxDk4FbiRkh1aUFOq4sd9K-0a2kUeuCXVT0NTwjQtIc23X6A8uQxcMNAuaBhOhvwu_odzBfcItixwzAwFdRepWvSvdRX4Tm8";
+            String access_token = "BQAjPGdwh2CTV_4pQPlGAEvaTJRYNvLUBN3QJoOJbsyRJxCrc8FuVvA1OrOjCkCzOyGmx38IsXXggurwQz6vlNcZ9E0a1en67WKJpY_WhCYIZTLCLY8gFlueKh-SNZhnbcTUdfSj5KoP2am7XGbcSk-YjoGiTkioWfjHHh5joGHgmBFqQMj3CZgeEYrB";
             
             SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
@@ -83,40 +83,49 @@ public class QueueController {
             String artist_name = userRequest.getSongArtist();
 
             // if [REC] is appended to the song name it means we want a rec
-            if (song_name.contains("[REC]")) {
+            if (song_name.contains("!REC")) {
 
-                System.out.println("### Getting Recommendation ###");
-                SeedBuilder builder = new SeedBuilder("3WrFJ7ztbogyGnTHbHJFl2", "rock", "2hOC9qItvmSkgMnxRjgPSr");
-                builder.addMinAcousticness("0.1");
-                builder.addMinPopularity("75");
-                builder.addMaxDanceability("0.5");
+                /** NOTE:
+                 * 
+                 * in the actual system, this pi will communicate with the
+                 * second pi to receive the recommendation seed
+                 *
+                 */
 
-                String seed = builder.getSeed();
-                System.out.println(seed);
+                // parse the song without the [REC] appended
 
-                RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
+                String cleaned_name = song_name.replaceAll("!REC", "");
+                TrackObject track = P.getSong(cleaned_name, artist_name);
 
-                TrackObject recommended_song = rec.getTracks()[0];
-                String song_id = recommended_song.getId();
+                // now that we have the track, get the id, artist_id, and genre
+                String song_id = track.getId();
+                String artist_id = track.getFirstArtistId();
+                String[] genres = track.getGenres();
 
-                String name = recommended_song.getName();
-
-                List<String> curr_artist_names = new ArrayList<String>();
-                // get the resulting artists for the track search result
-                for (ArtistObject artist : recommended_song.getArtists()) {
-                    curr_artist_names.add(artist.getName());
+                System.out.println("### Generating Recommendation for: ###");
+                System.out.println("# Song_ID = " + song_id + " #");
+                System.out.println("# Artist_ID = " + artist_id + " #");
+                System.out.print("# Genres = ");
+                for (String genre : genres) {
+                    System.out.print(genre + " ");
                 }
-                String artist_string = "";
-                for (String curr_artist : curr_artist_names) {
-                    artist_string += curr_artist + " ";
-                }
+                System.out.println("#");
 
-                System.out.println("### Queuing Song ###");
+                /**
+                 * 
+                 * we would then send this info to the rec pi, and are returned
+                 * with a song_id to queue
+                 * 
+                 */
+
+                System.out.println("(Would be queuing the returned song)");
+
+                //System.out.println("### Queuing Song ###");
                 // Add song to Queue
-                Song newSong = new Song(name, artist_string, id, userRequest.getUser());
-                sq.push(newSong);
-                sq.printQueue();
-                P.queueSong(song_id);
+                //Song newSong = new Song(name, artist_string, id, userRequest.getUser());
+                //sq.push(newSong);
+                //sq.printQueue();
+                //P.queueSong(song_id);
 
             }
             // otherwise just queue the song as normal

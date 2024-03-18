@@ -75,6 +75,28 @@ public class SpotifyPlaybackController {
 
     }
 
+    public TrackObject getSong(String song_name, String artist_name)    {
+        
+        System.out.println("### Searching to Get Song - Song Name: " + song_name + " - Artist Name: " + artist_name + "###");
+        
+        TrackObject found_track;
+        // make the first search attempt for the song
+        found_track = this.searchForTrack(this.access_token, song_name, artist_name, 1);
+        
+        // if the result is still null, we didn't find, so try again
+        if (found_track == null)    {
+            System.out.println("*** Searching Again ***");
+            found_track = this.searchForTrack(this.access_token, song_name, artist_name, 2);
+        }
+
+        // at this point if we are still null then we failed
+        if (found_track == null)    { return null; }
+
+        System.out.println("### Found Song ###");
+        return found_track;
+
+    }
+
     private TrackObject searchForTrack(String access_token, String song_name, String artist_name, int encoding_scheme)    {
 
         SearchResponse search_response = new SearchRequest().searchForTrack(access_token, song_name, artist_name, 1);
@@ -85,17 +107,7 @@ public class SpotifyPlaybackController {
         for (TrackObject t : tracks.getTrackItems())    {
 
             String curr_track_name = t.getName();
-            List<ArtistObject> curr_artists = t.getArtists();
-            List<String> curr_artist_names = new ArrayList<String>();
-
-            // get the resulting artists for the track search result
-            for (ArtistObject artist : curr_artists) {
-                curr_artist_names.add(artist.getName());
-            }
-            String curr_artist_string = "";
-            for (String curr_artist : curr_artist_names) {
-                curr_artist_string += curr_artist + " ";
-            }
+            String curr_artist_string = t.getArtistString();
 
             System.out.println("Search Result - Song Name: " + curr_track_name + " ### Artist Name: " + curr_artist_string);
 

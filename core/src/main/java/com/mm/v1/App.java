@@ -42,17 +42,6 @@ public class App extends NanoHTTPD {
         AuthorizationDriver auth = new AuthorizationDriver();
         auth.authorize();
 
-        //String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
-                
-        //SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
-
-        //System.out.println("### Queuing Song ###");
-
-        //String song_name = "Mo Bamba";
-        //String artist_name = "Sheck Wes";
-
-        //P.queueSong(song_name, artist_name);
-
     }
 
     /**
