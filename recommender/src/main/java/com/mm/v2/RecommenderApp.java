@@ -25,7 +25,7 @@ public class RecommenderApp {
          * 
          */
 
-        String access_token = "BQBTChnMcr5aYjlG8gRzq_mmKx8Im48wluo8W81RVAKI91Ux08J4Sm0Or2BnFdu4Z9KwZVHfsVRoh8hB3Bixw6a4NQpXX0mG5BPG20x8Z4lfi79qffZfL5L5YlW_JF88WswZTRxjY2bmVqC37PTjxZB9nS8no3s6fAfmWMNLzePJ_MVPrXj8YUZ_ltpC";
+        String access_token = "BQDa4sCw9_CwiYrvvM3YP5t5zipHYvm6592PtAq_xGOsJUD41D50hksRPxGcR7wfua5-MsU-d1DU8GvTIj0Xss7mSHkfsUhqrsReTT-mWIaXF6kpU8f-s3y510xvDKTuPCYEnQS-UYunxTj1h_wuSQ4AROT2dcTwy5YwnRIKBM22fFk-wH0LS1bWkhk9";
 
         SongAttributeDatabase db = new SongAttributeDatabase();
 
@@ -48,7 +48,7 @@ public class RecommenderApp {
         System.out.println(seed);
 
         RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
-        TrackObject recommended_song = RecommendationRanker.rank(rec.getTracks());
+        TrackObject recommended_song = RecommendationRanker.rank_euclidean(access_token, db, song_id, rec.getTracks());
 
         return recommended_song;
 
