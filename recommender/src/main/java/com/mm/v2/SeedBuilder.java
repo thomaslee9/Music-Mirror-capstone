@@ -33,29 +33,15 @@ public class SeedBuilder {
 
     // String seed = "seed_artists=3WrFJ7ztbogyGnTHbHJFl2&seed_genres=rock&seed_tracks=2hOC9qItvmSkgMnxRjgPSr";
 
-    public SeedBuilder(String artist_id, String[] genres, String track_id) {
-
-        if (genres.length == 0) { genres = default_genres; }
-
-        String seed_genres = "seed_genres=";
-
-        for (int i = 0; i < genres.length; i++) {
-            if (i == 0) { seed_genres += genres[i]; }
-            else    { seed_genres += "," + genres[i]; }
-        }
+    public SeedBuilder(String artist_id, String track_id) {
 
         /**
         seed_artists=3WrFJ7ztbogyGnTHbHJFl2&seed_genres=alternative%2Crock%2Ccountry%2Chip-hop%2Cr-n-b&seed_tracks=41ETKVJbZDSjATzW2wAqmc 
         seed_artists=3WrFJ7ztbogyGnTHbHJFl2&seed_genres%3Dalternative%2Crock%2Ccountry%2Chip-hop%2Cr-n-b&seed_tracks=41ETKVJbZDSjATzW2wAqmc
          */
 
-        try {
-            this.seed = "seed_artists=" + artist_id + "&" +
-                        URLEncoder.encode(seed_genres, "UTF-8") + "&" +
-                        "seed_tracks=" + track_id;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        this.seed = "seed_artists=" + artist_id + "&" +
+                    "seed_tracks=" + track_id;
 
     }
 
@@ -64,19 +50,14 @@ public class SeedBuilder {
      * @param genres max of 5
      * @param track_ids max of 5
      */
-    public SeedBuilder(String[] artist_ids, String[] genres, String[] track_ids) {
+    public SeedBuilder(String[] artist_ids, String[] track_ids) {
 
-        String seed_artists = "seed_artists=";
-        String seed_genres = "seed_genres=";
-        String seed_tracks = "seed_tracks=";
+        String seed_artists = "";
+        String seed_tracks = "";
 
         for (int i = 0; i < artist_ids.length; i++) {
             if (i == 0) { seed_artists += artist_ids[i]; }
             else    { seed_artists += "," + artist_ids[i]; }
-        }
-        for (int i = 0; i < genres.length; i++) {
-            if (i == 0) { seed_genres += genres[i]; }
-            else    { seed_genres += "," + genres[i]; }
         }
         for (int i = 0; i < track_ids.length; i++) {
             if (i == 0) { seed_tracks += track_ids[i]; }
@@ -84,9 +65,8 @@ public class SeedBuilder {
         }
 
         try {
-            this.seed = URLEncoder.encode(seed_artists, "UTF-8") + "&" 
-                      + URLEncoder.encode(seed_genres, "UTF-8") + "&" 
-                      + URLEncoder.encode(seed_tracks, "UTF-8");
+            this.seed = "seed_artists=" + URLEncoder.encode(seed_artists, "UTF-8") + "&" 
+                      + "seed_tracks=" + URLEncoder.encode(seed_tracks, "UTF-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }

@@ -74,7 +74,7 @@ public class QueueController {
                 return sq;
             }
 
-            String access_token = "BQAhiGQ6JY8JOBhqN8UwoW7SiBvOm-AGK3z0T2euiTSsYsE9dAeoZ4lluYwNucuYOEDEtwY8QYRDzdFPguz2BfzrL1Egve2jhendzHgLE0lRDW4Qpvlq87zfECBGG9o2ZX5HljWMELEmFp7T6zZvKZ3iuwHfn3BCx-X9YrllcSzJAKWxiYAMEtdazSmH";
+            String access_token = "BQDB57m5w_i8ahouyanFY3dMrAqdtB-KRp7LJ6eHWMuTUMKw32tmgEJsY_JS012JfhDN6EA9OfMIyPpVmFSf5rzTWsqflgwoc_Q7oWh87CJrYFknualF9P3lqtqjBWTm0n8JiNCK7a88Cw3ZXnYzxDLBlkBm7rH0JDIr4DrnpJSKuhYL1Zb11HAFU-Bd";
             
             SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
@@ -101,16 +101,10 @@ public class QueueController {
                 // now that we have the track, get the id, artist_id, and genre
                 String song_id = track.getId();
                 String artist_id = track.getFirstArtistId();
-                String[] genres = track.getGenres();
 
                 System.out.println("### Generating Recommendation for: ###");
                 System.out.println("# Song_ID = " + song_id + " #");
                 System.out.println("# Artist_ID = " + artist_id + " #");
-                System.out.print("# Genres = ");
-                for (String genre : genres) {
-                    System.out.print(genre + " ");
-                }
-                System.out.println("#");
 
                 /**
                  * 

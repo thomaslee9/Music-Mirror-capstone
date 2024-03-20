@@ -14,9 +14,9 @@ import com.mm.v2.song.TrackObject;
 
 public class SeedGenerator {
 
-    public static String generateSeed(String access_token, SongAttributeDatabase db, String song_id, String[] genres, String artist_id)   {
+    public static String generateSeed(String access_token, SongAttributeDatabase db, String song_id, String artist_id)   {
 
-        SeedBuilder builder = new SeedBuilder(artist_id, genres, song_id);
+        SeedBuilder builder = new SeedBuilder(artist_id, song_id);
 
         // once we have the builder, now try and get song attributes
         SongAudioFeatures features = db.GetAudioFeatures(song_id);
@@ -47,8 +47,7 @@ public class SeedGenerator {
         List<Pair<String, Integer>> topsongs = getMostLiked(num_songs, session);
 
         String[] song_ids = new String[num_songs];
-        String[] artist_ids = new String[num_songs];
-        String[] genres = new String[0];
+        String[] artist_ids = new String[num_songs-1];
 
         int idx = 0;
         // now for each top song we need to get the info about it
@@ -67,17 +66,15 @@ public class SeedGenerator {
                 db.AddSong(song_id, features);
             }
 
-            // take the genres from the first song
-            if (idx == 0)   { genres = track.getGenres(); }
             // collect the song_ids and artist_ids to pass into the builder
             song_ids[idx] = track.getId();
-            artist_ids[idx] = track.getFirstArtistId();
+            if (idx != num_songs - 1)   { artist_ids[idx] = track.getFirstArtistId();   }
 
             idx += 1;
         }
 
         // now we get the builder and generate the seed
-        SeedBuilder builder = new SeedBuilder(artist_ids, genres, song_ids);
+        SeedBuilder builder = new SeedBuilder(artist_ids, song_ids);
 
         /** TODO: aggregate the features here to pass into builder */
         builder.addMinPopularity("50");

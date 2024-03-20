@@ -17,7 +17,7 @@ public class RecommenderApp {
 
     public static void main( String[] args )    {
 
-        String access_token = "BQAhiGQ6JY8JOBhqN8UwoW7SiBvOm-AGK3z0T2euiTSsYsE9dAeoZ4lluYwNucuYOEDEtwY8QYRDzdFPguz2BfzrL1Egve2jhendzHgLE0lRDW4Qpvlq87zfECBGG9o2ZX5HljWMELEmFp7T6zZvKZ3iuwHfn3BCx-X9YrllcSzJAKWxiYAMEtdazSmH";
+        String access_token = "BQDB57m5w_i8ahouyanFY3dMrAqdtB-KRp7LJ6eHWMuTUMKw32tmgEJsY_JS012JfhDN6EA9OfMIyPpVmFSf5rzTWsqflgwoc_Q7oWh87CJrYFknualF9P3lqtqjBWTm0n8JiNCK7a88Cw3ZXnYzxDLBlkBm7rH0JDIr4DrnpJSKuhYL1Zb11HAFU-Bd";
         
         SongAttributeDatabase db = new SongAttributeDatabase();
 
@@ -42,9 +42,8 @@ public class RecommenderApp {
 
             String song_id = "41ETKVJbZDSjATzW2wAqmc"; // would parse from req
             String artist_id = "3WrFJ7ztbogyGnTHbHJFl2"; // would parse from req
-            String[] genres = new String[0]; // would parse from req
     
-            TrackObject recommended_song = getRecommendationFromSong(access_token, db, song_id, artist_id, genres);
+            TrackObject recommended_song = getRecommendationFromSong(access_token, db, song_id, artist_id);
     
             System.out.println("### Got Recommendation ###");
             System.out.println(recommended_song.getName() + " by " + recommended_song.getArtistString());
@@ -74,11 +73,11 @@ public class RecommenderApp {
         
     }
 
-    public static TrackObject getRecommendationFromSong(String access_token, SongAttributeDatabase db, String song_id, String artist_id, String[] genres) {
+    public static TrackObject getRecommendationFromSong(String access_token, SongAttributeDatabase db, String song_id, String artist_id) {
 
         System.out.println("### Getting Recommendation for song_id: " + song_id + " ###");
 
-        String seed = SeedGenerator.generateSeed(access_token, db, song_id, genres, artist_id);
+        String seed = SeedGenerator.generateSeed(access_token, db, song_id, artist_id);
         System.out.println(seed);
 
         RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
