@@ -1,5 +1,6 @@
 package com.mm.v2;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.mm.v2.requests.RecommendationRequest;
@@ -16,7 +17,7 @@ public class RecommenderApp {
 
     public static void main( String[] args )    {
 
-        String access_token = "BQDa4sCw9_CwiYrvvM3YP5t5zipHYvm6592PtAq_xGOsJUD41D50hksRPxGcR7wfua5-MsU-d1DU8GvTIj0Xss7mSHkfsUhqrsReTT-mWIaXF6kpU8f-s3y510xvDKTuPCYEnQS-UYunxTj1h_wuSQ4AROT2dcTwy5YwnRIKBM22fFk-wH0LS1bWkhk9";
+        String access_token = "BQAhiGQ6JY8JOBhqN8UwoW7SiBvOm-AGK3z0T2euiTSsYsE9dAeoZ4lluYwNucuYOEDEtwY8QYRDzdFPguz2BfzrL1Egve2jhendzHgLE0lRDW4Qpvlq87zfECBGG9o2ZX5HljWMELEmFp7T6zZvKZ3iuwHfn3BCx-X9YrllcSzJAKWxiYAMEtdazSmH";
         
         SongAttributeDatabase db = new SongAttributeDatabase();
 
@@ -53,6 +54,19 @@ public class RecommenderApp {
         else    {
 
             /** test out the session recommendation here */
+            Pair<String, Integer> p1 = new Pair<String,Integer>("1xzBco0xcoJEDXktl7Jxrr", 0);
+            Pair<String, Integer> p2 = new Pair<String,Integer>("54X78diSLoUDI3joC2bjMz", 6);
+            Pair<String, Integer> p3 = new Pair<String,Integer>("41ETKVJbZDSjATzW2wAqmc", 4);
+
+            List<Pair<String, Integer>> session = new ArrayList<Pair<String, Integer>>();
+            session.add(p1);
+            session.add(p2);
+            session.add(p3);
+
+            TrackObject recommended_song = getRecommendationFromSession(access_token, db, session);
+
+            System.out.println("### Got Recommendation ###");
+            System.out.println(recommended_song.getName() + " by " + recommended_song.getArtistString());
 
         }
 

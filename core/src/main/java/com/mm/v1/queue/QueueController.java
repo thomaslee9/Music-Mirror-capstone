@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.javatuples.Pair;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -73,7 +74,7 @@ public class QueueController {
                 return sq;
             }
 
-            String access_token = "BQAjPGdwh2CTV_4pQPlGAEvaTJRYNvLUBN3QJoOJbsyRJxCrc8FuVvA1OrOjCkCzOyGmx38IsXXggurwQz6vlNcZ9E0a1en67WKJpY_WhCYIZTLCLY8gFlueKh-SNZhnbcTUdfSj5KoP2am7XGbcSk-YjoGiTkioWfjHHh5joGHgmBFqQMj3CZgeEYrB";
+            String access_token = "BQAhiGQ6JY8JOBhqN8UwoW7SiBvOm-AGK3z0T2euiTSsYsE9dAeoZ4lluYwNucuYOEDEtwY8QYRDzdFPguz2BfzrL1Egve2jhendzHgLE0lRDW4Qpvlq87zfECBGG9o2ZX5HljWMELEmFp7T6zZvKZ3iuwHfn3BCx-X9YrllcSzJAKWxiYAMEtdazSmH";
             
             SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
@@ -126,6 +127,28 @@ public class QueueController {
                 //Song newSong = new Song(name, artist_string, song_id, userRequest.getUser());
                 //sq.push(newSong);
                 //sq.printQueue();
+
+            }
+            else if (song_name.equals("!SESSION_REC"))  {
+
+                System.out.println("### Displaying Session ###");
+
+                // get the queue session
+                List<Pair<String, Integer>> session = sq.getSession();
+
+                for (Pair<String, Integer> p : session) {
+
+                    System.out.println("Song ID: " + p.getValue0());
+                    System.out.println("Likes: " + p.getValue1());
+
+                }
+
+                /**
+                 * 
+                 * we would then send this info to the rec pi, and are returned
+                 * with a song_id to queue
+                 * 
+                 */
 
             }
             // otherwise just queue the song as normal

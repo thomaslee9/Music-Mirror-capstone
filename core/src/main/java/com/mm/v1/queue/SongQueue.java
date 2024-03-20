@@ -1,6 +1,11 @@
 package com.mm.v1.queue;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import org.javatuples.Pair;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,6 +49,23 @@ public class SongQueue {
         for (Song song : queue) {
             System.out.println(song + "\n");
         }
+    }
+
+    public List<Pair<String, Integer>> getSession() {
+
+        List<Pair<String, Integer>> session = new ArrayList<Pair<String, Integer>>();
+
+        for (Song song : queue) {
+            // create a pair of the song's id and likes
+            String song_id = song.getId();
+            // for now choose random value for likes
+            Random rand = new Random();
+            int likes = rand.nextInt(11);
+            Pair<String, Integer> pair = new Pair<String,Integer>(song_id, likes);
+            session.add(pair);
+        }
+        return session;
+
     }
 
 
