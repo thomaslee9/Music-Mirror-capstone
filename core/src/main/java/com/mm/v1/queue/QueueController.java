@@ -74,7 +74,7 @@ public class QueueController {
                 return sq;
             }
 
-            String access_token = "BQDB57m5w_i8ahouyanFY3dMrAqdtB-KRp7LJ6eHWMuTUMKw32tmgEJsY_JS012JfhDN6EA9OfMIyPpVmFSf5rzTWsqflgwoc_Q7oWh87CJrYFknualF9P3lqtqjBWTm0n8JiNCK7a88Cw3ZXnYzxDLBlkBm7rH0JDIr4DrnpJSKuhYL1Zb11HAFU-Bd";
+            String access_token = "BQBBKiuqoiyYVqU5FwT14-4gDwSG6JCRH9FI7t95vEcCXbo1NEPAhBDFBZnS_G8p5zGzqfCmWkYX0JyBM3ahz6y9fbvU-CGDX-rboeP903RKB8he_OXYKAixh6ZHW9LaM3rz5AnmeXLWJ7xiFH8ZFFPQ8gaxmzUqG3JmBO87cLhJmgbO-RjEc5isHNgD";
             
             SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
 
