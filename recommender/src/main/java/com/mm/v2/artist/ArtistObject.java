@@ -23,4 +23,12 @@ public class ArtistObject {
         return this.name;
     }
 
+    public String getId()   {
+        return this.id;
+    }
+
+    public List<String> getGenres()   {
+        return this.genres;
+    }
+
 }

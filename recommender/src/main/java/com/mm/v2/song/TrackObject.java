@@ -61,6 +61,26 @@ public class TrackObject {
 
     }
 
+    // naively get the first genre of the first artist
+    public String[] getGenres()    {
+
+        ArtistObject artist = this.getArtists().get(0);
+        List<String> genres = artist.getGenres();
+
+        String[] array;
+        if (genres != null) { array = genres.toArray(new String[0]); }
+        else { array = new String[0]; }
+
+        return array;
+
+    }
+
+    public String getFirstArtistId()    {
+
+        return this.artists.get(0).getId();
+
+    }
+
     public String getId()   {
         return this.id;
     }

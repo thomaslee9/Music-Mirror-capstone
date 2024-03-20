@@ -22,7 +22,7 @@ public class SpotifyPlaybackController {
         this.access_token = access_token;
     }
 
-    public boolean queueSong(String song_name, String artist_name) {
+    public String queueSong(String song_name, String artist_name) {
 
         System.out.println("### Searching to Queue Song - Song Name: " + song_name + " - Artist Name: " + artist_name + "###");
         
@@ -37,7 +37,7 @@ public class SpotifyPlaybackController {
         }
 
         // at this point if we are still null then we failed
-        if (found_track == null)    { return false; }
+        if (found_track == null)    { return ""; }
 
         System.out.println("### Found Song ###");
         // now we can get the song_id from the song and queue it
@@ -54,7 +54,7 @@ public class SpotifyPlaybackController {
         // playback.skipToNext(access_token);
         playback.startPlayback(access_token);
 
-        return true;
+        return song_id;
 
     }
 

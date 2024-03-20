@@ -121,21 +121,21 @@ public class QueueController {
                 System.out.println("(Would be queuing the returned song)");
 
                 //System.out.println("### Queuing Song ###");
+                //P.queueSong(song_id);
                 // Add song to Queue
-                //Song newSong = new Song(name, artist_string, id, userRequest.getUser());
+                //Song newSong = new Song(name, artist_string, song_id, userRequest.getUser());
                 //sq.push(newSong);
                 //sq.printQueue();
-                //P.queueSong(song_id);
 
             }
             // otherwise just queue the song as normal
             else    {
                 System.out.println("### Queuing Song ###");
+                String song_id = P.queueSong(song_name, artist_name);
                 // Add song to Queue
-                Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), id, userRequest.getUser());
+                Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), song_id, userRequest.getUser());
                 sq.push(newSong);
                 sq.printQueue();
-                P.queueSong(song_name, artist_name);
             }
 
             return sq;
