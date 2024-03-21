@@ -1,14 +1,14 @@
-package com.mm.v1.song;
+package com.mm.v2.song;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mm.v1.album.AlbumObject;
-import com.mm.v1.artist.ArtistObject;
-import com.mm.v1.meta.ExternalIDs;
-import com.mm.v1.meta.ExternalURLs;
-import com.mm.v1.meta.LinkedFrom;
-import com.mm.v1.meta.Restrictions;
+import com.mm.v2.album.AlbumObject;
+import com.mm.v2.artist.ArtistObject;
+import com.mm.v2.meta.ExternalIDs;
+import com.mm.v2.meta.ExternalURLs;
+import com.mm.v2.meta.LinkedFrom;
+import com.mm.v2.meta.Restrictions;
 
 public class TrackObject {
 
@@ -75,10 +75,9 @@ public class TrackObject {
 
     }
 
-    public String getFirstArtistId()  {
+    public String getFirstArtistId()    {
 
-        ArtistObject first_artist = this.artists.get(0);
-        return first_artist.getId();
+        return this.artists.get(0).getId();
 
     }
 

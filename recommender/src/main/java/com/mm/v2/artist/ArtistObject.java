@@ -1,10 +1,10 @@
-package com.mm.v1.artist;
+package com.mm.v2.artist;
 
 import java.util.List;
 
-import com.mm.v1.media.ImageObject;
-import com.mm.v1.meta.ExternalURLs;
-import com.mm.v1.popularity.Followers;
+import com.mm.v2.media.ImageObject;
+import com.mm.v2.meta.ExternalURLs;
+import com.mm.v2.popularity.Followers;
 
 public class ArtistObject {
 
