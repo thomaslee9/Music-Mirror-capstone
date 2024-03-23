@@ -47,6 +47,8 @@ function connect(event) {
 function onConnected() {
     stompClient.subscribe('/topic/public', onMessageReceived);
 
+    stompClient.subscribe('/topic/remove', onVetoReceived);
+
     // Send JOIN Request
     stompClient.send("/app/queue.addUser", 
         {},
@@ -75,7 +77,6 @@ function onError() {
 
 function sendRequest(event) {
     // Parse User Song Request
-    // var requestContent = requestInput.value.trim();
     var hasName = requestName.value.trim();
     var hasArtist = requestArtist.value.trim();
 
@@ -88,7 +89,6 @@ function sendRequest(event) {
         };
 
         stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));
-        // requestInput.value = '';
         requestName.value = '';
         requestArtist.value = '';
     }
@@ -123,10 +123,30 @@ function onMessageReceived(payload) {
         // Build Queue Elements
         for (var i = 0; i < message.queue.length; i++) {
             // Basic Queue Song View:
+            let currSongId = message.queue[i].id;
             var currSongElement = document.createElement('li');
-            var currSongText = document.createTextNode("'" + message.queue[i].songName + "' by " + message.queue[i].songArtist + " <--- queued by " + message.queue[i].user);
-            currSongElement.appendChild(currSongText);
+            var currSongText = document.createTextNode(message.queue[i].id + ": '" + message.queue[i].songName + "' by " + message.queue[i].songArtist + " <--- queued by " + message.queue[i].user + " Vote:");
+            currSongElement.id = "song_div_" + message.queue[i].id
             currSongElement.style['background-color'] = getAvatarColor(message.queue[i].user);
+            currSongElement.appendChild(currSongText);
+
+            // Build the Like button
+            var likeButton = document.createElement('button');
+            likeButton.innerHTML = '^';
+            likeButton.onclick = function() {
+                sendLike(currSongId, 1); // Update backend with new Like
+            };
+            currSongElement.appendChild(likeButton);
+
+            // Build the Dislike button
+            var dislikeButton = document.createElement('button');
+            dislikeButton.innerHTML = 'v';
+            dislikeButton.onclick = function() {
+                sendLike(currSongId, 2); // Update backend with new Dislike
+            };
+            currSongElement.appendChild(dislikeButton);
+
+            // Add Song Element to Queue Area
             queueArea.appendChild(currSongElement);
         }
     }
@@ -135,6 +155,41 @@ function onMessageReceived(payload) {
     queueArea.scrollTop = queueArea.scrollHeight;
 }
 
+
+
+function onVetoReceived(payload) {
+    // var songId = JSON.parse(payload.body);
+    var songId = payload.body;
+    // Do nothing if no veto
+    if (songId === "none") {
+        return;
+    }
+    var songElementId = "song_div_" + songId;
+    // Find the element by its ID
+    var songElement = document.getElementById(songElementId);
+    // If the element exists, remove it from its parent
+    if (songElement) {
+        songElement.parentNode.removeChild(songElement);
+    }   
+    
+}
+
+// songID is the spotify song id
+// Liked is whether it was liked or not. 0 for nothing 1 for liked 2 for dislike
+function sendLike(songId, liked) {
+    // If User is connected
+    if (stompClient) {
+        // Build User Vote
+        var userVote = {
+            id: songId,
+            username: username,
+            vote: liked,
+            type: 'VOTE'
+        };
+        // Send to stompClient
+        stompClient.send("/app/queue.sendLike", {}, JSON.stringify(userVote));
+    }
+}
 
 function getAvatarColor(messageSender) {
     var hash = 0;
