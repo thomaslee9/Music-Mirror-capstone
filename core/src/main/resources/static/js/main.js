@@ -6,9 +6,10 @@ var usernamePage = document.querySelector('#username-page');
 var queuePage = document.querySelector('#queue-page');
 
 var usernameForm = document.querySelector('#usernameForm');
+var sessionRecButton = document.querySelector('#sessionRecButton');
+var songRecButton = document.querySelector('#songRecButton');
 var requestForm = document.querySelector('#requestForm');
 
-// var requestInput = document.querySelector('#request');
 var requestName = document.querySelector('#reqName');
 var requestArtist = document.querySelector('#reqArtist');
 
@@ -84,6 +85,46 @@ function sendRequest(event) {
         var userRequest = {
             username: username,
             songName: requestName.value,
+            songArtist: requestArtist.value,
+            type: 'REQUEST'
+        };
+
+        stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));
+        requestName.value = '';
+        requestArtist.value = '';
+    }
+
+    event.preventDefault();
+}
+
+
+function sendSessionRequest(event) {
+
+    if (stompClient) {
+        var userRequest = {
+            username: username,
+            songName: '!SESSION_REC',
+            songArtist: 'Recommendations based on your listening history',
+            type: 'REQUEST'
+        };
+
+        stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));
+        requestName.value = '';
+        requestArtist.value = '';
+    }
+
+    event.preventDefault();
+}
+
+function sendSongRecRequest(event) {
+    // Parse User Song Request
+    var hasName = requestName.value.trim();
+    var hasArtist = requestArtist.value.trim();
+
+    if (hasName && hasArtist && stompClient) {
+        var userRequest = {
+            username: username,
+            songName: '!SONG_REC' + ' ' + requestName.value,
             songArtist: requestArtist.value,
             type: 'REQUEST'
         };
@@ -200,5 +241,7 @@ function getAvatarColor(messageSender) {
     return colors[index];
 }
 
+sessionRecButton.addEventListener('click', sendSessionRequest, true);
+songRecButton.addEventListener('click', sendSongRecRequest, true)
 usernameForm.addEventListener('submit', connect, true)
 requestForm.addEventListener('submit', sendRequest, true)
