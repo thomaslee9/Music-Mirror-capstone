@@ -17,6 +17,8 @@ public class QueueController {
     private static final int NOTHING = 0;
     private static final int LIKE = 1;
     private static final int DISLIKE = 2;
+    private static final int DISLIKE_TO_LIKE = 3;
+    private static final int LIKE_TO_DISLIKE = 4;
     // Connection
     private static final int PORT = 5000;
     private static final String HOSTNAME = "192.168.1.185";
@@ -125,7 +127,7 @@ public class QueueController {
         return userRequest;
     }
 
-    @MessageMapping("/queue.sendLike")
+     @MessageMapping("/queue.sendLike")
     @SendTo("/topic/remove")
     public String sendLike(
         @Payload Vote userVote
@@ -137,10 +139,24 @@ public class QueueController {
         // Process Vote
         if (vote == LIKE) {
             // Like Song
-            sd.like(id);
+            sd.like(id, 1);
         } else if (vote == DISLIKE) {
             // Dislike Song
-            int numLikes = sd.dislike(id);
+            int numLikes = sd.dislike(id, 1);
+            // Check if Song has been vetoed
+            if (numLikes < 0) {
+                Song song = sd.getSongById(id);
+                sq.remove(song);
+                sd.removeById(id);
+                // Return vetoed Song ID
+                return id;
+            }
+        } else if (vote == DISLIKE_TO_LIKE) {
+            // Dislike to Like Song
+            sd.like(id, 2);
+        } else if (vote == LIKE_TO_DISLIKE) {
+            // Dislike Song
+            int numLikes = sd.dislike(id, 2);
             // Check if Song has been vetoed
             if (numLikes < 0) {
                 Song song = sd.getSongById(id);

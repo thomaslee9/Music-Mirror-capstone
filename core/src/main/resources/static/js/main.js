@@ -173,6 +173,8 @@ function onMessageReceived(payload) {
 
             // Build the Like button
             var likeButton = document.createElement('button');
+            likeButton.id = "like_button_" + currSongId;
+            likeButton.style['background-color'] = 'white';
             likeButton.innerHTML = '^';
             likeButton.onclick = function() {
                 sendLike(currSongId, 1); // Update backend with new Like
@@ -181,6 +183,8 @@ function onMessageReceived(payload) {
 
             // Build the Dislike button
             var dislikeButton = document.createElement('button');
+            dislikeButton.style['background-color'] = 'white';
+            dislikeButton.id = "dislike_button_" + currSongId;
             dislikeButton.innerHTML = 'v';
             dislikeButton.onclick = function() {
                 sendLike(currSongId, 2); // Update backend with new Dislike
@@ -219,14 +223,43 @@ function onVetoReceived(payload) {
 // Liked is whether it was liked or not. 0 for nothing 1 for liked 2 for dislike
 function sendLike(songId, liked) {
     // If User is connected
+    let likeCount = 0;
     if (stompClient) {
+        var likeButton = document.querySelector("#like_button_" + songId);
+        var dislikeButton = document.querySelector("#dislike_button_" + songId);
+        if (liked === 1 && likeButton.style['background-color'] === 'green') {
+            likeButton.style['background-color'] = 'white';
+            dislikeButton.style['background-color'] = 'white';
+            likeCount = 2;
+        } else if (liked === 1 && dislikeButton.style['background-color'] === 'red') {
+            likeButton.style['background-color'] = 'green';
+            dislikeButton.style['background-color'] = 'white';
+            likeCount = 3;
+        } else if (liked === 1) {
+            likeButton.style['background-color'] = 'green';
+            dislikeButton.style['background-color'] = 'white';
+            likeCount = 1;
+        } else if (liked === 2 && dislikeButton.style['background-color'] === 'red') {
+            likeButton.style['background-color'] = 'white';
+            dislikeButton.style['background-color'] = 'white';
+            likeCount = 1;
+        } else if (liked === 2 && likeButton.style['background-color'] === 'green') {
+            likeButton.style['background-color'] = 'white';
+            dislikeButton.style['background-color'] = 'red';
+            likeCount = 4;
+        } else if (liked === 2) {
+            likeButton.style['background-color'] = 'white';
+            dislikeButton.style['background-color'] = 'red';
+            likeCount = 2;
+        }
         // Build User Vote
         var userVote = {
             id: songId,
             username: username,
-            vote: liked,
+            vote: likeCount,
             type: 'VOTE'
         };
+
         // Send to stompClient
         stompClient.send("/app/queue.sendLike", {}, JSON.stringify(userVote));
     }

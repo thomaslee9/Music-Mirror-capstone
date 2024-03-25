@@ -36,12 +36,12 @@ public class Song {
         return "Song { Title: '" + songName + "' id: '" + id + "' User: '" + username + "' }";
     }
 
-    public void like() {
-        likeScore += 1;
+    public void like(int count) {
+        likeScore += count;
     }
 
-    public void dislike() {
-        likeScore -= 1;
+    public void dislike(int count) {
+        likeScore -= count;
     }
 
     public int getLikes() {

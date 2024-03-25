@@ -30,14 +30,14 @@ public class SongDict {
         return map.get(songId);
     }
 
-    public void like(String songID) {
+    public void like(String songID, int likeCount) {
         Song song = map.get(songID);
-        song.like();
+        song.like(likeCount);
     }
 
-    public int dislike(String songID) {
+    public int dislike(String songID, int likeCount) {
         Song song = map.get(songID);
-        song.dislike();
+        song.dislike(likeCount);
         return song.getLikes();
     }
 
