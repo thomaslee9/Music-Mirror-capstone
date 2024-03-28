@@ -28,7 +28,7 @@ public class QueueController {
     private static SongDict sd = new SongDict();
     private static int curSongID = 0;
     // Raspberry Pi
-    private static PiClient pi;
+    //private static PiClient pi;
     private static boolean pi_active = false;
 
     @MessageMapping("/queue.sendRequest")
@@ -37,61 +37,56 @@ public class QueueController {
 
         // Host on Raspberry Pi 
         if (pi_active)  {
-
-            try {
-                // Activate Pi CLient
-                pi = new PiClient(HOSTNAME, PORT);
-
-                // Send Queue to New User on Connect
-                if (userRequest.getSongName().equals("NULL")) {
-                    return sq;
-                }
-
-                // =============================================================
-                // QUEUE MANAGER SECTION
-                // Set Song ID
-                String id = String.valueOf(curSongID);
-                curSongID += 1;
-                // Add song to Queue
-                Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), id, userRequest.getUser());
-                sd.add(newSong);
-                sq.push(newSong);
-                sq.printQueue();
-                // =============================================================
-
-                // =============================================================
-                // < Old >  SPOTIFY WEB API SECTION
-                // String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
-                // SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
-                // System.out.println("### Queuing Song ###");
-                // String song_name = userRequest.getSongName();
-                // String artist_name = userRequest.getSongArtist();
-                // Queue Song on Spotify Web API
-                // P.queueSong(song_name, artist_name);
-                // =============================================================
-
-                // =============================================================
-                // Async SPOTIFY WEB API SECTION
-                String access_token = "dummy_token";
-                String song_name = userRequest.getSongName();
-                String artist_name = userRequest.getSongArtist();
-                CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
-                    asyncSpotify(access_token, song_name, artist_name)
-                );
-                // =============================================================
-
-                // Transmit on Pi
-                pi.sendMessage(userRequest.getSongName());
-
-                // Return userRequest
+            // Send Queue to New User on Connect
+            if (userRequest.getSongName().equals("NULL")) {
                 return sq;
+            }
 
+            // =============================================================
+            // QUEUE MANAGER SECTION
+            // Set Song ID
+            String id = String.valueOf(curSongID);
+            curSongID += 1;
+            // Add song to Queue
+            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), id, userRequest.getUser());
+            sd.add(newSong);
+            sq.push(newSong);
+            sq.printQueue();
+            // =============================================================
+
+            // =============================================================
+            // < Old >  SPOTIFY WEB API SECTION
+            // String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
+            // SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
+            // System.out.println("### Queuing Song ###");
+            // String song_name = userRequest.getSongName();
+            // String artist_name = userRequest.getSongArtist();
+            // Queue Song on Spotify Web API
+            // P.queueSong(song_name, artist_name);
+            // =============================================================
+
+            // =============================================================
+            // Async SPOTIFY WEB API SECTION
+            String access_token = "dummy_token";
+            String song_name = userRequest.getSongName();
+            String artist_name = userRequest.getSongArtist();
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
+                asyncSpotify(access_token, song_name, artist_name)
+            );
+            // =============================================================
+
+            // Transmit on Pi
+            try (Socket socket = new Socket(HOSTNAME,PORT);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                    out.println(song_name);
+                    System.out.println("Sent to server: " + song_name);
             } catch (IOException e) {
                 System.out.println("Error: " + e.getMessage());
                 e.printStackTrace();
                 return null;
             }
-
+            // Return userRequest
+            return sq;
         // Host on Local Device
         } else {
 
