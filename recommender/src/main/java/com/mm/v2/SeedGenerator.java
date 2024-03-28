@@ -1,5 +1,6 @@
 package com.mm.v2;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -49,6 +50,10 @@ public class SeedGenerator {
         String[] song_ids = new String[num_songs];
         String[] artist_ids = new String[num_songs-1];
 
+        // use these for the params
+        List<SongAudioFeatures> feature_list = new ArrayList<SongAudioFeatures>();
+        List<Integer> weights = new ArrayList<Integer>();
+
         int idx = 0;
         // now for each top song we need to get the info about it
         for (Pair<String, Integer> pair : topsongs) {
@@ -59,6 +64,7 @@ public class SeedGenerator {
             // get the track object and the features
             TrackObject track = new GetTrackRequest().getTrack(access_token, song_id);
             SongAudioFeatures features = db.GetAudioFeatures(song_id);
+
             // if it wasn't in the db then get from spotify and add to db
             if (features == null)   {
                 // make the request and add to db
@@ -66,9 +72,14 @@ public class SeedGenerator {
                 db.AddSong(song_id, features);
             }
 
+            features.Print();
+
             // collect the song_ids and artist_ids to pass into the builder
             song_ids[idx] = track.getId();
             if (idx != num_songs - 1)   { artist_ids[idx] = track.getFirstArtistId();   }
+
+            feature_list.add(features);
+            weights.add(likes);
 
             idx += 1;
         }
@@ -76,10 +87,52 @@ public class SeedGenerator {
         // now we get the builder and generate the seed
         SeedBuilder builder = new SeedBuilder(artist_ids, song_ids);
 
-        /** TODO: aggregate the features here to pass into builder */
+        // aggregate the features here to pass into builder using weighted centroid
+        SongAudioFeatures centroid = computeWeightedCentroid(weights, feature_list);
+
+        System.out.println("Centroid Features:");
+        centroid.Print();
+
+        builder.addTargetTempo(centroid.getTempo());
+        builder.addTargetAcousticness(centroid.getAcousticness());
+        builder.addTargetInstrumentalness(centroid.getInstrumentalness());
+        builder.addTargetEnergy(centroid.getEnergy());
         builder.addMinPopularity("50");
 
         return builder.getSeed();
+
+    }
+
+    private static SongAudioFeatures computeWeightedCentroid(List<Integer> weights, List<SongAudioFeatures> session_features)  {
+
+        SongAudioFeatures result = new SongAudioFeatures();
+
+        int num_songs = session_features.size();
+        // for each feature (dimension in music vector space)
+        for (String f : SongAudioFeatures.base_features) {
+
+            Double total_sum = 0.0;
+
+            // find the weighted average of the feature
+            for (int i = 0; i < num_songs; i++) {
+
+                SongAudioFeatures song_features = session_features.get(i);
+
+                Double curr_feature = SongAudioFeatures.getFeatureValue(f, song_features);
+                int song_likes = weights.get(i);
+
+                Double weighted_sum = song_likes * curr_feature;
+                total_sum += weighted_sum;
+
+            }
+            // now average and set resulting feature
+            double weighted_feature_avg = total_sum / num_songs;
+            float casted = (float) weighted_feature_avg;
+            SongAudioFeatures.setFeatureValue(f, result, casted);
+
+        }
+
+        return result;
 
     }
 

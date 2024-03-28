@@ -30,6 +30,13 @@ public class AuthorizationDriver {
 
     public void authorize()  {
 
+        String url = "https://accounts.spotify.com/authorize?client_id=" + client_id + 
+        "&response_type=code&redirect_uri=" + redirect_uri + "&scope=" + scopes;
+
+        System.out.println(url);
+
+        if (url.contains("https"))  { return; }
+
         // set the path to the ChromeDriver executable
         System.setProperty("webdriver.chrome.driver", "core/bin/chrome/chromedriver");
 

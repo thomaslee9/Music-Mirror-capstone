@@ -73,7 +73,6 @@ public class RecommendationRanker {
 
     }
 
-
     private static List<SongAudioFeatures> getRecommendationsAttributes(String access_token, SongAttributeDatabase db, TrackObject[] track_objects)    {
 
         List<SongAudioFeatures> recommendation_features = new ArrayList<SongAudioFeatures>();
@@ -162,6 +161,38 @@ public class RecommendationRanker {
 
     }
 
+    private static void setFeatureValue(String f, SongAudioFeatures features, float value)   {
+
+        if      (f.equals("acousticness"))   {
+            features.setAcousticness(value);
+        }
+        else if (f.equals("danceability"))  {
+            features.setDanceability(value);
+        }
+        else if (f.equals("energy"))    {
+            features.setEnergy(value);
+        }
+        else if (f.equals("instrumentalness"))  {
+            features.setInstrumentalness(value);
+        }
+        else if (f.equals("liveness"))  {
+            features.setLiveness(value);
+        }
+        else if (f.equals("loudness"))  {
+            features.setLoudness(value);
+        }
+        else if (f.equals("speechiness"))  {
+            features.setSpeechines(value);
+        }
+        else if (f.equals("tempo"))  {
+            features.setTempo(value);
+        }
+        else if (f.equals("valence"))  {
+            features.setValence(value);
+        }
+
+    }
+
     /**
      * 
      * which features do we think are meaningful?
@@ -206,6 +237,39 @@ public class RecommendationRanker {
         }
 
         return Math.sqrt(sumofsquared);
+    }
+
+    public SongAudioFeatures computeWeightedCentroid(List<Integer> weights, List<SongAudioFeatures> session_features)  {
+
+        SongAudioFeatures result = new SongAudioFeatures();
+
+        int num_songs = session_features.size();
+        // for each feature (dimension in music vector space)
+        for (String f : base_features) {
+
+            Double total_sum = 0.0;
+
+            // find the weighted average of the feature
+            for (int i = 0; i < num_songs; i++) {
+
+                SongAudioFeatures song_features = session_features.get(i);
+
+                Double curr_feature = getFeatureValue(f, song_features);
+                int song_likes = weights.get(i);
+
+                Double weighted_sum = song_likes * curr_feature;
+                total_sum += weighted_sum;
+
+            }
+            // now average and set resulting feature
+            double weighted_feature_avg = total_sum / num_songs;
+            float casted = (float) weighted_feature_avg;
+            setFeatureValue(f, result, casted);
+
+        }
+
+        return result;
+
     }
     
 }

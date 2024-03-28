@@ -17,7 +17,7 @@ public class RecommenderApp {
 
     public static void main( String[] args )    {
 
-        String access_token = "BQBBKiuqoiyYVqU5FwT14-4gDwSG6JCRH9FI7t95vEcCXbo1NEPAhBDFBZnS_G8p5zGzqfCmWkYX0JyBM3ahz6y9fbvU-CGDX-rboeP903RKB8he_OXYKAixh6ZHW9LaM3rz5AnmeXLWJ7xiFH8ZFFPQ8gaxmzUqG3JmBO87cLhJmgbO-RjEc5isHNgD";
+        String access_token = "BQB7SvyVSR-hBIuNBt-iepLZLyMDmtZyXD6CapWLDjjpHwvh9ONWCGVXD6oHE367vF4BT-YRGCwdLAtpXKQNqDqHbBG2Ov08zFhbakyswgnBjlzFTJoJwjSba7upA6xIpA4T38ZShndZb6FyIQfZ6kZIiA8CdTWDrm05EhWctm2DWGo98iqqyDRkyHbc";
         
         SongAttributeDatabase db = new SongAttributeDatabase();
 
@@ -53,7 +53,7 @@ public class RecommenderApp {
         else    {
 
             /** test out the session recommendation here */
-            Pair<String, Integer> p1 = new Pair<String,Integer>("1xzBco0xcoJEDXktl7Jxrr", 0);
+            Pair<String, Integer> p1 = new Pair<String,Integer>("1xzBco0xcoJEDXktl7Jxrr", 1);
             Pair<String, Integer> p2 = new Pair<String,Integer>("54X78diSLoUDI3joC2bjMz", 6);
             Pair<String, Integer> p3 = new Pair<String,Integer>("41ETKVJbZDSjATzW2wAqmc", 4);
 
