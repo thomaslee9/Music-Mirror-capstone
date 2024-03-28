@@ -124,7 +124,7 @@ function sendSongRecRequest(event) {
     if (hasName && hasArtist && stompClient) {
         var userRequest = {
             username: username,
-            songName: '!SONG_REC' + ' ' + requestName.value,
+            songName: requestName.value + ' ' + '!SONG_REC',
             songArtist: requestArtist.value,
             type: 'REQUEST'
         };

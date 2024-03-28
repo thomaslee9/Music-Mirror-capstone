@@ -3,12 +3,16 @@ package com.mm.v1.queue;
 import org.springframework.stereotype.Controller;
 
 import com.mm.v1.SpotifyPlaybackController;
+import com.mm.v1.communication.MessageRequest;
+import com.mm.v1.communication.MessageRequestSerializer;
+import com.mm.v1.song.TrackObject;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.io.*;
 import java.net.*;
 
+import org.javatuples.Pair;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -28,7 +32,7 @@ public class QueueController {
     // Song Queue 
     private static SongQueue sq = new SongQueue();
     private static SongDict sd = new SongDict();
-    private static int curSongID = 0;
+    private static int curQueueId = 0;
     // Raspberry Pi
     //private static PiClient pi;
     private static boolean pi_active = false;
@@ -46,11 +50,16 @@ public class QueueController {
 
             // =============================================================
             // QUEUE MANAGER SECTION
-            // Set Song ID
-            String id = String.valueOf(curSongID);
-            curSongID += 1;
+
+            // Set queue ID
+            String queue_id = String.valueOf(curQueueId);
+            curQueueId += 1;
+
+            // for now, the song_id will be "" until the async spotify returns w resources
+            String song_id = "";
+
             // Add song to Queue
-            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), id, userRequest.getUser());
+            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id, userRequest.getUser());
             sd.add(newSong);
             sq.push(newSong);
             sq.printQueue();
@@ -69,26 +78,18 @@ public class QueueController {
 
             // =============================================================
             // Async SPOTIFY WEB API SECTION
+
             String access_token = "dummy_token";
             String song_name = userRequest.getSongName();
             String artist_name = userRequest.getSongArtist();
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
-                asyncSpotify(access_token, song_name, artist_name)
+                asyncSpotify(access_token, song_name, artist_name, queue_id)
             );
             // =============================================================
 
-            // Transmit on Pi
-            try (Socket socket = new Socket(HOSTNAME,PORT);
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-                    out.println(song_name);
-                    System.out.println("Sent to server: " + song_name);
-            } catch (IOException e) {
-                System.out.println("Error: " + e.getMessage());
-                e.printStackTrace();
-                return null;
-            }
             // Return userRequest
             return sq;
+            
         // Host on Local Device
         } else {
 
@@ -100,10 +101,14 @@ public class QueueController {
             // =================================================================
             // QUEUE MANAGER SECTION
             // Set Song ID
-            String id = String.valueOf(curSongID);
-            curSongID += 1;
+            String queue_id = String.valueOf(curQueueId);
+            curQueueId += 1;
+
+            // for now, the song_id will be "" until the async spotify returns w resources
+            String song_id = "";
+
             // Add song to Queue
-            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), id, userRequest.getUser());
+            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id, userRequest.getUser());
             sd.add(newSong);
             sq.push(newSong);
             sq.printQueue();
@@ -126,7 +131,7 @@ public class QueueController {
             String song_name = userRequest.getSongName();
             String artist_name = userRequest.getSongArtist();
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
-                asyncSpotify(access_token, song_name, artist_name)
+                asyncSpotify(access_token, song_name, artist_name, queue_id)
             );
             // =================================================================
             
@@ -192,23 +197,133 @@ public class QueueController {
 
     // Async SPOTIFY WEB API BLOCK
     // Circumvents Spotify Web API round-trip time
-    public void asyncSpotify(String token, String song_name, String artist_name) {
+    public void asyncSpotify(String token, String song_name, String artist_name, String queue_id) {
+        
+        boolean result = false;
+        String result_song_id = "";
+
         // Attempt to find a Song match and add to Spotify Queue
         try {
-            // Simulated round-trip delay
-            Thread.sleep(3000);
 
-            // Actual code block
-            // SpotifyPlaybackController P = new SpotifyPlaybackController(token);
-            // System.out.println("### Queuing Song ###");
-            // P.queueSong(song_name, artist_name);
+            SpotifyPlaybackController P = new SpotifyPlaybackController(token);
+            System.out.println("### Queuing Song ###");
 
-        } catch (InterruptedException e) {
+            // if !SONG_REC is appended to the song name it means we want a rec
+            if (song_name.contains("!SONG_REC")) {
+
+                String cleaned_name = song_name.replaceAll("!REC", "");
+                TrackObject track = P.getSong(cleaned_name, artist_name);
+
+                // now that we have the track, get the id, artist_id, and genre
+                String song_id = track.getId();
+                String artist_id = track.getFirstArtistId();
+
+                System.out.println("### Generating Recommendation for: ###");
+                System.out.println("# Song_ID = " + song_id + " #");
+                System.out.println("# Artist_ID = " + artist_id + " #");
+
+                /* send this to the second pi - serialize and send */
+                MessageRequest rec_request = new MessageRequest(1, song_id, artist_id, null);
+                String serialized_request = MessageRequestSerializer.serialize(rec_request);
+
+                try (Socket socket = new Socket(HOSTNAME,PORT);
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+
+                        // write the serialized request to the output
+                        out.println(serialized_request);
+                        System.out.println("Sent to server: " + serialized_request);
+
+                } catch (IOException e) {
+                    System.out.println("Error: " + e.getMessage());
+                    e.printStackTrace();
+                }
+
+                System.out.println("(Would be queuing the returned song)");
+
+                /**
+                 * 
+                 * TODO: need to listen for response from second pi
+                 * 
+                 */
+
+                result_song_id = ""; // would set this to response from pi2
+
+                System.out.println("### Queuing Song ###");
+
+                result = P.queueSong(result_song_id);
+
+            }
+            else if (song_name.equals("!SESSION_REC"))  {
+
+                System.out.println("### Displaying Session ###");
+
+                // get the queue session
+                List<Pair<String, Integer>> session = sq.getSession();
+
+                for (Pair<String, Integer> p : session) {
+
+                    System.out.println("Song ID: " + p.getValue0());
+                    System.out.println("Likes: " + p.getValue1());
+
+                }
+
+                System.out.println("### Generating Session Recommendation ###");
+
+                /* send this to the second pi - serialize and send */
+                MessageRequest rec_request = new MessageRequest(2, "", "", session);
+                String serialized_request = MessageRequestSerializer.serialize(rec_request);
+
+                try (Socket socket = new Socket(HOSTNAME,PORT);
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+
+                        // write the serialized request to the output
+                        out.println(serialized_request);
+                        System.out.println("Sent to server: " + serialized_request);
+
+                } catch (IOException e) {
+                    System.out.println("Error: " + e.getMessage());
+                    e.printStackTrace();
+                }
+
+                System.out.println("(Would be queuing the returned song)");
+
+                /**
+                 * 
+                 * TODO: need to listen for response from second pi
+                 * 
+                 */
+
+                result_song_id = ""; // would set this to result from pi2
+
+                System.out.println("### Queuing Song ###");
+
+                result = P.queueSong(result_song_id);
+                
+
+            }
+            // otherwise just queue the song as normal
+            else    {
+
+                System.out.println("### Queuing Song ###");
+
+                result_song_id = P.queueSong(song_name, artist_name);
+                result = true;
+                
+            }
+
+        } catch (Exception e) {
             System.err.println("Async Spotify Queue Song FAILED");
         }
 
+        // now we want to update the song dict to reflect the spotify resources
+        if (result) {
+            System.out.println("Async Spotify Queue Song SUCCESS");
+            sd.updateSongId(queue_id, result_song_id);
+            System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
+        }
         // Return silently
-        System.out.println("Async Spotify Queue Song SUCCESS");
+        System.out.println("Async Spotify Queue Song FAILURE");
+
     }
 
 }

@@ -19,7 +19,12 @@ public class SongDict {
     }
 
     public void add(Song song) {
-        map.put(song.getId(), song);
+        map.put(song.getQueueId(), song);
+    }
+
+    public void updateSongId(String queue_id, String song_id)  {
+        Song song = map.get(queue_id);
+        song.updateSongId(song_id);
     }
 
     public void removeById(String songId) {
