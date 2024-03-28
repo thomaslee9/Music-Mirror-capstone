@@ -35,7 +35,7 @@ public class QueueController {
     private static int curQueueId = 0;
     // Raspberry Pi
     //private static PiClient pi;
-    private static boolean pi_active = false;
+    private static boolean pi_active = true;
 
     @MessageMapping("/queue.sendRequest")
     @SendTo("/topic/public")

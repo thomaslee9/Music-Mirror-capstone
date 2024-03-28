@@ -20,6 +20,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.mm.v1</groupId>
+      <artifactId>core</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>
