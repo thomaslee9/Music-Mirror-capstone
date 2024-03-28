@@ -79,7 +79,7 @@ public class QueueController {
             // =============================================================
             // Async SPOTIFY WEB API SECTION
 
-            String access_token = "dummy_token";
+            String access_token = "BQBOS-1HWujvAgAAtTFTDdsvVwZnm54ppWP0LaniwXAIQ3Y1_LNxJM9lXYhry18Bcje_y-16V2fSig7qPFdYtTIrqsUCBJDcio8x5YJ68l5npM-vKAm_E0XQnBTWdLZ_ZDK1dy51OXhePooBL-rAfPtjl_iv08ihSPSnBG1aoJBLP21aTYWHGOZCjWat";
             String song_name = userRequest.getSongName();
             String artist_name = userRequest.getSongArtist();
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
