@@ -1,4 +1,4 @@
-package com.mm.v1.communication;
+package com.mm.v3;
 
 import java.io.Serializable;
 import java.util.List;

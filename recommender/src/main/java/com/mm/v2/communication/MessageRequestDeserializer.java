@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.util.Base64;
 
-import com.mm.v1.communication.MessageRequest;
+import com.mm.v3.MessageRequest;
 
 public class MessageRequestDeserializer {
 

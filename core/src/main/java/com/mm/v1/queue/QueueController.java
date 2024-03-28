@@ -3,9 +3,10 @@ package com.mm.v1.queue;
 import org.springframework.stereotype.Controller;
 
 import com.mm.v1.SpotifyPlaybackController;
-import com.mm.v1.communication.MessageRequest;
 import com.mm.v1.communication.MessageRequestSerializer;
 import com.mm.v1.song.TrackObject;
+
+import com.mm.v3.MessageRequest;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

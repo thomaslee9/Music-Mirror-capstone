@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.util.Base64;
 
+import com.mm.v3.MessageRequest;
+
 public class MessageRequestSerializer {
 
     public static String serialize(MessageRequest message) throws Exception    {

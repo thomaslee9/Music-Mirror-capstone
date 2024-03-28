@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.javatuples.Pair;
 
-import com.mm.v1.communication.MessageRequest;
+import com.mm.v3.MessageRequest;
 
 import com.mm.v2.communication.MessageRequestDeserializer;
 import com.mm.v2.communication.MessageResponse;
