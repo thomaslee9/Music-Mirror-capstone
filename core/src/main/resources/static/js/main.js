@@ -18,6 +18,7 @@ var connectingElement = document.querySelector('.connecting');
 
 var stompClient = null;
 var username = null;
+var userId = null;
 
 var colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -56,12 +57,18 @@ function onConnected() {
         JSON.stringify({sender: username, type: 'JOIN'})
     )
 
+    //Generate cleint id
+    var clientId = Math.floor(Math.random() * 1000000);
+    userId = username + clientId.toString();
+    console.log("User ID: ", userId);
+
     // Forward Current Queue to New User:
     var userRequest = {
         username: username,
         songName: "NULL",
         songArtist: "NULL",
-        type: 'REQUEST'
+        type: 'CONNECT',
+        userId: userId
     };
 
     stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));
@@ -86,7 +93,8 @@ function sendRequest(event) {
             username: username,
             songName: requestName.value,
             songArtist: requestArtist.value,
-            type: 'REQUEST'
+            type: 'REQUEST',
+            userId: userId
         };
 
         stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));
@@ -174,7 +182,12 @@ function onMessageReceived(payload) {
             // Build the Like button
             var likeButton = document.createElement('button');
             likeButton.id = "like_button_" + currSongId;
-            likeButton.style['background-color'] = 'white';
+            // Check if user has already liked the song
+            if (message.queue[i].userId === userId) {
+                likeButton.style['background-color'] = 'green';
+            } else {
+                likeButton.style['background-color'] = 'white';
+            }
             likeButton.innerHTML = '^';
             likeButton.onclick = function() {
                 sendLike(currSongId, 1); // Update backend with new Like
@@ -257,7 +270,8 @@ function sendLike(songId, liked) {
             id: songId,
             username: username,
             vote: likeCount,
-            type: 'VOTE'
+            type: 'VOTE',
+            userId: userId
         };
 
         // Send to stompClient

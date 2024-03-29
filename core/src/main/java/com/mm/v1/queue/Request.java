@@ -21,6 +21,8 @@ public class Request {
     private String username;
     // Communication Type
     private MessageType type;
+    // UserId 
+    private String userId;
 
     public String getUser() {
         return username;
@@ -32,5 +34,13 @@ public class Request {
 
     public String getSongArtist() {
         return songArtist;
+    }
+
+    public MessageType getMessageType() {
+        return type;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 }

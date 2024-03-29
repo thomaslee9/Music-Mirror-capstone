@@ -4,5 +4,6 @@ public enum MessageType {
     JOIN,
     REQUEST,
     LEAVE,
-    VOTE
+    VOTE,
+    CONNECT
 }
