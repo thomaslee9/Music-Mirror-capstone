@@ -22,9 +22,11 @@ public class SongDict {
         map.put(song.getQueueId(), song);
     }
 
-    public void updateSongId(String queue_id, String song_id)  {
+    public void updateSong(String queue_id, String song_id, String song_name, String artist_name)  {
         Song song = map.get(queue_id);
         song.updateSongId(song_id);
+        song.updateSongName(song_name);
+        song.updateArtistName(artist_name);
     }
 
     public void removeById(String songId) {

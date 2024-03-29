@@ -216,6 +216,7 @@ public class QueueController {
         
         boolean result = false;
         String result_song_id = "";
+        MessageResponse rec_response = null;
 
         // Attempt to find a Song match and add to Spotify Queue
         try {
@@ -240,8 +241,6 @@ public class QueueController {
                 /* send this to the second pi - serialize and send */
                 MessageRequest rec_request = new MessageRequest(1, song_id, artist_id, null);
                 String serialized_request = MessageRequestSerializer.serialize(rec_request);
-
-                MessageResponse rec_response = null;
 
                 try (Socket socket = new Socket(HOSTNAME,PORT);
                      PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
@@ -340,7 +339,9 @@ public class QueueController {
         // now we want to update the song dict to reflect the spotify resources
         if (result) {
             System.out.println("Async Spotify Queue Song SUCCESS");
-            sd.updateSongId(queue_id, result_song_id);
+
+            sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName());
+
             System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
         }
         else    {

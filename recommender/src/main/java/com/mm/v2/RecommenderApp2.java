@@ -95,8 +95,13 @@ public class RecommenderApp2 {
                     }
 
                     System.out.println("Preparing to send back to core");
+
+                    String rec_song_id = recommended_song.getId();
+                    String rec_song_name = recommended_song.getName();
+                    String rec_artist_name = recommended_song.getArtistString();
+
                     // now that we have the recommended song, build the message to send back
-                    MessageResponse rec_response = new MessageResponse(recommended_song.getId());
+                    MessageResponse rec_response = new MessageResponse(rec_song_id, rec_song_name, rec_artist_name);
 
                     String serialized_response = MessageResponseSerializer.serialize(rec_response);
 

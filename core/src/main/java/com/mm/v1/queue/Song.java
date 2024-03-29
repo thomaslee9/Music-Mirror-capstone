@@ -52,6 +52,14 @@ public class Song {
         this.song_id = song_id;
     }
 
+    public void updateSongName(String song_name)    {
+        this.songName = song_name;
+    }
+
+    public void updateArtistName(String artist_name)    {
+        this.songArtist = artist_name;
+    }
+
     public void like(int count) {
         likeScore += count;
     }
