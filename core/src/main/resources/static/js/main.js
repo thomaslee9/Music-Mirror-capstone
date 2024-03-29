@@ -174,16 +174,16 @@ function onMessageReceived(payload) {
         // Build Queue Elements
         for (var i = 0; i < message.queue.length; i++) {
             // Basic Queue Song View:
-            let currSongId = message.queue[i].id;
+            let currQueueId = message.queue[i].queueId;
             var currSongElement = document.createElement('li');
-            var currSongText = document.createTextNode(message.queue[i].id + ": '" + message.queue[i].songName + "' by " + message.queue[i].songArtist + " <--- queued by " + message.queue[i].user + " Vote:");
-            currSongElement.id = "song_div_" + message.queue[i].id
+            var currSongText = document.createTextNode(currQueueId + ": '" + message.queue[i].songName + "' by " + message.queue[i].songArtist + " <--- queued by " + message.queue[i].user + " Vote:");
+            currSongElement.id = "song_div_" + currQueueId
             currSongElement.style['background-color'] = getAvatarColor(message.queue[i].user);
             currSongElement.appendChild(currSongText);
 
             // Build the Like button
             var likeButton = document.createElement('button');
-            likeButton.id = "like_button_" + currSongId;
+            likeButton.id = "like_button_" + currQueueId;
             // Check if user has already liked the song
             if (message.queue[i].userId === userId) {
                 likeButton.style['background-color'] = 'green';
@@ -192,17 +192,17 @@ function onMessageReceived(payload) {
             }
             likeButton.innerHTML = '^';
             likeButton.onclick = function() {
-                sendLike(currSongId, 1); // Update backend with new Like
+                sendLike(currQueueId, 1); // Update backend with new Like
             };
             currSongElement.appendChild(likeButton);
 
             // Build the Dislike button
             var dislikeButton = document.createElement('button');
             dislikeButton.style['background-color'] = 'white';
-            dislikeButton.id = "dislike_button_" + currSongId;
+            dislikeButton.id = "dislike_button_" + currQueueId;
             dislikeButton.innerHTML = 'v';
             dislikeButton.onclick = function() {
-                sendLike(currSongId, 2); // Update backend with new Dislike
+                sendLike(currQueueId, 2); // Update backend with new Dislike
             };
             currSongElement.appendChild(dislikeButton);
 
