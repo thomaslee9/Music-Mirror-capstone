@@ -87,7 +87,7 @@ public class QueueController {
             // =============================================================
             // Async SPOTIFY WEB API SECTION
 
-            String access_token = "BQC4Pl9RDNSK_qHUMTFKS-4c-zU558OXpJS3zA8oIJZqCuDvmuZ_sZ_owHEPM-GiErCBsdPWO3zO2IIqawKE7l-yFVGmzG2SOcdNWDux_8E63NVh4H4ARv3lDBMTB0yr2ZCwVbuPYatFeBxizlknVuUtscHdMK26N0oR1EJ7YDHMAj_IC0kjvp63G1R6";
+            String access_token = "BQAZrG8eQ60m4yaP2OQVsXHPvTfdpoBuJ5RuAgyAZd-Z9tWMgHJz4eM4As0ntAcqvSr_z8BSSK7a8sElPRG2Q4D6w9YfCFbh0MpjL5MQlQiXBOUoW2nMVJo90svUP2AgCuF1b-sj8UtXRHIkUrtItgBb7s8D_KKbnlY1KFqPdnAzqeKY4LBqS5VwPHyg";
             String song_name = userRequest.getSongName();
             String artist_name = userRequest.getSongArtist();
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
@@ -295,11 +295,22 @@ public class QueueController {
                 String serialized_request = MessageRequestSerializer.serialize(rec_request);
 
                 try (Socket socket = new Socket(HOSTNAME,PORT);
-                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
                         // write the serialized request to the output
                         out.println(serialized_request);
                         System.out.println("Sent to server: " + serialized_request);
+
+                        System.out.println("Awaiting response from recommender");
+
+                        String response = in.readLine();
+                        System.out.println("Recevied from server: " + response);
+
+                        // now deserialize the response
+                        rec_response = MessageResponseDeserializer.deserialize(response);
+
+                        System.out.println("Deserialized from server!");
 
                 } catch (IOException e) {
                     System.out.println("Error: " + e.getMessage());
@@ -308,18 +319,11 @@ public class QueueController {
 
                 System.out.println("(Would be queuing the returned song)");
 
-                /**
-                 * 
-                 * TODO: need to listen for response from second pi
-                 * 
-                 */
-
-                result_song_id = ""; // would set this to result from pi2
+                result_song_id = rec_response.getSongId(); // would set this to response from pi2
 
                 System.out.println("### Queuing Song ###");
 
                 result = P.queueSong(result_song_id);
-                
 
             }
             // otherwise just queue the song as normal
