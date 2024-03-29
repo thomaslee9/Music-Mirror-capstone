@@ -9,5 +9,9 @@ public class MessageResponse {
         this.song_id = song_id;
 
     }
+
+    public String getSongId()   {
+        return this.song_id;
+    }
     
 }

@@ -4,9 +4,11 @@ import org.springframework.stereotype.Controller;
 
 import com.mm.v1.SpotifyPlaybackController;
 import com.mm.v1.communication.MessageRequestSerializer;
+import com.mm.v1.communication.MessageResponseDeserializer;
 import com.mm.v1.song.TrackObject;
 
 import com.mm.v3.MessageRequest;
+import com.mm.v3.MessageResponse;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -239,12 +241,25 @@ public class QueueController {
                 MessageRequest rec_request = new MessageRequest(1, song_id, artist_id, null);
                 String serialized_request = MessageRequestSerializer.serialize(rec_request);
 
+                MessageResponse rec_response = null;
+
                 try (Socket socket = new Socket(HOSTNAME,PORT);
-                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
                         // write the serialized request to the output
                         out.println(serialized_request);
                         System.out.println("Sent to server: " + serialized_request);
+
+                        System.out.println("Awaiting response from recommender");
+
+                        String response = in.readLine();
+                        System.out.println("Recevied from server: " + response);
+
+                        // now deserialize the response
+                        rec_response = MessageResponseDeserializer.deserialize(response);
+
+                        System.out.println("Deserialized from server!");
 
                 } catch (IOException e) {
                     System.out.println("Error: " + e.getMessage());
@@ -253,13 +268,7 @@ public class QueueController {
 
                 System.out.println("(Would be queuing the returned song)");
 
-                /**
-                 * 
-                 * TODO: need to listen for response from second pi
-                 * 
-                 */
-
-                result_song_id = ""; // would set this to response from pi2
+                result_song_id = rec_response.getSongId(); // would set this to response from pi2
 
                 System.out.println("### Queuing Song ###");
 
@@ -334,8 +343,9 @@ public class QueueController {
             sd.updateSongId(queue_id, result_song_id);
             System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
         }
-        // Return silently
-        System.out.println("Async Spotify Queue Song FAILURE");
+        else    {
+            System.out.println("Async Spotify Queue Song FAILURE");
+        }
 
     }
 

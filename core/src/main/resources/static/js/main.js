@@ -113,7 +113,8 @@ function sendSessionRequest(event) {
             username: username,
             songName: '!SESSION_REC',
             songArtist: 'Recommendations based on your listening history',
-            type: 'REQUEST'
+            type: 'REQUEST',
+            userId: userId
         };
 
         stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));
@@ -134,7 +135,8 @@ function sendSongRecRequest(event) {
             username: username,
             songName: requestName.value + ' ' + '!SONG_REC',
             songArtist: requestArtist.value,
-            type: 'REQUEST'
+            type: 'REQUEST',
+            userId: userId
         };
 
         stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));

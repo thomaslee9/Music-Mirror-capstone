@@ -3,6 +3,7 @@ package com.mm.v2;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.javatuples.Pair;
 import com.mm.v3.MessageRequest;
 import com.mm.v3.MessageResponse;
 import com.mm.v2.communication.MessageRequestDeserializer;
+import com.mm.v2.communication.MessageResponseSerializer;
 import com.mm.v2.requests.RecommendationRequest;
 import com.mm.v2.responses.RecommendationResponse;
 import com.mm.v2.song.TrackObject;
@@ -35,7 +37,8 @@ public class RecommenderApp2 {
 
                 // accept message from client
                 try (Socket socket = serverSocket.accept();
-                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
                     
                     // read the message from the first pi
                     String message = in.readLine();
@@ -91,14 +94,16 @@ public class RecommenderApp2 {
                         System.out.println("Unknown message request type");
                     }
 
+                    System.out.println("Preparing to send back to core");
                     // now that we have the recommended song, build the message to send back
                     MessageResponse rec_response = new MessageResponse(recommended_song.getId());
 
-                    /**
-                     * 
-                     * TODO: send response back to original pi
-                     * 
-                    */
+                    String serialized_response = MessageResponseSerializer.serialize(rec_response);
+
+                    System.out.println("Serialized Response ** Sending Now");
+
+                    out.println(serialized_response);
+                    System.out.println("Sent to Core: " + serialized_response);
 
                              
                 } catch (Exception e) {
