@@ -29,7 +29,7 @@ public class QueueController {
     private static final int LIKE_TO_DISLIKE = 4;
     // Connection
     private static final int PORT = 5000;
-    private static final String HOSTNAME = "192.168.1.185";
+    private static final String HOSTNAME = "172.26.54.24";
     // Song Queue 
     private static UserDict ud = new UserDict();
     private static SongQueue sq = new SongQueue();
@@ -85,7 +85,7 @@ public class QueueController {
             // =============================================================
             // Async SPOTIFY WEB API SECTION
 
-            String access_token = "BQBOS-1HWujvAgAAtTFTDdsvVwZnm54ppWP0LaniwXAIQ3Y1_LNxJM9lXYhry18Bcje_y-16V2fSig7qPFdYtTIrqsUCBJDcio8x5YJ68l5npM-vKAm_E0XQnBTWdLZ_ZDK1dy51OXhePooBL-rAfPtjl_iv08ihSPSnBG1aoJBLP21aTYWHGOZCjWat";
+            String access_token = "BQC4Pl9RDNSK_qHUMTFKS-4c-zU558OXpJS3zA8oIJZqCuDvmuZ_sZ_owHEPM-GiErCBsdPWO3zO2IIqawKE7l-yFVGmzG2SOcdNWDux_8E63NVh4H4ARv3lDBMTB0yr2ZCwVbuPYatFeBxizlknVuUtscHdMK26N0oR1EJ7YDHMAj_IC0kjvp63G1R6";
             String song_name = userRequest.getSongName();
             String artist_name = userRequest.getSongArtist();
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
@@ -224,7 +224,7 @@ public class QueueController {
             // if !SONG_REC is appended to the song name it means we want a rec
             if (song_name.contains("!SONG_REC")) {
 
-                String cleaned_name = song_name.replaceAll("!REC", "");
+                String cleaned_name = song_name.replaceAll(" !SONG_REC", "");
                 TrackObject track = P.getSong(cleaned_name, artist_name);
 
                 // now that we have the track, get the id, artist_id, and genre

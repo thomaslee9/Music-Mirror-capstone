@@ -10,9 +10,8 @@ import java.util.List;
 import org.javatuples.Pair;
 
 import com.mm.v3.MessageRequest;
-
+import com.mm.v3.MessageResponse;
 import com.mm.v2.communication.MessageRequestDeserializer;
-import com.mm.v2.communication.MessageResponse;
 import com.mm.v2.requests.RecommendationRequest;
 import com.mm.v2.responses.RecommendationResponse;
 import com.mm.v2.song.TrackObject;
@@ -22,7 +21,7 @@ public class RecommenderApp2 {
     public static void main(String[] args) {
 
         // access token for auth use
-        String access_token = "BQBOS-1HWujvAgAAtTFTDdsvVwZnm54ppWP0LaniwXAIQ3Y1_LNxJM9lXYhry18Bcje_y-16V2fSig7qPFdYtTIrqsUCBJDcio8x5YJ68l5npM-vKAm_E0XQnBTWdLZ_ZDK1dy51OXhePooBL-rAfPtjl_iv08ihSPSnBG1aoJBLP21aTYWHGOZCjWat";
+        String access_token = "BQC4Pl9RDNSK_qHUMTFKS-4c-zU558OXpJS3zA8oIJZqCuDvmuZ_sZ_owHEPM-GiErCBsdPWO3zO2IIqawKE7l-yFVGmzG2SOcdNWDux_8E63NVh4H4ARv3lDBMTB0yr2ZCwVbuPYatFeBxizlknVuUtscHdMK26N0oR1EJ7YDHMAj_IC0kjvp63G1R6";
         // create the song attribute database
         SongAttributeDatabase db = new SongAttributeDatabase();
 
