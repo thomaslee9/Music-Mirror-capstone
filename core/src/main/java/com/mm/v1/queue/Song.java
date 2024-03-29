@@ -6,14 +6,16 @@ public class Song {
     private String queue_id;
     private String song_id;
     private String username;
+    private String userId;
     private int likeScore;
 
-    public Song(String songName, String songArtist, String queue_id, String song_id, String username) {
+    public Song(String songName, String songArtist, String queue_id, String song_id, String username, String userId) {
         this.songName = songName;
         this.songArtist = songArtist;
         this.queue_id = queue_id;
         this.song_id = song_id;
         this.username = username;
+        this.userId = userId;
         this.likeScore = 1;
     }
 
@@ -35,6 +37,10 @@ public class Song {
 
     public String getUser() {
         return username;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     @Override

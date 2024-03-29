@@ -31,6 +31,7 @@ public class QueueController {
     private static final int PORT = 5000;
     private static final String HOSTNAME = "192.168.1.185";
     // Song Queue 
+    private static UserDict ud = new UserDict();
     private static SongQueue sq = new SongQueue();
     private static SongDict sd = new SongDict();
     private static int curQueueId = 0;
@@ -45,7 +46,10 @@ public class QueueController {
         // Host on Raspberry Pi 
         if (pi_active)  {
             // Send Queue to New User on Connect
-            if (userRequest.getSongName().equals("NULL")) {
+            if (userRequest.getMessageType() == MessageType.CONNECT) {
+                // Add User to UserDict
+                System.out.println("### Adding User ###   " + userRequest.getUserId());
+                ud.addUser(userRequest.getUserId());
                 return sq;
             }
 
@@ -60,8 +64,9 @@ public class QueueController {
             String song_id = "";
 
             // Add song to Queue
-            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id, userRequest.getUser());
+            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id, userRequest.getUser(), userRequest.getUserId());
             sd.add(newSong);
+            ud.addSong(userRequest.getUserId(), newSong);
             sq.push(newSong);
             sq.printQueue();
             // =============================================================
@@ -95,7 +100,10 @@ public class QueueController {
         } else {
 
             // Send Queue to New User on Connect
-            if (userRequest.getSongName().equals("NULL")) {
+            if (userRequest.getMessageType() == MessageType.CONNECT) {
+                // Add User to UserDict
+                System.out.println("### Adding User ###   " + userRequest.getUserId());
+                ud.addUser(userRequest.getUserId());
                 return sq;
             }
 
@@ -109,8 +117,9 @@ public class QueueController {
             String song_id = "";
 
             // Add song to Queue
-            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id, userRequest.getUser());
+            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id, userRequest.getUser(), userRequest.getUserId());
             sd.add(newSong);
+            ud.addSong(userRequest.getUserId(), newSong);
             sq.push(newSong);
             sq.printQueue();
             // =================================================================
@@ -160,6 +169,7 @@ public class QueueController {
         // Extract Vote details
         String id = userVote.getSongId();
         int vote = userVote.getVote();
+        String userId = userVote.getUser();
 
         // Process Vote
         if (vote == LIKE) {
@@ -173,6 +183,7 @@ public class QueueController {
                 Song song = sd.getSongById(id);
                 sq.remove(song);
                 sd.removeById(id);
+                ud.removeSong(userId, song);
                 // Return vetoed Song ID
                 return id;
             }
@@ -187,6 +198,7 @@ public class QueueController {
                 Song song = sd.getSongById(id);
                 sq.remove(song);
                 sd.removeById(id);
+                ud.removeSong(userId, song);
                 // Return vetoed Song ID
                 return id;
             }
