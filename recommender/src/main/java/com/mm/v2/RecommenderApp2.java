@@ -139,6 +139,8 @@ public class RecommenderApp2 {
 
         System.out.println("### Getting Recommendation from session songs ###");
 
+        cleanSession(session);
+
         String seed = SeedGenerator.generateSeed(access_token, db, session);
         System.out.println(seed);
 
@@ -146,6 +148,18 @@ public class RecommenderApp2 {
         TrackObject recommended_song = RecommendationRanker.rank_random(access_token, db, rec.getTracks());
 
         return recommended_song;
+
+    }
+
+    public static void cleanSession(List<Pair<String, Integer>> session)    {
+
+        for (int i = 0; i < session.size();)    {
+
+            Pair<String, Integer> p = session.get(i);
+            if (p.getValue0() == "")    { session.remove(i); }
+            else    { i++; }
+
+        }
 
     }
 
