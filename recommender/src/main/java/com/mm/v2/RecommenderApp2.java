@@ -23,7 +23,7 @@ public class RecommenderApp2 {
     public static void main(String[] args) {
 
         // access token for auth use
-        String access_token = "BQAZrG8eQ60m4yaP2OQVsXHPvTfdpoBuJ5RuAgyAZd-Z9tWMgHJz4eM4As0ntAcqvSr_z8BSSK7a8sElPRG2Q4D6w9YfCFbh0MpjL5MQlQiXBOUoW2nMVJo90svUP2AgCuF1b-sj8UtXRHIkUrtItgBb7s8D_KKbnlY1KFqPdnAzqeKY4LBqS5VwPHyg";
+        String access_token = "BQCCtpUNxqciOB2qstGEWnC6n2OnEhpvPhs925dyE50FOtIbEeC9JlLtBbEBxRsuCzy6jdWymAhY0AUHVDI9FvEwAbjUug6GHyEFr_wZmpKCeEZfGUgR2seS4D7P4Aic6Ffxw5AB-cZL8dS9-fPIg3pZ7bVONgu3BREnDXkqsLF1cp0bFZGU4Uli2X2ig";
         // create the song attribute database
         SongAttributeDatabase db = new SongAttributeDatabase();
 

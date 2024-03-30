@@ -23,10 +23,13 @@ public class SongDict {
     }
 
     public void updateSong(String queue_id, String song_id, String song_name, String artist_name)  {
+        System.out.println("inside update song");
         Song song = map.get(queue_id);
         song.updateSongId(song_id);
         song.updateSongName(song_name);
         song.updateArtistName(artist_name);
+        System.out.println("after update song");
+
     }
 
     public void removeById(String songId) {
