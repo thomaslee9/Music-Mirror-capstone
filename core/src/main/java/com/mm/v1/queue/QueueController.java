@@ -1,6 +1,7 @@
 package com.mm.v1.queue;
 
 import org.springframework.stereotype.Controller;
+import com.google.gson.Gson;
 
 import com.mm.v1.SpotifyPlaybackController;
 import com.mm.v1.communication.MessageRequestSerializer;
@@ -43,7 +44,7 @@ public class QueueController {
 
     @MessageMapping("/queue.sendRequest")
     @SendTo("/topic/public")
-    public SongQueue sendRequest(@Payload Request userRequest) {
+    public String sendRequest(@Payload Request userRequest) {
 
         // Host on Raspberry Pi 
         if (pi_active)  {
@@ -52,7 +53,8 @@ public class QueueController {
                 // Add User to UserDict
                 System.out.println("### Adding User ###   " + userRequest.getUserId());
                 ud.addUser(userRequest.getUserId());
-                return sq;
+                Gson gson = new Gson();
+                return gson.toJson(sq);
             }
 
             // =============================================================
@@ -96,7 +98,8 @@ public class QueueController {
             // =============================================================
 
             // Return userRequest
-            return sq;
+            Gson gson = new Gson();
+            return gson.toJson(sq);
             
         // Host on Local Device
         } else {
@@ -106,7 +109,8 @@ public class QueueController {
                 // Add User to UserDict
                 System.out.println("### Adding User ###   " + userRequest.getUserId());
                 ud.addUser(userRequest.getUserId());
-                return sq;
+                Gson gson = new Gson();
+                return gson.toJson(sq);
             }
 
             // =================================================================
@@ -148,7 +152,8 @@ public class QueueController {
             // =================================================================
             
             // Return userRequest
-            return sq;
+            Gson gson = new Gson();
+            return gson.toJson(sq);
         }
     }
 
@@ -169,40 +174,42 @@ public class QueueController {
         @Payload Vote userVote
     ) {
         // Extract Vote details
-        String id = userVote.getSongId();
+        String queueId = userVote.getQueueId();
         int vote = userVote.getVote();
-        String userId = userVote.getUser();
+        String userId = userVote.getUserId();
+        String color = userVote.getColor();
 
+        //Set color 
+        Song song = sd.getSongByQueueId(queueId);
+        song.setColor(color, userId);
         // Process Vote
         if (vote == LIKE) {
             // Like Song
-            sd.like(id, 1);
+            sd.like(queueId, 1);
         } else if (vote == DISLIKE) {
             // Dislike Song
-            int numLikes = sd.dislike(id, 1);
+            int numLikes = sd.dislike(queueId, 1);
             // Check if Song has been vetoed
             if (numLikes < 0) {
-                Song song = sd.getSongById(id);
                 sq.remove(song);
-                sd.removeById(id);
+                sd.removeById(queueId);
                 ud.removeSong(userId, song);
                 // Return vetoed Song ID
-                return id;
+                return queueId;
             }
         } else if (vote == DISLIKE_TO_LIKE) {
             // Dislike to Like Song
-            sd.like(id, 2);
+            sd.like(queueId, 2);
         } else if (vote == LIKE_TO_DISLIKE) {
             // Dislike Song
-            int numLikes = sd.dislike(id, 2);
+            int numLikes = sd.dislike(queueId, 2);
             // Check if Song has been vetoed
             if (numLikes < 0) {
-                Song song = sd.getSongById(id);
                 sq.remove(song);
-                sd.removeById(id);
+                sd.removeById(queueId);
                 ud.removeSong(userId, song);
                 // Return vetoed Song ID
-                return id;
+                return queueId;
             }
         }
 

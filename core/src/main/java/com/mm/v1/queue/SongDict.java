@@ -36,8 +36,8 @@ public class SongDict {
         map.remove(songId);
     }
 
-    public Song getSongById(String songId) {
-        return map.get(songId);
+    public Song getSongByQueueId(String queueId) {
+        return map.get(queueId);
     }
 
     public void like(String songID, int likeCount) {

@@ -14,7 +14,7 @@ import lombok.Setter;
 public class Vote {
 
     // String Name User input
-    private String id;
+    private String queueId;
     private String username;
     // Vote Decision
     // 0: nothing
@@ -23,13 +23,18 @@ public class Vote {
     private int vote;
     // Communication Type
     private MessageType type;
+    private String color;
+    private String userId;
 
     public String getUser() {
         return username;
     }
 
-    public String getSongId() {
-        return id;
+    public String getUserId() {
+        return userId;
+    }
+    public String getQueueId() {
+        return queueId;
     }
 
     public int getVote() {
@@ -38,5 +43,9 @@ public class Vote {
 
     public MessageType getMsgType() {
         return type;
+    }
+
+    public String getColor() {
+        return color;
     }
 }

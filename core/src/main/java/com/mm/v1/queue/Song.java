@@ -1,24 +1,33 @@
 package com.mm.v1.queue;
-
+import java.util.concurrent.ConcurrentHashMap;
 public class Song {
     private String songName;
     private String songArtist;
-    private String queue_id;
-    private String song_id;
+    private String queueId;
+    private String songId;
     private String username;
     private String userId;
+    //private boolean isRec;
+    private ConcurrentHashMap<String, String> colorMap;
     private int likeScore;
 
-    public Song(String songName, String songArtist, String queue_id, String song_id, String username, String userId) {
+    public Song(String songName, String songArtist, String queueId, String songId, String username, String userId) {
         this.songName = songName;
         this.songArtist = songArtist;
-        this.queue_id = queue_id;
-        this.song_id = song_id;
+        this.queueId = queueId;
+        this.songId = songId;
         this.username = username;
         this.userId = userId;
+        this.colorMap = new ConcurrentHashMap<String, String>();
+        this.colorMap.put(userId, "green");
         this.likeScore = 1;
     }
 
+    public void setColor(String color, String userId) {
+
+        colorMap.put(userId, color);
+        System.out.println("Color Map: " + colorMap);
+    }
     public String getSongName() {
         return songName;
     }
@@ -28,11 +37,11 @@ public class Song {
     }
 
     public String getQueueId() {
-        return queue_id;
+        return queueId;
     }
 
     public String getSongId() {
-        return song_id;
+        return songId;
     }
 
     public String getUser() {
@@ -45,11 +54,11 @@ public class Song {
 
     @Override
     public String toString() {
-        return "Song { Title: '" + songName + "' queue_id: '" + queue_id + "' song_id: '" + song_id + "' User: '" + username + "' }";
+        return "Song { Title: '" + songName + "' queueId: '" + queueId + "' songId: '" + songId + "' username: '" + username + "' colorMap: '" + colorMap + "' }";
     }
 
-    public void updateSongId(String song_id)  {
-        this.song_id = song_id;
+    public void updateSongId(String songId)  {
+        this.songId = songId;
     }
 
     public void updateSongName(String song_name)    {
