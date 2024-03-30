@@ -55,7 +55,7 @@ public class RecommendationRanker {
 
             System.out.println("* Computed L2 Distance: " + distance);
 
-            if (distance < min_distance)    {
+            if (distance != 0.0 && distance < min_distance)    {
                 // update the min and set the corresponding index
                 min_distance = distance;
                 min_idx = i;
@@ -240,6 +240,14 @@ public class RecommendationRanker {
     }
 
     public SongAudioFeatures computeWeightedCentroid(List<Integer> weights, List<SongAudioFeatures> session_features)  {
+
+        boolean equally_weighted = true;
+        // check if all of the weights are just 0s. if they are, equally weight
+        for (int w : weights)   { if (w != 0) { equally_weighted = false; } }
+        // set the weights to equally weighted
+        if (equally_weighted)   { 
+            for (int i = 0; i < weights.size(); i++) { weights.set(i, 1); }
+        }
 
         SongAudioFeatures result = new SongAudioFeatures();
 
