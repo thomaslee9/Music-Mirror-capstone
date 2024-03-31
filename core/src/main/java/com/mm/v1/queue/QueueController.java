@@ -280,6 +280,11 @@ public class QueueController {
 
                 result = P.queueSong(result_song_id);
 
+                sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName());
+
+                System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
+    
+
             }
             else if (song_name.equals("!SESSION_REC"))  {
 
@@ -332,6 +337,11 @@ public class QueueController {
 
                 result = P.queueSong(result_song_id);
 
+                sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName());
+
+                System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
+    
+
             }
             // otherwise just queue the song as normal
             else    {
@@ -340,6 +350,9 @@ public class QueueController {
 
                 result_song_id = P.queueSong(song_name, artist_name);
                 result = true;
+
+                sd.updateSongId(queue_id, result_song_id);
+                System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
                 
             }
 
@@ -350,10 +363,6 @@ public class QueueController {
         // now we want to update the song dict to reflect the spotify resources
         if (result) {
             System.out.println("Async Spotify Queue Song SUCCESS");
-
-            sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName());
-
-            System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
         }
         else    {
             System.out.println("Async Spotify Queue Song FAILURE");
