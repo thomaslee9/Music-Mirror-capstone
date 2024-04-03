@@ -21,7 +21,7 @@ public class Request {
     private String username;
     // Communication Type
     private MessageType type;
-    // UserId 
+    // UserId
     private String userId;
 
     public String getUser() {

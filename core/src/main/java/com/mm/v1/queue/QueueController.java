@@ -21,9 +21,14 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Controller
 public class QueueController {
+    // Used to send queue in async operation
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
     // Vote Decisions
     private static final int NOTHING = 0;
     private static final int LIKE = 1;
@@ -33,153 +38,103 @@ public class QueueController {
     // Connection
     private static final int PORT = 5000;
     private static final String HOSTNAME = "172.26.54.24";
-    // Song Queue 
+    // Song Queue
     private static UserDict ud = new UserDict();
     private static SongQueue sq = new SongQueue();
     private static SongDict sd = new SongDict();
     private static int curQueueId = 0;
     // Raspberry Pi
-    //private static PiClient pi;
+    // private static PiClient pi;
     private static boolean pi_active = true;
 
     @MessageMapping("/queue.sendRequest")
     @SendTo("/topic/public")
     public String sendRequest(@Payload Request userRequest) {
 
-        // Host on Raspberry Pi 
-        if (pi_active)  {
-            // Send Queue to New User on Connect
-            if (userRequest.getMessageType() == MessageType.CONNECT) {
-                // Add User to UserDict
-                System.out.println("### Adding User ###   " + userRequest.getUserId());
-                ud.addUser(userRequest.getUserId());
-                Gson gson = new Gson();
-                return gson.toJson(sq);
-            }
-
-            // =============================================================
-            // QUEUE MANAGER SECTION
-
-            // Set queue ID
-            String queue_id = String.valueOf(curQueueId);
-            curQueueId += 1;
-
-            // for now, the song_id will be "" until the async spotify returns w resources
-            String song_id = "";
-
-            // Add song to Queue
-            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id, userRequest.getUser(), userRequest.getUserId());
-            sd.add(newSong);
-            ud.addSong(userRequest.getUserId(), newSong);
-            sq.push(newSong);
-            sq.printQueue();
-            // =============================================================
-
-            // =============================================================
-            // < Old >  SPOTIFY WEB API SECTION
-            // String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
-            // SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
-            // System.out.println("### Queuing Song ###");
-            // String song_name = userRequest.getSongName();
-            // String artist_name = userRequest.getSongArtist();
-            // Queue Song on Spotify Web API
-            // P.queueSong(song_name, artist_name);
-            // =============================================================
-
-            // =============================================================
-            // Async SPOTIFY WEB API SECTION
-
-            String access_token = "BQCCtpUNxqciOB2qstGEWnC6n2OnEhpvPhs925dyE50FOtIbEeC9JlLtBbEBxRsuCzy6jdWymAhY0AUHVDI9FvEwAbjUug6GHyEFr_wZmpKCeEZfGUgR2seS4D7P4Aic6Ffxw5AB-cZL8dS9-fPIg3pZ7bVONgu3BREnDXkqsLF1cp0bFZGU4Uli2X2i";
-            String song_name = userRequest.getSongName();
-            String artist_name = userRequest.getSongArtist();
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
-                asyncSpotify(access_token, song_name, artist_name, queue_id)
-            );
-            // =============================================================
-
-            // Return userRequest
-            Gson gson = new Gson();
-            return gson.toJson(sq);
-            
-        // Host on Local Device
-        } else {
-
-            // Send Queue to New User on Connect
-            if (userRequest.getMessageType() == MessageType.CONNECT) {
-                // Add User to UserDict
-                System.out.println("### Adding User ###   " + userRequest.getUserId());
-                ud.addUser(userRequest.getUserId());
-                Gson gson = new Gson();
-                return gson.toJson(sq);
-            }
-
-            // =================================================================
-            // QUEUE MANAGER SECTION
-            // Set Song ID
-            String queue_id = String.valueOf(curQueueId);
-            curQueueId += 1;
-
-            // for now, the song_id will be "" until the async spotify returns w resources
-            String song_id = "";
-
-            // Add song to Queue
-            Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id, userRequest.getUser(), userRequest.getUserId());
-            sd.add(newSong);
-            ud.addSong(userRequest.getUserId(), newSong);
-            sq.push(newSong);
-            sq.printQueue();
-            // =================================================================
-
-            // =================================================================
-            // < Old >  SPOTIFY WEB API SECTION
-            // String access_token = "BQA3g0IRJgTO6LcN-rgrPd6bC-KEzzT3FaSAkQEmhIN6oGhunH_j-bT5iwvfR-0emeWjNgXkwrM8Xs0mb7G9_ix9gKn3jxGmr2VLIbYbAHY8Uh5TdHWrHTCRhuFR12CsWCSbsUByn0SyX9VTlXutJ_pJiWcOrQY1hrdD--40HGKa3EhtUZgCdlqu-qAu";
-            // SpotifyPlaybackController P = new SpotifyPlaybackController(access_token);
-            // System.out.println("### Queuing Song ###");
-            // String song_name = userRequest.getSongName();
-            // String artist_name = userRequest.getSongArtist();
-            // // Queue Song on Spotify Web API
-            // P.queueSong(song_name, artist_name);
-            // =================================================================
-
-            // =================================================================
-            // Async SPOTIFY WEB API SECTION
-            String access_token = "dummy_token";
-            String song_name = userRequest.getSongName();
-            String artist_name = userRequest.getSongArtist();
-            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> 
-                asyncSpotify(access_token, song_name, artist_name, queue_id)
-            );
-            // =================================================================
-            
-            // Return userRequest
+        // Host on Raspberry Pi
+        // Send Queue to New User on Connect
+        if (userRequest.getMessageType() == MessageType.CONNECT) {
+            // Add User to UserDict
+            System.out.println("### Adding User ###   " + userRequest.getUserId());
+            ud.addUser(userRequest.getUserId());
             Gson gson = new Gson();
             return gson.toJson(sq);
         }
+
+        // =============================================================
+        // QUEUE MANAGER SECTION
+
+        // Set queue ID
+        String queue_id = String.valueOf(curQueueId);
+        curQueueId += 1;
+
+        // for now, the song_id will be "" until the async spotify returns w resources
+        String song_id = "";
+
+        // Add song to Queue
+        MessageType messageType = userRequest.getType();
+        boolean isRec = messageType == MessageType.SONGREC || messageType == MessageType.SESSIONREC;
+        Song newSong = new Song(userRequest.getSongName(), userRequest.getSongArtist(), queue_id, song_id,
+                userRequest.getUser(), userRequest.getUserId(), isRec);
+        sd.add(newSong);
+        ud.addSong(userRequest.getUserId(), newSong);
+        sq.push(newSong);
+        sq.printQueue();
+
+        // =============================================================
+
+        // =============================================================
+        // Async SPOTIFY WEB API SECTION
+
+        String access_token = "BQAVQ7aSR1ziO8TWFsANt_p_anm1RLnuK0MTwped6Uz-teosjDUmWsd2NtlOJcHrJ53kzteCJjzI6y57DCRNinMDqdZqqDHM3i4YvvrVGtmEyk-ZBOTbTW0V54vPzI0tm0oqIWiR3JMeBysnUHFAbFNpqNOh0sz90PlNe503WfuGUBqnZjDFk6Bofjob";
+        String song_name = userRequest.getSongName();
+        String artist_name = userRequest.getSongArtist();
+        CompletableFuture<Void> future = CompletableFuture
+                .runAsync(() -> asyncSpotify(access_token, song_name, artist_name, queue_id, messageType))
+                .thenAccept(result -> {
+                    Gson gson = new Gson();
+                    String updatedQueue = gson.toJson(sq);
+                    // SEND updated queue
+                    if (messageType != MessageType.REQUEST) {
+                        System.out.println("FINISHED ASYNC FUNCTION");
+                        newSong.setRecComplete();
+                        messagingTemplate.convertAndSend("/topic/public", updatedQueue);
+                    }
+                });
+        // =============================================================
+
+        // Want like buttons to show
+        if (messageType == MessageType.REQUEST) {
+            newSong.setRecComplete();
+        }
+        Gson gson = new Gson();
+        return gson.toJson(sq);
+
+        // Host on Local Device
+
     }
 
     @MessageMapping("/queue.addUser")
     @SendTo("/topic/public")
     public Request addUser(
-        @Payload Request userRequest,
-        SimpMessageHeaderAccessor accessor
-    ) {
+            @Payload Request userRequest,
+            SimpMessageHeaderAccessor accessor) {
         // Accept a new user
         accessor.getSessionAttributes().put("username", userRequest.getUser());
         return userRequest;
     }
 
-     @MessageMapping("/queue.sendLike")
+    @MessageMapping("/queue.sendLike")
     @SendTo("/topic/remove")
     public String sendLike(
-        @Payload Vote userVote
-    ) {
+            @Payload Vote userVote) {
         // Extract Vote details
         String queueId = userVote.getQueueId();
         int vote = userVote.getVote();
         String userId = userVote.getUserId();
         String color = userVote.getColor();
 
-        //Set color 
+        // Set color
         Song song = sd.getSongByQueueId(queueId);
         song.setColor(color, userId);
         // Process Vote
@@ -219,8 +174,9 @@ public class QueueController {
 
     // Async SPOTIFY WEB API BLOCK
     // Circumvents Spotify Web API round-trip time
-    public void asyncSpotify(String token, String song_name, String artist_name, String queue_id) {
-        
+    public void asyncSpotify(String token, String song_name, String artist_name, String queue_id,
+            MessageType messageType) {
+
         boolean result = false;
         String result_song_id = "";
         MessageResponse rec_response = null;
@@ -232,10 +188,10 @@ public class QueueController {
             System.out.println("### Queuing Song ###");
 
             // if !SONG_REC is appended to the song name it means we want a rec
-            if (song_name.contains("!SONG_REC")) {
+            if (messageType == MessageType.SONGREC) {
 
-                String cleaned_name = song_name.replaceAll(" !SONG_REC", "");
-                TrackObject track = P.getSong(cleaned_name, artist_name);
+                // String cleaned_name = song_name.replaceAll(" !SONG_REC", "");
+                TrackObject track = P.getSong(song_name, artist_name);
 
                 // now that we have the track, get the id, artist_id, and genre
                 String song_id = track.getId();
@@ -249,23 +205,23 @@ public class QueueController {
                 MessageRequest rec_request = new MessageRequest(1, song_id, artist_id, null);
                 String serialized_request = MessageRequestSerializer.serialize(rec_request);
 
-                try (Socket socket = new Socket(HOSTNAME,PORT);
-                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+                try (Socket socket = new Socket(HOSTNAME, PORT);
+                        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                        // write the serialized request to the output
-                        out.println(serialized_request);
-                        System.out.println("Sent to server: " + serialized_request);
+                    // write the serialized request to the output
+                    out.println(serialized_request);
+                    System.out.println("Sent to server: " + serialized_request);
 
-                        System.out.println("Awaiting response from recommender");
+                    System.out.println("Awaiting response from recommender");
 
-                        String response = in.readLine();
-                        System.out.println("Recevied from server: " + response);
+                    String response = in.readLine();
+                    System.out.println("Recevied from server: " + response);
 
-                        // now deserialize the response
-                        rec_response = MessageResponseDeserializer.deserialize(response);
+                    // now deserialize the response
+                    rec_response = MessageResponseDeserializer.deserialize(response);
 
-                        System.out.println("Deserialized from server!");
+                    System.out.println("Deserialized from server!");
 
                 } catch (IOException e) {
                     System.out.println("Error: " + e.getMessage());
@@ -283,10 +239,8 @@ public class QueueController {
                 sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName());
 
                 System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
-    
 
-            }
-            else if (song_name.equals("!SESSION_REC"))  {
+            } else if (messageType == MessageType.SESSIONREC) {
 
                 System.out.println("### Displaying Session ###");
 
@@ -306,23 +260,23 @@ public class QueueController {
                 MessageRequest rec_request = new MessageRequest(2, "", "", session);
                 String serialized_request = MessageRequestSerializer.serialize(rec_request);
 
-                try (Socket socket = new Socket(HOSTNAME,PORT);
-                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+                try (Socket socket = new Socket(HOSTNAME, PORT);
+                        PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                        BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
 
-                        // write the serialized request to the output
-                        out.println(serialized_request);
-                        System.out.println("Sent to server: " + serialized_request);
+                    // write the serialized request to the output
+                    out.println(serialized_request);
+                    System.out.println("Sent to server: " + serialized_request);
 
-                        System.out.println("Awaiting response from recommender");
+                    System.out.println("Awaiting response from recommender");
 
-                        String response = in.readLine();
-                        System.out.println("Recevied from server: " + response);
+                    String response = in.readLine();
+                    System.out.println("Recevied from server: " + response);
 
-                        // now deserialize the response
-                        rec_response = MessageResponseDeserializer.deserialize(response);
+                    // now deserialize the response
+                    rec_response = MessageResponseDeserializer.deserialize(response);
 
-                        System.out.println("Deserialized from server!");
+                    System.out.println("Deserialized from server!");
 
                 } catch (IOException e) {
                     System.out.println("Error: " + e.getMessage());
@@ -340,11 +294,10 @@ public class QueueController {
                 sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName());
 
                 System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
-    
 
             }
             // otherwise just queue the song as normal
-            else    {
+            else {
 
                 System.out.println("### Queuing Song ###");
 
@@ -353,7 +306,7 @@ public class QueueController {
 
                 sd.updateSongId(queue_id, result_song_id);
                 System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
-                
+
             }
 
         } catch (Exception e) {
@@ -363,8 +316,7 @@ public class QueueController {
         // now we want to update the song dict to reflect the spotify resources
         if (result) {
             System.out.println("Async Spotify Queue Song SUCCESS");
-        }
-        else    {
+        } else {
             System.out.println("Async Spotify Queue Song FAILURE");
         }
 

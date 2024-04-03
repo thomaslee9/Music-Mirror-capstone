@@ -19,10 +19,12 @@ var connectingElement = document.querySelector('.connecting');
 var stompClient = null;
 var username = null;
 var userId = null;
-
+var DjColor = '#2196F3';
 var colors = [
-    '#2196F3', '#32c787', '#00BCD4', '#ff5652',
-    '#ffc107', '#ff85af', '#FF9800', '#39bbb0'
+    '#32c787', '#00BCD4', '#ff5652', '#ffc107', 
+    '#ff85af', '#FF9800', '#39bbb0', '#f2274f',
+    '#fa11a2', '#cc9a47', '#6ff126', '#cad502',
+    '#f111f5', '#6ed00c', '#f602df'
 ];
 
 function connect(event) {
@@ -113,7 +115,7 @@ function sendSessionRequest(event) {
             username: username,
             songName: '!SESSION_REC',
             songArtist: 'Recommendations based on your listening history',
-            type: 'REQUEST',
+            type: 'SESSIONREC',
             userId: userId
         };
 
@@ -133,9 +135,9 @@ function sendSongRecRequest(event) {
     if (hasName && hasArtist && stompClient) {
         var userRequest = {
             username: username,
-            songName: requestName.value + ' ' + '!SONG_REC',
+            songName: requestName.value,
             songArtist: requestArtist.value,
-            type: 'REQUEST',
+            type: 'SONGREC',
             userId: userId
         };
 
@@ -175,10 +177,19 @@ function onMessageReceived(payload) {
         for (var i = 0; i < message.queue.length; i++) {
             // Basic Queue Song View:
             let currQueueId = message.queue[i].queueId;
+            let queuedBy = message.queue[i].isRec ? 'DJ Music Mirror' : message.queue[i].username;
+            let voteStr = message.queue[i].recComplete ? 'Vote: ' : '';
+            //Song that is shown. SongDisplay is what is shown. Strings before make it
+            let regularSong = message.queue[i].songName + "' by " + message.queue[i].songArtist;
+            let sessionRec = "Session Recommendation based on your listening history";
+            let songRec = "Song similar to " + regularSong;
+            let sessionOrSongRec = message.queue[i].songName === "!SESSION_REC" ? sessionRec : songRec;
+            let songDisplay = message.queue[i].recComplete ? regularSong : sessionOrSongRec;
+
             var currSongElement = document.createElement('li');
-            var currSongText = document.createTextNode(currQueueId + ": '" + message.queue[i].songName + "' by " + message.queue[i].songArtist + " <--- queued by " + message.queue[i].username + " Vote:");
-            currSongElement.id = "song_div_" + currQueueId
-            currSongElement.style['background-color'] = getAvatarColor(message.queue[i].userId);
+            var currSongText = document.createTextNode(currQueueId + ": '" + songDisplay + " <--- queued by " + queuedBy + voteStr);
+            currSongElement.id = "song_div_" + currQueueId;
+            currSongElement.style['background-color'] = message.queue[i].isRec ? DjColor : getAvatarColor(message.queue[i].userId);
             currSongElement.appendChild(currSongText);
 
             let likeButtonColor = 'white';
@@ -192,32 +203,29 @@ function onMessageReceived(payload) {
                     dislikeButtonColor = 'red';
                 }
             }
-            // Build the Like button
-            var likeButton = document.createElement('button');
-            likeButton.id = "like_button_" + currQueueId;
-            // Check if user has already liked the song
-            // if (message.queue[i].userId === userId) {
-            //     likeButton.style['background-color'] = 'green';
-            // } else {
-            //     likeButton.style['background-color'] = 'white';
-            // }
-            likeButton.style['background-color'] = likeButtonColor;
-            likeButton.innerHTML = '^';
-            likeButton.onclick = function() {
-                sendLike(currQueueId, 1); // Update backend with new Like
-            };
-            currSongElement.appendChild(likeButton);
+            // Add buttons if song is loaded
+            if (message.queue[i].recComplete === true) {
+                // Build the Like button
+                var likeButton = document.createElement('button');
+                likeButton.id = "like_button_" + currQueueId;
+                likeButton.style['background-color'] = likeButtonColor;
+                likeButton.innerHTML = '^';
+                likeButton.onclick = function() {
+                    sendLike(currQueueId, 1); // Update backend with new Like
+                };
+                currSongElement.appendChild(likeButton);
 
-            // Build the Dislike button
-            var dislikeButton = document.createElement('button');
-            dislikeButton.style['background-color'] = dislikeButtonColor;
-            dislikeButton.id = "dislike_button_" + currQueueId;
-            dislikeButton.innerHTML = 'v';
-            dislikeButton.onclick = function() {
-                sendLike(currQueueId, 2); // Update backend with new Dislike
-            };
-            currSongElement.appendChild(dislikeButton);
+                // Build the Dislike button
+                var dislikeButton = document.createElement('button');
+                dislikeButton.style['background-color'] = dislikeButtonColor;
+                dislikeButton.id = "dislike_button_" + currQueueId;
+                dislikeButton.innerHTML = 'v';
+                dislikeButton.onclick = function() {
+                    sendLike(currQueueId, 2); // Update backend with new Dislike
+                };
+                currSongElement.appendChild(dislikeButton);
 
+            }
             // Add Song Element to Queue Area
             queueArea.appendChild(currSongElement);
         }

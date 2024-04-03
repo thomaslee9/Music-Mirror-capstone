@@ -33,6 +33,7 @@ public class Vote {
     public String getUserId() {
         return userId;
     }
+
     public String getQueueId() {
         return queueId;
     }
