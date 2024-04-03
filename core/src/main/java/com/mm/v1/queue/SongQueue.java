@@ -61,13 +61,12 @@ public class SongQueue {
             String song_id = song.getSongId();
             int likes = song.getLikes();
 
-            Pair<String, Integer> pair = new Pair<String,Integer>(song_id, likes);
+            Pair<String, Integer> pair = new Pair<String, Integer>(song_id, likes);
             session.add(pair);
         }
         return session;
 
     }
-
 
     // Main Method for continually accepting song messages
     public static void main(String[] args) {
@@ -77,17 +76,17 @@ public class SongQueue {
 
         // // Continuous Request Acceptor loop
         // while (true) {
-            
-        //     Song newSong = new Song("test", "testID_" + i, "testUser");
-        //     i++;
 
-        //     // Add New Song to Queue
-        //     testQueue.push(newSong);
-        //     testQueue.printQueue();
+        // Song newSong = new Song("test", "testID_" + i, "testUser");
+        // i++;
 
-        //     if (i >= 10) {
-        //         break;
-        //     }
+        // // Add New Song to Queue
+        // testQueue.push(newSong);
+        // testQueue.printQueue();
+
+        // if (i >= 10) {
+        // break;
+        // }
         // }
     }
 
