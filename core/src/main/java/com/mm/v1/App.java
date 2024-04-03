@@ -113,7 +113,7 @@ public class App extends NanoHTTPD {
             }
         }
 
-        return newFixedLengthResponse("");
+        return newFixedLengthResponse(this.access_token);
     }
 
 }

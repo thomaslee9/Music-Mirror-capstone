@@ -50,7 +50,9 @@ public class QueueController {
     // private static max_time
     private static int MAX_AUTH_TIME_MS = 60000 * 30;
 
+    private String access_token;
     private boolean first_authorization;
+
     // timing stuff
     private long current_time_millis;
     private long last_auth_time;
@@ -61,6 +63,8 @@ public class QueueController {
         this.current_time_millis = System.currentTimeMillis();
         this.last_auth_time = this.current_time_millis;
         this.first_authorization = true;
+
+        this.access_token = "";
 
     }
 
@@ -106,21 +110,20 @@ public class QueueController {
             // =============================================================
             // Async SPOTIFY WEB API SECTION
 
-            long time_diff = this.current_time_millis - this.last_auth_time;
-            /* if the timer has passed certain threshold, regen token */
-            if (first_authorization || time_diff >= MAX_AUTH_TIME_MS)   {
-
-
-
-            }
+        long time_diff = this.current_time_millis - this.last_auth_time;
+        /* if the timer has passed certain threshold, regen token */
+        if (first_authorization || time_diff >= MAX_AUTH_TIME_MS)   {
+            this.update_access_token();
+            this.last_auth_time = this.current_time_millis;
+            this.first_authorization = false;
+        }
         // =============================================================
         // Async SPOTIFY WEB API SECTION
 
-        String access_token = "BQAVQ7aSR1ziO8TWFsANt_p_anm1RLnuK0MTwped6Uz-teosjDUmWsd2NtlOJcHrJ53kzteCJjzI6y57DCRNinMDqdZqqDHM3i4YvvrVGtmEyk-ZBOTbTW0V54vPzI0tm0oqIWiR3JMeBysnUHFAbFNpqNOh0sz90PlNe503WfuGUBqnZjDFk6Bofjob";
         String song_name = userRequest.getSongName();
         String artist_name = userRequest.getSongArtist();
         CompletableFuture<Void> future = CompletableFuture
-                .runAsync(() -> asyncSpotify(access_token, song_name, artist_name, queue_id, messageType))
+                .runAsync(() -> asyncSpotify(this.access_token, song_name, artist_name, queue_id, messageType))
                 .thenAccept(result -> {
                     Gson gson = new Gson();
                     String updatedQueue = gson.toJson(sq);
@@ -128,8 +131,8 @@ public class QueueController {
                     if (messageType != MessageType.REQUEST) {
                         System.out.println("FINISHED ASYNC FUNCTION");
                         newSong.setRecComplete();
-                        Gson gson = new Gson();
-                        String updatedQueue = gson.toJson(sq);
+                        gson = new Gson();
+                        updatedQueue = gson.toJson(sq);
                         messagingTemplate.convertAndSend("/topic/public", updatedQueue);
                     }
                 });
@@ -364,11 +367,13 @@ public class QueueController {
             HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
             // Set request method
             connection.setRequestMethod("GET");
-
             // Get the response
             BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String response = reader.readLine();
             System.out.println("Current token: " + response);
+
+            // update token
+            this.access_token = response;
 
             // Close the connection
             connection.disconnect();
