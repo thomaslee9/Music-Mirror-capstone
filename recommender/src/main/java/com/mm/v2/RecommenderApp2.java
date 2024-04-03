@@ -23,7 +23,7 @@ public class RecommenderApp2 {
     public static void main(String[] args) {
 
         // access token for auth use
-        String access_token = "BQCCtpUNxqciOB2qstGEWnC6n2OnEhpvPhs925dyE50FOtIbEeC9JlLtBbEBxRsuCzy6jdWymAhY0AUHVDI9FvEwAbjUug6GHyEFr_wZmpKCeEZfGUgR2seS4D7P4Aic6Ffxw5AB-cZL8dS9-fPIg3pZ7bVONgu3BREnDXkqsLF1cp0bFZGU4Uli2X2ig";
+        String access_token = "";
         // create the song attribute database
         SongAttributeDatabase db = new SongAttributeDatabase();
 
@@ -53,6 +53,21 @@ public class RecommenderApp2 {
                     int message_id = rec_request.getMessageId();
 
                     /*
+                     * message_id = 0
+                     * 
+                     * this message gets the newly generated access token
+                     * 
+                     */
+                    if (message_id == 0)    {
+
+                        access_token = rec_request.getAccessToken();
+
+                        System.out.println("### Got Access Token ###");
+                        System.out.println(access_token);
+
+                    }
+
+                    /*
                      * message_id == 1
                      * 
                      * this message is a song specific recommendation
@@ -61,7 +76,7 @@ public class RecommenderApp2 {
                      * - artist_id 
                      * 
                      */
-                    if (message_id == 1)    {
+                    else if (message_id == 1)    {
 
                         String song_id = rec_request.getSongId();
                         String artist_id = rec_request.getArtistId();

@@ -8,9 +8,21 @@ import org.javatuples.Pair;
 public class MessageRequest implements Serializable {
 
     private int message_id;
+
+    private String access_token;
     private String song_id;
     private String artist_id;
     private List<Pair<String, Integer>> session;
+
+    public MessageRequest(int message_id, String access_token)  {
+
+        this.message_id = message_id;
+        this.access_token = access_token;
+        this.song_id = "";
+        this.artist_id = "";
+        this.session = null;
+
+    }
 
     public MessageRequest(int message_id, String song_id, String artist_id, List<Pair<String, Integer>> session)   {
 
@@ -23,6 +35,10 @@ public class MessageRequest implements Serializable {
 
     public int getMessageId()   {
         return this.message_id;
+    }
+
+    public String getAccessToken()  {
+        return this.access_token;
     }
 
     public String getSongId()   {

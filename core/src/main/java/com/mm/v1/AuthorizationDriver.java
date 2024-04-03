@@ -6,6 +6,8 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import io.github.bonigarcia.wdm.WebDriverManager;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -30,15 +32,7 @@ public class AuthorizationDriver {
 
     public void authorize()  {
 
-        String url = "https://accounts.spotify.com/authorize?client_id=" + client_id + 
-        "&response_type=code&redirect_uri=" + redirect_uri + "&scope=" + scopes;
-
-        System.out.println(url);
-
-        if (url.contains("https"))  { return; }
-
-        // set the path to the ChromeDriver executable
-        System.setProperty("webdriver.chrome.driver", "core/bin/chrome/chromedriver");
+        WebDriverManager.chromedriver().setup();
 
         // create a new instance of the ChromeDriver
         WebDriver driver = new ChromeDriver();
@@ -54,8 +48,6 @@ public class AuthorizationDriver {
         driver.findElement(By.id("login-password")).sendKeys(password);
 
         driver.findElement(By.id("login-button")).click();
-
-        /** TODO: may have to add an additional button click */
 
         boolean retry = false;
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
@@ -75,8 +67,12 @@ public class AuthorizationDriver {
             }
         }
 
+        // otherwise just wait 30 sec and then close
+        try { Thread.sleep(30000); } 
+        catch (InterruptedException e) { e.printStackTrace(); }
+
         // close the browser
-        // driver.quit();
+        driver.quit();
 
     }
 

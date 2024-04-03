@@ -42,9 +42,29 @@ public class QueueController {
     //private static PiClient pi;
     private static boolean pi_active = true;
 
+    // private static max_time
+    private static int MAX_AUTH_TIME_MS = 60000 * 30;
+
+    private boolean first_authorization;
+    // timing stuff
+    private long current_time_millis;
+    private long last_auth_time;
+
+    public QueueController()    {
+
+        System.out.println("Initializing queue controller: marking time");
+        this.current_time_millis = System.currentTimeMillis();
+        this.last_auth_time = this.current_time_millis;
+        this.first_authorization = true;
+
+    }
+
     @MessageMapping("/queue.sendRequest")
     @SendTo("/topic/public")
     public String sendRequest(@Payload Request userRequest) {
+
+        // mark the current time
+        this.current_time_millis = System.currentTimeMillis();
 
         // Host on Raspberry Pi 
         if (pi_active)  {
@@ -88,6 +108,14 @@ public class QueueController {
 
             // =============================================================
             // Async SPOTIFY WEB API SECTION
+
+            long time_diff = this.current_time_millis - this.last_auth_time;
+            /* if the timer has passed certain threshold, regen token */
+            if (first_authorization || time_diff >= MAX_AUTH_TIME_MS)   {
+
+
+
+            }
 
             String access_token = "BQCCtpUNxqciOB2qstGEWnC6n2OnEhpvPhs925dyE50FOtIbEeC9JlLtBbEBxRsuCzy6jdWymAhY0AUHVDI9FvEwAbjUug6GHyEFr_wZmpKCeEZfGUgR2seS4D7P4Aic6Ffxw5AB-cZL8dS9-fPIg3pZ7bVONgu3BREnDXkqsLF1cp0bFZGU4Uli2X2i";
             String song_name = userRequest.getSongName();
@@ -368,6 +396,29 @@ public class QueueController {
             System.out.println("Async Spotify Queue Song FAILURE");
         }
 
+    }
+
+    public void update_access_token() {
+        
+        // URL of your NanoHTTPD server
+        String url = "http://localhost:8080/spotify";
+
+        try {
+            // Create a URL connection
+            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
+            // Set request method
+            connection.setRequestMethod("GET");
+
+            // Get the response
+            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            String response = reader.readLine();
+            System.out.println("Current token: " + response);
+
+            // Close the connection
+            connection.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
