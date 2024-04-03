@@ -98,6 +98,8 @@ public class QueueController {
                     if (messageType != MessageType.REQUEST) {
                         System.out.println("FINISHED ASYNC FUNCTION");
                         newSong.setRecComplete();
+                        Gson gson = new Gson();
+                        String updatedQueue = gson.toJson(sq);
                         messagingTemplate.convertAndSend("/topic/public", updatedQueue);
                     }
                 });
