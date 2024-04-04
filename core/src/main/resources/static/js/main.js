@@ -29,61 +29,68 @@ var colors = [
 
 let timeoutId;
 
-function resetTimeout() {
-    // Clear the existing timeout
-    if (timeoutId) {
-        clearTimeout(timeoutId);
-    }
+//UNCOMMENT
+// function resetTimeout() {
+//     // Clear the existing timeout
+//     if (timeoutId) {
+//         clearTimeout(timeoutId);
+//     }
+//     let active = localStorage.getItem('active');
+//     // Set a new timeout
+//     timeoutId = setTimeout(function() {
+//         // The user has been inactive for 15 minutes
+//         // Send a message to the server
+//         if (active && stompClient && userId) {
+//         stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
+//         }
+//     }, 1 * 60 * 1000);  // 15 minutes
+//     if (!active && stompClient && userId) {
+//         stompClient.send("/app/userActive", {}, JSON.stringify({ 'userId': userId }));
+//     }
+//     localStorage.setItem('active', true);
+// }
 
-    // Set a new timeout
-    timeoutId = setTimeout(function() {
-        // The user has been inactive for 15 minutes
-        // Send a message to the server
-        stompClient.send("/app/userInactive", {}, JSON.stringify({ 'username': username }));
-    }, 1 * 60 * 1000);  // 15 minutes
-}
+// // Reset the timeout whenever the user interacts with the page
+// window.addEventListener('mousemove', resetTimeout, true);
+// window.addEventListener('mousedown', resetTimeout, true);
+// window.addEventListener('keypress', resetTimeout, true);
+// window.addEventListener('touchmove', resetTimeout, true);
 
-// Reset the timeout whenever the user interacts with the page
-window.addEventListener('mousemove', resetTimeout, true);
-window.addEventListener('mousedown', resetTimeout, true);
-window.addEventListener('keypress', resetTimeout, true);
-window.addEventListener('touchmove', resetTimeout, true);
+// // Set the initial timeout
+// resetTimeout();
 
-// Set the initial timeout
-resetTimeout();
+// function refreshPage(event) {
+//     event.preventDefault();
+//     var storedUsername = localStorage.getItem('username');
+//     var storedUserId = localStorage.getItem('userId');
+//     var storedStompClient = localStorage.getItem('stompClient');
 
-function refreshPage(event) {
-    event.preventDefault();
-    var storedUsername = localStorage.getItem('username');
-    var storedUserId = localStorage.getItem('userId');
-    var storedStompClient = localStorage.getItem('stompClient');
+//     // If there is, use that information to log the user in
+//     if (storedUsername && storedUserId && storedStompClient) {
+//         console.warn("User already stored");
+//         username = storedUsername;
+//         userId = storedUserId;
+//         stompClient = storedStompClient; 
+//         console.log("user stored");
+//         // Hide New User Page
+//         usernamePage.classList.add('hidden');
+//         // Reveal Queue Page
+//         queuePage.classList.remove('hidden');
+//         connectingElement.classList.add('hidden');
 
-    // If there is, use that information to log the user in
-    if (storedUsername && storedUserId && storedStompClient) {
-        console.warn("User already stored");
-        username = storedUsername;
-        userId = storedUserId;
-        stompClient = storedStompClient; 
-        console.log("user stored");
-        // Hide New User Page
-        usernamePage.classList.add('hidden');
-        // Reveal Queue Page
-        queuePage.classList.remove('hidden');
-        connectingElement.classList.add('hidden');
+//         // WebSocket 
+//         if (!stompClient || !stompClient.connected) { 
+//             var socket = new SockJS('/ws');
+//             stompClient = Stomp.over(socket);
+//             stompClient.subscribe('/topic/public', onMessageReceived);
 
-        // WebSocket 
-        if (!stompClient || !stompClient.connected) { 
-            var socket = new SockJS('/ws');
-            stompClient = Stomp.over(socket);
-            stompClient.subscribe('/topic/public', onMessageReceived);
+//             stompClient.subscribe('/topic/remove', onVetoReceived);
+//             // Send JOIN Request
+//             stompClient.send("/app/queue.addUser", {}, JSON.stringify({sender: username, type: 'JOIN'}))   
 
-            stompClient.subscribe('/topic/remove', onVetoReceived);
-            // Send JOIN Request
-            stompClient.send("/app/queue.addUser", {}, JSON.stringify({sender: username, type: 'JOIN'}))   
-
-        }
-    }
-}
+//         }
+//     }
+// }
 
 
 function connect(event) {
@@ -125,6 +132,7 @@ function onConnected() {
     localStorage.setItem('username', username);
     localStorage.setItem('userId', userId);
     localStorage.setItem('stompClient', stompClient);
+    localStorage.setItem('active', true);
     console.log("User ID: ", userId);
 
     // Forward Current Queue to New User:
@@ -385,12 +393,18 @@ songRecButton.addEventListener('click', sendSongRecRequest, true)
 usernameForm.addEventListener('submit', connect, true)
 requestForm.addEventListener('submit', sendRequest, true)
 
+//UNCOMMENT
 // document.addEventListener('DOMContentLoaded', refreshPage, true);
 
 // window.addEventListener('unload', function() {
 //     localStorage.removeItem('username');
 //     localStorage.removeItem('userId');
 //     localStorage.removeItem('stompClient');
+//     let active = localStorage.getItem('active');
+//     if (active) {
+//         stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
+//     }
+//     this.localStorage.removeItem('active');
 //     console.log("User Logged Out");
 // });
 

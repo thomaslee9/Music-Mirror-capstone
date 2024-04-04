@@ -159,33 +159,53 @@ public class QueueController {
         return userRequest;
     }
 
+    //UNCOMMENT THIS
+    // @MessageMapping("/userInactive")
+    // private void removeInactiveLikes(@Payload String userId) {
+    //     System.out.println("User " + userId + " has been inactive for 15 minutes");
+    //     // Remove inactive likes
+    //     for (Song song : ud.getUserSongs(userId)) {
+    //         if (song.getColor(userId) == "green") {
+    //             //song.setColor("none", userId);
+    //             sd.dislike(song.getQueueId(), 1);
+    //             if (numLikes < 0) {
+    //                 string queueId = song.getQueueId();
+    //                 sq.remove(song);
+    //                 sd.removeById(queueId);
+    //                 ud.removeSong(userId, song);
+    //                 messagingTemplate.convertAndSend("/topic/remove", queueId);
+    //             }
+    //         } else if (song.getColor(userId) == "red") {
+    //             //song.setColor("none", userId);
+    //             sd.like(song.getQueueId(), 1);
+    //         }
+    //     }
+    // }
 
-    @MessageMapping("/userInactive")
-    public void handleUserInactive(@Payload String userId) {
-        // The user has been inactive for 15 minutes
-        // You can add code here to handle this event
-        System.out.println("User " + username + " has been inactive for 15 minutes");
-    }
+    //     //UNCOMMENT THIS
+    //     @MessageMapping("/userActive")
+    //     private void addInactiveLikes(@Payload String userId) {
+    //     System.out.println("User " + userId + " is reactivated");
+    //     // Remove inactive likes
+    //     for (Song song : ud.getUserSongs(userId)) {
+    //         queueId = song.getQueueId();
+    //         color = song.getColor(userId);
+    //         if (color == "red") {
+    //             //song.setColor("none", userId);
+    //             sd.dislike(queueId, 1);
+    //             if (numLikes < 0) {
+    //                 sq.remove(song);
+    //                 sd.removeById(queueId);
+    //                 ud.removeSong(userId, song);
+    //                 messagingTemplate.convertAndSend("/topic/remove", queueId);
+    //             }
+    //         } else if(color == "green") {
+    //             //song.setColor("none", userId);
+    //             sd.like(queueId, 1);
+    //         }
+    //     }
+    // }
 
-    private void removeInactiveLikes(string userId) {
-        // Remove inactive likes
-        for (Song song : ud.getUserSongs(userId)) {
-            if (song.getColor(userId) == "like") {
-                song.setColor("none", userId);
-                sd.dislike(song.getQueueId(), 1);
-                if (numLikes < 0) {
-                    string queueId = song.getQueueId();
-                    sq.remove(song);
-                    sd.removeById(queueId);
-                    ud.removeSong(userId, song);
-                    messagingTemplate.convertAndSend("/topic/remove", queueId);
-                }
-            } else if (song.getColor(userId) == "dislike") {
-                song.setColor("none", userId);
-                sd.like(song.getQueueId(), 1);
-            }
-        }
-    }
 
 
     @MessageMapping("/queue.sendLike")
