@@ -27,6 +27,65 @@ var colors = [
     '#f111f5', '#6ed00c', '#f602df'
 ];
 
+let timeoutId;
+
+function resetTimeout() {
+    // Clear the existing timeout
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+    }
+
+    // Set a new timeout
+    timeoutId = setTimeout(function() {
+        // The user has been inactive for 15 minutes
+        // Send a message to the server
+        stompClient.send("/app/userInactive", {}, JSON.stringify({ 'username': username }));
+    }, 1 * 60 * 1000);  // 15 minutes
+}
+
+// Reset the timeout whenever the user interacts with the page
+window.addEventListener('mousemove', resetTimeout, true);
+window.addEventListener('mousedown', resetTimeout, true);
+window.addEventListener('keypress', resetTimeout, true);
+window.addEventListener('touchmove', resetTimeout, true);
+
+// Set the initial timeout
+resetTimeout();
+
+function refreshPage(event) {
+    event.preventDefault();
+    var storedUsername = localStorage.getItem('username');
+    var storedUserId = localStorage.getItem('userId');
+    var storedStompClient = localStorage.getItem('stompClient');
+
+    // If there is, use that information to log the user in
+    if (storedUsername && storedUserId && storedStompClient) {
+        console.warn("User already stored");
+        username = storedUsername;
+        userId = storedUserId;
+        stompClient = storedStompClient; 
+        console.log("user stored");
+        // Hide New User Page
+        usernamePage.classList.add('hidden');
+        // Reveal Queue Page
+        queuePage.classList.remove('hidden');
+        connectingElement.classList.add('hidden');
+
+        // WebSocket 
+        if (!stompClient || !stompClient.connected) { 
+            var socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.subscribe('/topic/public', onMessageReceived);
+
+            stompClient.subscribe('/topic/remove', onVetoReceived);
+            // Send JOIN Request
+            stompClient.send("/app/queue.addUser", {}, JSON.stringify({sender: username, type: 'JOIN'}))   
+
+        }
+    }
+}
+
+
 function connect(event) {
     // Set username for New User
     username = document.querySelector('#name').value.trim();
@@ -62,6 +121,10 @@ function onConnected() {
     //Generate cleint id
     var clientId = Math.floor(Math.random() * 1000000);
     userId = username + clientId.toString();
+    //add stuff to local storage
+    localStorage.setItem('username', username);
+    localStorage.setItem('userId', userId);
+    localStorage.setItem('stompClient', stompClient);
     console.log("User ID: ", userId);
 
     // Forward Current Queue to New User:
@@ -321,3 +384,19 @@ sessionRecButton.addEventListener('click', sendSessionRequest, true);
 songRecButton.addEventListener('click', sendSongRecRequest, true)
 usernameForm.addEventListener('submit', connect, true)
 requestForm.addEventListener('submit', sendRequest, true)
+
+// document.addEventListener('DOMContentLoaded', refreshPage, true);
+
+// window.addEventListener('unload', function() {
+//     localStorage.removeItem('username');
+//     localStorage.removeItem('userId');
+//     localStorage.removeItem('stompClient');
+//     console.log("User Logged Out");
+// });
+
+// window.addEventListener('beforeunload', function (e) {
+//     // Cancel the event
+//     e.preventDefault();
+//     // Chrome requires returnValue to be set
+//     e.returnValue = '';
+// });

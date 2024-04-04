@@ -159,6 +159,34 @@ public class QueueController {
         return userRequest;
     }
 
+
+    @MessageMapping("/userInactive")
+    public void handleUserInactive(@Payload String userId) {
+        // The user has been inactive for 15 minutes
+        // You can add code here to handle this event
+        System.out.println("User " + username + " has been inactive for 15 minutes");
+    }
+
+    private void removeInactiveLikes(string userId) {
+        // Remove inactive likes
+        for (Song song : ud.getUserSongs(userId)) {
+            if (song.getColor(userId) == "like") {
+                song.setColor("none", userId);
+                sd.dislike(song.getQueueId(), 1);
+                if (numLikes < 0) {
+                    string queueId = song.getQueueId();
+                    sq.remove(song);
+                    sd.removeById(queueId);
+                    ud.removeSong(userId, song);
+                    messagingTemplate.convertAndSend("/topic/remove", queueId);
+            } else if (song.getColor(userId) == "dislike") {
+                song.setColor("none", userId);
+                sd.like(song.getQueueId(), 1);
+            }
+        }
+    }
+
+
     @MessageMapping("/queue.sendLike")
     @SendTo("/topic/remove")
     public String sendLike(
