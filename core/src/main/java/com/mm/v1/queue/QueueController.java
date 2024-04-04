@@ -179,6 +179,7 @@ public class QueueController {
                     sd.removeById(queueId);
                     ud.removeSong(userId, song);
                     messagingTemplate.convertAndSend("/topic/remove", queueId);
+                }
             } else if (song.getColor(userId) == "dislike") {
                 song.setColor("none", userId);
                 sd.like(song.getQueueId(), 1);
