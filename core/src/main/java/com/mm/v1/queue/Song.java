@@ -33,10 +33,15 @@ public class Song {
         this.recComplete = true;
     }
 
+
     public void setColor(String color, String userId) {
 
         colorMap.put(userId, color);
         System.out.println("Color Map: " + colorMap);
+    }
+
+    public String getColor(String userId) {
+        return colorMap.get(userId);
     }
 
     public String getSongName() {

@@ -32,6 +32,16 @@ public class UserDict {
     }
 
     public ConcurrentLinkedDeque<Song> getUserSongs(String userId) {
+        System.out.println("Getting songs for user: " + userId);
         return map.get(userId);
+    }
+
+    public void printDict() {
+        for (String key : map.keySet()) {
+            System.out.println("User: " + key);
+            for (Song song : map.get(key)) {
+                System.out.println("Song: " + song.getSongName());
+            }
+        }
     }
 }

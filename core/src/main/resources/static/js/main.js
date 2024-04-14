@@ -30,67 +30,68 @@ var colors = [
 let timeoutId;
 
 //UNCOMMENT
-// function resetTimeout() {
-//     // Clear the existing timeout
-//     if (timeoutId) {
-//         clearTimeout(timeoutId);
-//     }
-//     let active = localStorage.getItem('active');
-//     // Set a new timeout
-//     timeoutId = setTimeout(function() {
-//         // The user has been inactive for 15 minutes
-//         // Send a message to the server
-//         if (active && stompClient && userId) {
-//         stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
-//         }
-//     }, 1 * 60 * 1000);  // 15 minutes
-//     if (!active && stompClient && userId) {
-//         stompClient.send("/app/userActive", {}, JSON.stringify({ 'userId': userId }));
-//     }
-//     localStorage.setItem('active', true);
-// }
+function resetTimeout() {
+    // Clear the existing timeout
+    if (timeoutId) {
+        clearTimeout(timeoutId);
+    }
+    let active = localStorage.getItem('active');
+    // Set a new timeout
+    timeoutId = setTimeout(function() {
+        // The user has been inactive for 15 minutes
+        // Send a message to the server
+        if (active && stompClient && userId) {
+        stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
+        localStorage.setItem('active', 'false');
+        }
+    }, 30 * 1000);  // 5 seconds
+    if (active === 'false' && stompClient && userId) {
+        stompClient.send("/app/userActive", {}, JSON.stringify({ 'userId': userId }));
+        localStorage.setItem('active', 'true');
+    }
+}
 
-// // Reset the timeout whenever the user interacts with the page
-// window.addEventListener('mousemove', resetTimeout, true);
-// window.addEventListener('mousedown', resetTimeout, true);
-// window.addEventListener('keypress', resetTimeout, true);
-// window.addEventListener('touchmove', resetTimeout, true);
+// Reset the timeout whenever the user interacts with the page
+window.addEventListener('mousemove', resetTimeout, true);
+window.addEventListener('mousedown', resetTimeout, true);
+window.addEventListener('keypress', resetTimeout, true);
+window.addEventListener('touchmove', resetTimeout, true);
 
-// // Set the initial timeout
-// resetTimeout();
+// Set the initial timeout
+resetTimeout();
 
-// function refreshPage(event) {
-//     event.preventDefault();
-//     var storedUsername = localStorage.getItem('username');
-//     var storedUserId = localStorage.getItem('userId');
-//     var storedStompClient = localStorage.getItem('stompClient');
+function refreshPage(event) {
+    event.preventDefault();
+    var storedUsername = localStorage.getItem('username');
+    var storedUserId = localStorage.getItem('userId');
+    var storedStompClient = localStorage.getItem('stompClient');
 
-//     // If there is, use that information to log the user in
-//     if (storedUsername && storedUserId && storedStompClient) {
-//         console.warn("User already stored");
-//         username = storedUsername;
-//         userId = storedUserId;
-//         stompClient = storedStompClient; 
-//         console.log("user stored");
-//         // Hide New User Page
-//         usernamePage.classList.add('hidden');
-//         // Reveal Queue Page
-//         queuePage.classList.remove('hidden');
-//         connectingElement.classList.add('hidden');
+    // If there is, use that information to log the user in
+    if (storedUsername && storedUserId && storedStompClient) {
+        console.warn("User already stored");
+        username = storedUsername;
+        userId = storedUserId;
+        stompClient = storedStompClient; 
+        console.log("user stored");
+        // Hide New User Page
+        usernamePage.classList.add('hidden');
+        // Reveal Queue Page
+        queuePage.classList.remove('hidden');
+        connectingElement.classList.add('hidden');
 
-//         // WebSocket 
-//         if (!stompClient || !stompClient.connected) { 
-//             var socket = new SockJS('/ws');
-//             stompClient = Stomp.over(socket);
-//             stompClient.subscribe('/topic/public', onMessageReceived);
+        // WebSocket 
+        if (!stompClient || !stompClient.connected) { 
+            var socket = new SockJS('/ws');
+            stompClient = Stomp.over(socket);
+            stompClient.subscribe('/topic/public', onMessageReceived);
 
-//             stompClient.subscribe('/topic/remove', onVetoReceived);
-//             // Send JOIN Request
-//             stompClient.send("/app/queue.addUser", {}, JSON.stringify({sender: username, type: 'JOIN'}))   
+            stompClient.subscribe('/topic/remove', onVetoReceived);
+            // Send JOIN Request
+            stompClient.send("/app/queue.addUser", {}, JSON.stringify({sender: username, type: 'JOIN'}))   
 
-//         }
-//     }
-// }
+        }
+    }
+}
 
 
 function connect(event) {
@@ -132,7 +133,7 @@ function onConnected() {
     localStorage.setItem('username', username);
     localStorage.setItem('userId', userId);
     localStorage.setItem('stompClient', stompClient);
-    localStorage.setItem('active', true);
+    localStorage.setItem('active', 'true');
     console.log("User ID: ", userId);
 
     // Forward Current Queue to New User:
@@ -394,23 +395,48 @@ usernameForm.addEventListener('submit', connect, true)
 requestForm.addEventListener('submit', sendRequest, true)
 
 //UNCOMMENT
-// document.addEventListener('DOMContentLoaded', refreshPage, true);
+document.addEventListener('DOMContentLoaded', refreshPage, true);
 
-// window.addEventListener('unload', function() {
-//     localStorage.removeItem('username');
-//     localStorage.removeItem('userId');
-//     localStorage.removeItem('stompClient');
-//     let active = localStorage.getItem('active');
-//     if (active) {
-//         stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
-//     }
-//     this.localStorage.removeItem('active');
-//     console.log("User Logged Out");
-// });
+window.addEventListener('unload', function() {
+    localStorage.removeItem('username');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('stompClient');
+    let active = localStorage.getItem('active');
+    if (active) {
+        stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
+    }
+    this.localStorage.removeItem('active');
+    console.log("User Logged Out");
+});
 
-// window.addEventListener('beforeunload', function (e) {
-//     // Cancel the event
-//     e.preventDefault();
-//     // Chrome requires returnValue to be set
-//     e.returnValue = '';
+
+// // Store a timestamp in localStorage every second
+// setInterval(function() {
+//     localStorage.setItem('lastTimestamp', Date.now());
+// }, 1000);
+
+// // When the page loads, check if the last timestamp is recent
+// window.addEventListener('load', function() {
+//     var lastTimestamp = localStorage.getItem('lastTimestamp');
+//     var currentTime = Date.now();
+
+//     // If the last timestamp is more than 5 seconds ago, it was probably a tab/window close
+//     if (currentTime - lastTimestamp > 5000) {
+//         localStorage.removeItem('username');
+//         localStorage.removeItem('userId');
+//         localStorage.removeItem('stompClient');
+//         let active = localStorage.getItem('active');
+//         if (active) {
+//             stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
+//         }
+//         this.localStorage.removeItem('active');
+//         console.log("User Logged Out");
+//     } 
+//     refreshPage();
 // });
+window.addEventListener('beforeunload', function (e) {
+    // Cancel the event
+    e.preventDefault();
+    // Chrome requires returnValue to be set
+    e.returnValue = '';
+});

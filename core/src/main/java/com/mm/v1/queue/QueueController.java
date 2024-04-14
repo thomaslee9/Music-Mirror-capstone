@@ -7,7 +7,8 @@ import com.mm.v1.SpotifyPlaybackController;
 import com.mm.v1.communication.MessageRequestSerializer;
 import com.mm.v1.communication.MessageResponseDeserializer;
 import com.mm.v1.song.TrackObject;
-
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import com.mm.v3.MessageRequest;
 import com.mm.v3.MessageResponse;
 
@@ -104,6 +105,7 @@ public class QueueController {
         ud.addSong(userRequest.getUserId(), newSong);
         sq.push(newSong);
         sq.printQueue();
+        ud.printDict();
 
         // =============================================================
 
@@ -120,6 +122,7 @@ public class QueueController {
         // =============================================================
         // Async SPOTIFY WEB API SECTION
 
+    
         String song_name = userRequest.getSongName();
         String artist_name = userRequest.getSongArtist();
         CompletableFuture<Void> future = CompletableFuture
@@ -136,6 +139,7 @@ public class QueueController {
                         messagingTemplate.convertAndSend("/topic/public", updatedQueue);
                     }
                 });
+        
         // =============================================================
 
         // Want like buttons to show
@@ -160,51 +164,55 @@ public class QueueController {
     }
 
     //UNCOMMENT THIS
-    // @MessageMapping("/userInactive")
-    // private void removeInactiveLikes(@Payload String userId) {
-    //     System.out.println("User " + userId + " has been inactive for 15 minutes");
-    //     // Remove inactive likes
-    //     for (Song song : ud.getUserSongs(userId)) {
-    //         if (song.getColor(userId) == "green") {
-    //             //song.setColor("none", userId);
-    //             sd.dislike(song.getQueueId(), 1);
-    //             if (numLikes < 0) {
-    //                 string queueId = song.getQueueId();
-    //                 sq.remove(song);
-    //                 sd.removeById(queueId);
-    //                 ud.removeSong(userId, song);
-    //                 messagingTemplate.convertAndSend("/topic/remove", queueId);
-    //             }
-    //         } else if (song.getColor(userId) == "red") {
-    //             //song.setColor("none", userId);
-    //             sd.like(song.getQueueId(), 1);
-    //         }
-    //     }
-    // }
+    @MessageMapping("/userInactive")
+    private void removeInactiveLikes(@Payload UserId userId) {
+        String userId2 = userId.getUserId();
+        System.out.println("User " + userId2 + " has been inactive for 15 minutes");
+        // Remove inactive likes
+        ConcurrentLinkedDeque<Song> userSongs = ud.getUserSongs(userId2);
+        //System.out.println("here are the user songs: " + ud.getUserSongs(userId2).size());
+        for (Song song : userSongs) {
+            if (song.getColor(userId2) == "green") {
+                //song.setColor("none", userId2);
+                int numLikes = sd.dislike(song.getQueueId(), 1);
+                if (numLikes < 0) {
+                    String queueId = song.getQueueId();
+                    sq.remove(song);
+                    sd.removeById(queueId);
+                    ud.removeSong(userId2, song);
+                    messagingTemplate.convertAndSend("/topic/remove", queueId);
+                }
+            } else if (song.getColor(userId2) == "red") {
+                //song.setColor("none", userId2);
+                sd.like(song.getQueueId(), 1);
+            }
+        }
+    }
 
-    //     //UNCOMMENT THIS
-    //     @MessageMapping("/userActive")
-    //     private void addInactiveLikes(@Payload String userId) {
-    //     System.out.println("User " + userId + " is reactivated");
-    //     // Remove inactive likes
-    //     for (Song song : ud.getUserSongs(userId)) {
-    //         queueId = song.getQueueId();
-    //         color = song.getColor(userId);
-    //         if (color == "red") {
-    //             //song.setColor("none", userId);
-    //             sd.dislike(queueId, 1);
-    //             if (numLikes < 0) {
-    //                 sq.remove(song);
-    //                 sd.removeById(queueId);
-    //                 ud.removeSong(userId, song);
-    //                 messagingTemplate.convertAndSend("/topic/remove", queueId);
-    //             }
-    //         } else if(color == "green") {
-    //             //song.setColor("none", userId);
-    //             sd.like(queueId, 1);
-    //         }
-    //     }
-    // }
+        //UNCOMMENT THIS
+        @MessageMapping("/userActive")
+        private void addInactiveLikes(@Payload UserId userId) {
+        String userId2 = userId.getUserId();
+        System.out.println("User " + userId2 + " is reactivated");
+        // Remove inactive likes
+        for (Song song : ud.getUserSongs(userId2)) {
+            String queueId = song.getQueueId();
+            String color = song.getColor(userId2);
+            if (color == "red") {
+                //song.setColor("none", userId2);
+                int numLikes = sd.dislike(queueId, 1);
+                if (numLikes < 0) {
+                    sq.remove(song);
+                    sd.removeById(queueId);
+                    ud.removeSong(userId2, song);
+                    messagingTemplate.convertAndSend("/topic/remove", queueId);
+                }
+            } else if(color == "green") {
+                //song.setColor("none", userId2);
+                sd.like(queueId, 1);
+            }
+        }
+    }
 
 
 
@@ -220,6 +228,8 @@ public class QueueController {
 
         // Set color
         Song song = sd.getSongByQueueId(queueId);
+        ud.addSong(userId, song);
+        System.out.println("added song: " + song.getSongName() + " to user: " + userId);
         song.setColor(color, userId);
         // Process Vote
         if (vote == LIKE) {
@@ -255,6 +265,22 @@ public class QueueController {
         // Return something
         return "none";
     }
+
+
+    // public void asyncSpotifyTest(String token, String song_name, String artist_name, String queue_id,
+    //         MessageType messageType) {
+    //     if (MessageType.REQUEST == messageType) {
+    //         return;
+    //     }
+
+    //     try {
+    //             Thread.sleep(5000);
+    //     String result_song_id = "1";
+    //     sd.updateSong(queue_id, result_song_id, "Test Song Name", "Test Artist Name");
+    //     } catch (InterruptedException e) {
+    //         e.printStackTrace();
+    //     }
+    // }
 
     // Async SPOTIFY WEB API BLOCK
     // Circumvents Spotify Web API round-trip time
