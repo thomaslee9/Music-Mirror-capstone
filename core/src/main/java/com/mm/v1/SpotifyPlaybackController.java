@@ -14,7 +14,7 @@ import com.mm.v1.song.Tracks;
 
 public class SpotifyPlaybackController {
 
-    private static Double search_threshold = 0.80;
+    private static Double search_threshold = 0.85;
     private static String device_id = "83e2221a51a366dbca4e16114644ef9a6ad165e9";
     private String access_token;
 
@@ -97,7 +97,7 @@ public class SpotifyPlaybackController {
 
     }
 
-    private TrackObject searchForTrack(String access_token, String song_name, String artist_name, int encoding_scheme)    {
+    private TrackObject searchForTrack2(String access_token, String song_name, String artist_name, int encoding_scheme)    {
 
         SearchResponse search_response = new SearchRequest().searchForTrack(access_token, song_name, artist_name, 1);
 
@@ -121,6 +121,39 @@ public class SpotifyPlaybackController {
 
     }
 
+    private TrackObject searchForTrack(String access_token, String song_name, String artist_name, int encoding_scheme)    {
+
+        SearchResponse search_response = new SearchRequest().searchForTrack(access_token, song_name, artist_name, 1);
+
+        Tracks tracks = search_response.getTracks();
+        TrackObject result = null;
+
+        double max_semantic_similarity = 0;
+
+        for (TrackObject t : tracks.getTrackItems())    {
+
+            String curr_track_name = t.getName();
+            String curr_artist_string = t.getArtistString();
+
+            System.out.println("Search Result - Song Name: " + curr_track_name + " ### Artist Name: " + curr_artist_string);
+
+            double semantic_similarity = this.get_semantic_match(song_name, artist_name, curr_track_name, curr_artist_string);
+            
+            // if we have found the new highest semantic match then use this as the result
+            if (semantic_similarity > max_semantic_similarity)  {
+                System.out.println("** New highest match: similarity = " + semantic_similarity);
+                result = t;
+                max_semantic_similarity = semantic_similarity;
+            }
+
+        }
+
+        // now check that the max similarity (associated w the result) meets minimum
+        if (max_semantic_similarity >= search_threshold)    { return result; }
+        else    { return null; }
+
+    }
+
     private boolean is_semantic_match(String song_name, String artist_name, String curr_name, String curr_artist) {
 
         String input = song_name + " " + artist_name;
@@ -132,6 +165,19 @@ public class SpotifyPlaybackController {
 
         if (similarity >= search_threshold) { return true; }
         else    { return false; }
+
+    }
+
+    private double get_semantic_match(String song_name, String artist_name, String curr_name, String curr_artist) {
+
+        String input = song_name + " " + artist_name;
+        String output = curr_name + " " + curr_artist;
+
+        Double similarity = SemanticMatch.computeCosineSimilarity(input, output);
+
+        System.out.println("Similarity: " + similarity);
+
+        return similarity;
 
     }
     
