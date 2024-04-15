@@ -72,10 +72,41 @@ public class SemanticMatch {
             e.printStackTrace();
         }
 
-        List<List<Double>> embeddings = embeddingClient.embed(List.of(texts[0], texts[1]));
+        String input = strip_text(texts[0]);
+        String output = strip_text(texts[1]);
+        
+        List<List<Double>> embeddings = embeddingClient.embed(List.of(input, output));
 
         return embeddings;
 
+    }
+
+    /**
+     * attempt at model performance: strip away key repetitve words
+     */
+    private static String strip_text(String text)  {
+
+        String result = text.toLowerCase();
+
+        String[] words_to_remove = {
+            " remastered",
+            " remix",
+            " remaster",
+            " (remastered)",
+            " (remaster)",
+            " (remix)",
+            " - remastered",
+            " - remaster"
+        };
+
+        for (String word : words_to_remove) {
+            result = result.replaceAll("\\b" + word + "\\b", "");
+        }
+
+        System.out.println("After stripping: " + result);
+
+        return result;
+        
     }
 
     /**

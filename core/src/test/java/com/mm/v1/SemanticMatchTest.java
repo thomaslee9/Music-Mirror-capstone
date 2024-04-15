@@ -13,7 +13,7 @@ public class SemanticMatchTest {
         List<String[]> expected_matches = getPositiveTests();
         List<String[]> expected_failures = getNegativeTests();
 
-        boolean print_enabled = false;
+        boolean print_enabled = true;
 
         evaluate(expected_matches, expected_failures, print_enabled);
 
