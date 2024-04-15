@@ -1,0 +1,131 @@
+{
+    "title": "MM-Pi",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 821,
+            "height": 834,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "http://172.26.54.24:8080/",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://172.26.54.24:8080/",
+                    "title": "Music Mirror app"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "#name"
+                ]
+            ],
+            "offsetY": 29.0625,
+            "offsetX": 190.3333282470703
+        },
+        {
+            "type": "change",
+            "value": "U",
+            "selectors": [
+                [
+                    "#name"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "keyUp",
+            "key": "u",
+            "target": "main"
+        },
+        {
+            "type": "change",
+            "value": "User",
+            "selectors": [
+                [
+                    "#name"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "#username-page button"
+                ],
+                [
+                    "text/Submit"
+                ]
+            ],
+            "offsetY": 14.0625,
+            "offsetX": 30.791656494140625
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "#reqName"
+                ]
+            ],
+            "offsetY": 10.08331298828125,
+            "offsetX": 243.3333282470703
+        },
+        {
+            "type": "change",
+            "value": "Song",
+            "selectors": [
+                [
+                    "#reqName"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "#reqArtist"
+                ]
+            ],
+            "offsetY": 20.08331298828125,
+            "offsetX": 214.3333282470703
+        },
+        {
+            "type": "change",
+            "value": "Artist",
+            "selectors": [
+                [
+                    "#reqArtist"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "button:nth-of-type(2)"
+                ],
+                [
+                    "text/Queue"
+                ]
+            ],
+            "offsetY": 20.08331298828125,
+            "offsetX": 27.33331298828125
+        }
+    ]
+}
