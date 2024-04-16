@@ -87,7 +87,7 @@ public class TrackObject {
     }
 
     public int getDuration()    {
-        return this.disc_number;
+        return this.duration_ms;
     }
     
 }

@@ -13,12 +13,16 @@ public class SongQueueProcessor {
     private SongQueue sq;
     private ScheduledExecutorService executor;
     private String access_token;
+    private boolean first_song;
+    
+    private static int buffer = 5000;
 
     public SongQueueProcessor(SongQueue sq) {
         this.sq = sq;
         // can be single threaded to start
         this.executor = Executors.newSingleThreadScheduledExecutor();
         this.access_token = "";
+        this.first_song = true;
     }
 
     public void setAccessToken(String access_token) {
@@ -33,7 +37,15 @@ public class SongQueueProcessor {
 
         System.out.println("__SCHEDULER__: processing next song");
         // get the duration of the currently playing song
-        long duration = getCurrentSongDuration();
+        long duration;
+        if (this.first_song)    {
+            System.out.println("__SCHEDULER__: first song, adding some buffer time");
+            duration = getCurrentSongDuration() - buffer;
+        }
+        else    {
+            duration = getCurrentSongDuration();
+        }
+        this.first_song = false;
 
         executor.schedule( () -> {
 
@@ -44,7 +56,7 @@ public class SongQueueProcessor {
             SpotifyPlaybackController P = new SpotifyPlaybackController(this.access_token);
             boolean result = P.queueSong(song_id);
 
-            /** TODO: will likely have to then remove the song from queue */
+            sq.pop();
 
             // process the next song recursively
             processNextSong();
