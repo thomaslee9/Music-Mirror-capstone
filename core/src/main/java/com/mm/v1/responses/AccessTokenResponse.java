@@ -13,5 +13,11 @@ public class AccessTokenResponse {
         return this.access_token;
 
     }
+
+    public String getRefreshToken() {
+
+        return this.refresh_token;
+
+    }
     
 }

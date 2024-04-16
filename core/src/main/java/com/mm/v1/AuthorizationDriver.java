@@ -33,10 +33,10 @@ public class AuthorizationDriver {
 
     public void authorize()  {
 
-        WebDriverManager.firefoxdriver().setup();
+        WebDriverManager.chromedriver().setup();
 
         // create a new instance of the ChromeDriver
-        WebDriver driver = new FirefoxDriver();
+        WebDriver driver = new ChromeDriver();
 
         // navigate to the Spotify authorization URL
         driver.get("https://accounts.spotify.com/authorize?client_id=" + client_id + 

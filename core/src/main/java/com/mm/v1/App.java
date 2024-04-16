@@ -94,6 +94,8 @@ public class App extends NanoHTTPD {
             System.out.println("Spotify Access Token: " + access_token);
             this.access_token = access_token;
 
+            System.out.println("Refresh Token: " + resp.getRefreshToken());
+
             // after we get the access token, send it to the second pi
             try (Socket socket = new Socket(HOSTNAME,PORT);
                  PrintWriter out = new PrintWriter(socket.getOutputStream(), true);

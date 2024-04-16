@@ -6,6 +6,8 @@ import com.google.gson.Gson;
 import com.mm.v1.SpotifyPlaybackController;
 import com.mm.v1.communication.MessageRequestSerializer;
 import com.mm.v1.communication.MessageResponseDeserializer;
+import com.mm.v1.requests.RefreshAccessTokenRequest;
+import com.mm.v1.responses.AccessTokenResponse;
 import com.mm.v1.song.TrackObject;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -47,12 +49,15 @@ public class QueueController {
     // Raspberry Pi
     // private static PiClient pi;
     private static boolean pi_active = true;
+    // Authorization
+    private static String refresh_token = "AQA0oPc9DSdol2r5SxFx3LhHXGylRH4HIevFmjH1605DWojB5jam36ZnluQg34DksHFRv1yOoB0pGOsYRfBUXI1PIyoLeRdGa2TaUE14WUHjupZyE_c2gOvR6RQEMALI7nc";
 
     // private static max_time
     private static int MAX_AUTH_TIME_MS = 60000 * 30;
 
     private String access_token;
     private boolean first_authorization;
+    private boolean first_user = true;
 
     // timing stuff
     private long current_time_millis;
@@ -79,6 +84,16 @@ public class QueueController {
         // Host on Raspberry Pi
         // Send Queue to New User on Connect
         if (userRequest.getMessageType() == MessageType.CONNECT) {
+
+            if (this.first_user)    {
+                System.out.println("Initializing queue controller: marking time");
+                this.current_time_millis = System.currentTimeMillis();
+                this.last_auth_time = this.current_time_millis;
+                this.first_authorization = true;
+                this.access_token = "";
+                this.first_user = false;
+            }
+
             // Add User to UserDict
             System.out.println("### Adding User ###   " + userRequest.getUserId());
             ud.addUser(userRequest.getUserId());
@@ -432,7 +447,7 @@ public class QueueController {
 
     }
 
-    public void update_access_token() {
+    public void update_access_token2() {
         
         // URL of your NanoHTTPD server
         String url = "http://localhost:8080/spotify";
@@ -455,6 +470,16 @@ public class QueueController {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void update_access_token() {
+        
+        AccessTokenResponse resp = new RefreshAccessTokenRequest().requestAccessToken(refresh_token);
+        String access_token = resp.getAccessToken();
+
+        System.out.println("Spotify Access Token: " + access_token);
+        this.access_token = access_token;
+
     }
 
 }
