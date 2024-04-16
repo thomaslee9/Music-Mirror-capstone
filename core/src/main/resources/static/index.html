@@ -2,9 +2,18 @@
 <html lang="en">
 
 <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8">
     <title>Music Mirror app</title>
     <link rel="stylesheet" href="/css/main.css"/>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+      integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
 </head>
 
 
@@ -32,7 +41,9 @@
     <div id="queue-page" class="hidden">
         <div class="queue-container">
             <div class="queue-header">
-                <h2>dj MUSIC MIRROR COLLECTIVE QUEUE</h2>
+                <button id="sessionRecButton" type="button"class="primary">Session Rec</button>
+                <h2>MUSIC MIRROR</h2>
+                <button id="questionButton" type="button"class="primary">?</button>
             </div>
 
             <div class="connecting">
@@ -45,7 +56,6 @@
             </ul>
 
             <!-- Recommendation Buttons -->
-            <button id="sessionRecButton" type="button"class="primary">Session Rec</button>
 
             <!-- User Request Form -->
             <form id="requestForm" name="requestForm">

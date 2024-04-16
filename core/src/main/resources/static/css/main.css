@@ -139,6 +139,8 @@ button.accent {
     height: calc(100% - 60px);
     max-height: 600px;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 #queue-page ul {
@@ -160,6 +162,52 @@ button.accent {
     padding: 10px 20px;
     margin: 0;
     border-bottom: 1px solid #f4f4f4;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+
+
+.btn-group {
+    display: flex;
+    flex-direction: row;
+    gap: 0px;
+    justify-content: flex-end;
+}
+
+
+
+#queue-page ul li > *{
+    flex-grow: 1;
+    flex-basis: 0;
+    text-align: center;
+}
+
+.scrolling-container {
+    flex-grow: 3;
+    overflow-x: hidden;
+    padding-right: 20px;
+    max-width: 70%;
+}
+
+.message-content {
+    white-space: nowrap; 
+} 
+
+@keyframes scroll {
+    from {
+        transform: translateX(0%);  
+    }
+    to {
+        transform: translateX(calc(-100% - 100px));  
+    }
+}
+
+.btnGroup {
+    width: 20%;
+    text-align: right;
 }
 
 #queue-page ul li p {
@@ -211,12 +259,15 @@ button.accent {
 
 #requestForm .input-group input {
     float: left;
-    width: calc(100% - 85px);
+    width: calc(100% - 105px);
+    white-space: nowrap; /* Prevents the text from wrapping to the next line */
+    overflow: hidden; /* Hides the overflow text */
+    text-overflow: ellipsis; /* Adds "..." to the end of the text that overflows the container */
 }
 
 #requestForm .input-group button {
     float: left;
-    width: 80px;
+    width: 100px;
     height: 38px;
     margin-left: 5px;
 }
@@ -241,7 +292,26 @@ button.accent {
     width: 100%;
 }
 
+.queue-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
 
+.queue-header > * {
+    flex-grow: 1;    /* Allow each element to grow and fill the container */
+    flex-basis: 0;   /* Set the initial size of each element to 0, so growth is even */
+    text-align: center; /* Center the text within each element */
+}
+
+.queue-header h2 {
+    flex-grow: 5;
+}
+
+button {
+    text-align: center;
+}
+/* 
 @media screen and (max-width: 730px) {
 
     .queue-container {
@@ -286,4 +356,4 @@ button.accent {
     .queue-header h2 {
         font-size: 1.1em;
     }
-}
+} */
