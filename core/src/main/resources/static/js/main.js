@@ -223,9 +223,9 @@ function sendSessionRequest(event) {
 function questionAsked(event) {
 
    event.preventDefault();
-   alert("Press queue with the song name and artist filled in to queue the song. \n\n" +
-         "Press the song rec button with the song and artist filled in to queue a song like the one you inputted. \n\n" + 
-         "Press the session rec button to get a reccomendation based on all songs. \n\n" +
+   alert("Press 'Queue' with the song name and artist filled in to queue the song. \n\n" +
+         "Press the 'Song rec' button with the song and artist filled in to queue a song like the one you inputted. \n\n" + 
+         "Press the 'Session rec' button to get a reccomendation based on all songs. \n\n" +
          "Once songs are added to the queue you can like and dislike them!" );
 }
 
