@@ -85,5 +85,9 @@ public class TrackObject {
     public String getId()   {
         return this.id;
     }
+
+    public int getDuration()    {
+        return this.disc_number;
+    }
     
 }

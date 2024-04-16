@@ -9,6 +9,7 @@ import com.mm.v1.communication.MessageResponseDeserializer;
 import com.mm.v1.requests.RefreshAccessTokenRequest;
 import com.mm.v1.responses.AccessTokenResponse;
 import com.mm.v1.song.TrackObject;
+import com.mm.v1.scheduler.SongQueueProcessor;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import com.mm.v3.MessageRequest;
@@ -45,6 +46,7 @@ public class QueueController {
     private static UserDict ud = new UserDict();
     private static SongQueue sq = new SongQueue();
     private static SongDict sd = new SongDict();
+    private static SongQueueProcessor ps = new SongQueueProcessor(sq);
     private static int curQueueId = 0;
     // Raspberry Pi
     // private static PiClient pi;
@@ -58,21 +60,12 @@ public class QueueController {
     private String access_token;
     private boolean first_authorization;
     private boolean first_user = true;
+    private boolean first_song = true;
 
     // timing stuff
     private long current_time_millis;
     private long last_auth_time;
 
-    public QueueController()    {
-
-        System.out.println("Initializing queue controller: marking time");
-        this.current_time_millis = System.currentTimeMillis();
-        this.last_auth_time = this.current_time_millis;
-        this.first_authorization = true;
-
-        this.access_token = "";
-
-    }
 
     @MessageMapping("/queue.sendRequest")
     @SendTo("/topic/public")
@@ -310,7 +303,6 @@ public class QueueController {
         try {
 
             SpotifyPlaybackController P = new SpotifyPlaybackController(token);
-            System.out.println("### Queuing Song ###");
 
             // if !SONG_REC is appended to the song name it means we want a rec
             if (messageType == MessageType.SONGREC) {
@@ -357,13 +349,19 @@ public class QueueController {
 
                 result_song_id = rec_response.getSongId(); // would set this to response from pi2
 
-                System.out.println("### Queuing Song ###");
+                System.out.println("### Updating Song Queue ###");
 
-                result = P.queueSong(result_song_id);
-
-                sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName());
+                sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName(), rec_response.getDuration());
 
                 System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
+
+                if (this.first_song)    {
+                    System.out.println("FIRST SONG: Queueing, and starting Scheduler");
+                    result = P.queueSong(result_song_id);
+                    this.first_song = false;
+                    // and so now also initiate the queue scheduler
+                    ps.processNextSong();
+                }
 
             } else if (messageType == MessageType.SESSIONREC) {
 
@@ -412,25 +410,41 @@ public class QueueController {
 
                 result_song_id = rec_response.getSongId(); // would set this to response from pi2
 
-                System.out.println("### Queuing Song ###");
+                System.out.println("### Updating Song Queue ###");
 
-                result = P.queueSong(result_song_id);
-
-                sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName());
+                sd.updateSong(queue_id, result_song_id, rec_response.getSongName(), rec_response.getArtistName(), rec_response.getDuration());
 
                 System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
+
+                if (this.first_song)    {
+                    System.out.println("FIRST SONG: Queueing, and starting Scheduler");
+                    result = P.queueSong(result_song_id);
+                    this.first_song = false;
+                    // and so now also initiate the queue scheduler
+                    ps.processNextSong();
+                }
 
             }
             // otherwise just queue the song as normal
             else {
 
-                System.out.println("### Queuing Song ###");
+                System.out.println("### Updating Song Queue ###");
 
-                result_song_id = P.queueSong(song_name, artist_name);
+                TrackObject result_song = P.getSong(song_name, artist_name);
+                result_song_id = result_song.getId();
+                int result_song_duration = result_song.getDuration();
                 result = true;
 
-                sd.updateSongId(queue_id, result_song_id);
+                sd.updateSongId(queue_id, result_song_id, result_song_duration);
                 System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
+
+                if (this.first_song)    {
+                    System.out.println("FIRST SONG: Queueing, and starting Scheduler");
+                    result = P.queueSong(result_song_id);
+                    this.first_song = false;
+                    // and so now also initiate the queue scheduler
+                    ps.processNextSong();
+                }
 
             }
 
@@ -454,6 +468,7 @@ public class QueueController {
 
         System.out.println("Spotify Access Token: " + access_token);
         this.access_token = access_token;
+        ps.setAccessToken(access_token);
 
     }
 

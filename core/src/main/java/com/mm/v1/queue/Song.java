@@ -13,6 +13,7 @@ public class Song {
     private boolean recComplete;
     private ConcurrentHashMap<String, String> colorMap;
     private int likeScore;
+    private int duration_ms;
 
     public Song(String songName, String songArtist, String queueId, String songId, String username, String userId,
             boolean isRec) {
@@ -31,6 +32,10 @@ public class Song {
 
     public void setRecComplete() {
         this.recComplete = true;
+    }
+
+    public void setDuration(int duration_ms)    {
+        this.duration_ms = duration_ms;
     }
 
 
@@ -66,6 +71,10 @@ public class Song {
 
     public String getUserId() {
         return userId;
+    }
+
+    public int getDuration()    {
+        return duration_ms;
     }
 
     @Override

@@ -22,16 +22,18 @@ public class SongDict {
         map.put(song.getQueueId(), song);
     }
 
-    public void updateSong(String queue_id, String song_id, String song_name, String artist_name) {
+    public void updateSong(String queue_id, String song_id, String song_name, String artist_name, int duration_ms) {
         Song song = map.get(queue_id);
         song.updateSongId(song_id);
         song.updateSongName(song_name);
         song.updateArtistName(artist_name);
+        song.setDuration(duration_ms);
     }
 
-    public void updateSongId(String queue_id, String song_id) {
+    public void updateSongId(String queue_id, String song_id, int duration_ms) {
         Song song = map.get(queue_id);
         song.updateSongId(song_id);
+        song.setDuration(duration_ms);
     }
 
     public void removeById(String songId) {

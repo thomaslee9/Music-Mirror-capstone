@@ -43,6 +43,28 @@ public class SongQueue {
         return queue.peek();
     }
 
+    public Song peekSecondElement() {
+
+        if (queue.size() < 2) {
+            throw new IllegalArgumentException("Queue doesn't have a second element");
+        }
+
+        Song firstSong = null;
+        Song secondSong = null;
+
+        // Iterate over the elements of the queue
+        for (Song song : this.queue) {
+            if (firstSong == null) {
+                firstSong = song;
+            } else {
+                secondSong = song;
+                break; // Found the second element, exit the loop
+            }
+        }
+
+        return secondSong;
+    }
+
     public void printQueue() {
         System.out.println("Song Queue: \n");
 

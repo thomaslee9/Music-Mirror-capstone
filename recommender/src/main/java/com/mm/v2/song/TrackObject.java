@@ -85,4 +85,8 @@ public class TrackObject {
         return this.id;
     }
     
+    public int getDuration()    {
+        return this.duration_ms;
+    }
+
 }
