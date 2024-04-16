@@ -447,31 +447,6 @@ public class QueueController {
 
     }
 
-    public void update_access_token2() {
-        
-        // URL of your NanoHTTPD server
-        String url = "http://localhost:8080/spotify";
-
-        try {
-            // Create a URL connection
-            HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
-            // Set request method
-            connection.setRequestMethod("GET");
-            // Get the response
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String response = reader.readLine();
-            System.out.println("Current token: " + response);
-
-            // update token
-            this.access_token = response;
-
-            // Close the connection
-            connection.disconnect();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
     public void update_access_token() {
         
         AccessTokenResponse resp = new RefreshAccessTokenRequest().requestAccessToken(refresh_token);

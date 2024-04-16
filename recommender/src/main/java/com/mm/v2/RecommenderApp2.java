@@ -15,15 +15,25 @@ import com.mm.v3.MessageResponse;
 import com.mm.v2.communication.MessageRequestDeserializer;
 import com.mm.v2.communication.MessageResponseSerializer;
 import com.mm.v2.requests.RecommendationRequest;
+import com.mm.v2.requests.RefreshAccessTokenRequest;
+import com.mm.v2.responses.AccessTokenResponse;
 import com.mm.v2.responses.RecommendationResponse;
 import com.mm.v2.song.TrackObject;
 
 public class RecommenderApp2 {
 
+    private static String refresh_token = "AQA0oPc9DSdol2r5SxFx3LhHXGylRH4HIevFmjH1605DWojB5jam36ZnluQg34DksHFRv1yOoB0pGOsYRfBUXI1PIyoLeRdGa2TaUE14WUHjupZyE_c2gOvR6RQEMALI7nc";
+    private static int MAX_AUTH_TIME_MS = 60000 * 30;
+
     public static void main(String[] args) {
 
         // access token for auth use
         String access_token = "";
+        boolean first_authorization = true;
+        // timing stuff
+        long current_time_millis = 0;
+        long last_auth_time = 0;
+
         // create the song attribute database
         SongAttributeDatabase db = new SongAttributeDatabase();
 
@@ -46,26 +56,20 @@ public class RecommenderApp2 {
 
                     // message handling: deserialize the string to message request
                     MessageRequest rec_request = MessageRequestDeserializer.deserialize(message);
+
+                    // see if we need to update the access token
+                    long time_diff = current_time_millis - last_auth_time;
+                    /* if the timer has passed certain threshold, regen token */
+                    if (first_authorization || time_diff >= MAX_AUTH_TIME_MS)   {
+                        access_token = update_access_token();
+                        last_auth_time = current_time_millis;
+                        first_authorization = false;
+                    }
                     
                     // now separate control flow based on message_id
 
                     TrackObject recommended_song = null;
                     int message_id = rec_request.getMessageId();
-
-                    /*
-                     * message_id = 0
-                     * 
-                     * this message gets the newly generated access token
-                     * 
-                     */
-                    if (message_id == 0)    {
-
-                        access_token = rec_request.getAccessToken();
-
-                        System.out.println("### Got Access Token ###");
-                        System.out.println(access_token);
-
-                    }
 
                     /*
                      * message_id == 1
@@ -76,7 +80,7 @@ public class RecommenderApp2 {
                      * - artist_id 
                      * 
                      */
-                    else if (message_id == 1)    {
+                    if (message_id == 1)    {
 
                         String song_id = rec_request.getSongId();
                         String artist_id = rec_request.getArtistId();
@@ -175,6 +179,16 @@ public class RecommenderApp2 {
             else    { i++; }
 
         }
+
+    }
+
+    public static String update_access_token() {
+        
+        AccessTokenResponse resp = new RefreshAccessTokenRequest().requestAccessToken(refresh_token);
+        String access_token = resp.getAccessToken();
+
+        System.out.println("Spotify Access Token: " + access_token);
+        return access_token;
 
     }
 
