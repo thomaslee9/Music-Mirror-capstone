@@ -3,6 +3,7 @@ package com.mm.v1;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -32,10 +33,10 @@ public class AuthorizationDriver {
 
     public void authorize()  {
 
-        WebDriverManager.chromedriver().setup();
+        WebDriverManager.firefoxdriver().setup();
 
         // create a new instance of the ChromeDriver
-        WebDriver driver = new ChromeDriver();
+        WebDriver driver = new FirefoxDriver();
 
         // navigate to the Spotify authorization URL
         driver.get("https://accounts.spotify.com/authorize?client_id=" + client_id + 
