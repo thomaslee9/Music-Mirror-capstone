@@ -41,6 +41,11 @@
         <artifactId>javatuples</artifactId>
         <version>1.2</version>
     </dependency>
+    <dependency>
+      <groupId>com.fazecast</groupId>
+      <artifactId>jSerialComm</artifactId>
+      <version>2.7.0</version> <!-- Use the latest version available -->
+    </dependency> 
   </dependencies>
 
   <build>
