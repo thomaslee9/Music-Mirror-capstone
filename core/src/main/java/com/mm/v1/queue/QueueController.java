@@ -525,13 +525,7 @@ public class QueueController {
             this.first_song = false;
 
             // before scheduling, if the queue has no next up songs, prefetch a req
-            if (needRecommendation())   {
-
-                System.out.println("__SCHEDULER__: prefetching rec");
-                Song curr_song = this.sq.peek();
-                prefetched = getEndlessQueueRecommendation(P, curr_song.getSongName(), curr_song.getSongArtist());
-            }
-
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> asyncPrefetch(P));
     
             executor.schedule( () -> {
     
@@ -553,6 +547,19 @@ public class QueueController {
     
             }, duration, TimeUnit.MILLISECONDS);
     
+        }
+
+        public void asyncPrefetch(SpotifyPlaybackController P)  {
+
+            // before scheduling, if the queue has no next up songs, prefetch a req
+            if (needRecommendation())   {
+
+                System.out.println("__SCHEDULER__: prefetching rec");
+                Song curr_song = this.sq.peek();
+                prefetched = getEndlessQueueRecommendation(P, curr_song.getSongName(), curr_song.getSongArtist());
+
+            }
+
         }
 
         public boolean needRecommendation() {
@@ -655,6 +662,7 @@ public class QueueController {
             Song newSong = new Song(rec_response.getSongName(), rec_response.getArtistName(), queue_id, result_song_id,
             username, user_id, isRec);
             newSong.setRecComplete();
+            newSong.setDuration(rec_response.getDuration());
 
             sd.add(newSong);
             sq.push(newSong);

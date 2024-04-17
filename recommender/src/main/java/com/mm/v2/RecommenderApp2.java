@@ -57,6 +57,9 @@ public class RecommenderApp2 {
                     // message handling: deserialize the string to message request
                     MessageRequest rec_request = MessageRequestDeserializer.deserialize(message);
 
+                    // mark the current time
+                    current_time_millis = System.currentTimeMillis();
+
                     // see if we need to update the access token
                     long time_diff = current_time_millis - last_auth_time;
                     /* if the timer has passed certain threshold, regen token */
