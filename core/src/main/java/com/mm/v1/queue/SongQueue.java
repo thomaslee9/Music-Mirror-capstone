@@ -46,7 +46,7 @@ public class SongQueue {
     public Song peekSecondElement() {
 
         if (queue.size() < 2) {
-            throw new IllegalArgumentException("Queue doesn't have a second element");
+            return null;
         }
 
         Song firstSong = null;

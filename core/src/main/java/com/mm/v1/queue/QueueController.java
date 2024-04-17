@@ -349,8 +349,6 @@ public class QueueController {
                     e.printStackTrace();
                 }
 
-                System.out.println("(Would be queuing the returned song)");
-
                 result_song_id = rec_response.getSongId(); // would set this to response from pi2
 
                 System.out.println("### Updating Song Queue ###");
@@ -409,8 +407,6 @@ public class QueueController {
                     System.out.println("Error: " + e.getMessage());
                     e.printStackTrace();
                 }
-
-                System.out.println("(Would be queuing the returned song)");
 
                 result_song_id = rec_response.getSongId(); // would set this to response from pi2
 
@@ -489,6 +485,7 @@ public class QueueController {
         private ScheduledExecutorService executor;
         private String access_token;
         private boolean first_song;
+        private MessageResponse prefetched = null;
         
         private int buffer = 5000;
     
@@ -513,6 +510,9 @@ public class QueueController {
         public void processNextSong()   {
     
             System.out.println("__SCHEDULER__: processing next song");
+
+            SpotifyPlaybackController P = new SpotifyPlaybackController(this.access_token);
+
             // get the duration of the currently playing song
             long duration;
             if (this.first_song)    {
@@ -523,17 +523,24 @@ public class QueueController {
                 duration = getCurrentSongDuration();
             }
             this.first_song = false;
+
+            // before scheduling, if the queue has no next up songs, prefetch a req
+            if (needRecommendation())   {
+
+                System.out.println("__SCHEDULER__: prefetching rec");
+                Song curr_song = this.sq.peek();
+                prefetched = getEndlessQueueRecommendation(P, curr_song.getSongName(), curr_song.getSongArtist());
+            }
+
     
             executor.schedule( () -> {
     
                 System.out.println("__SCHEDULER__: timer reached, queueing song now");
 
-                SpotifyPlaybackController P = new SpotifyPlaybackController(this.access_token);
-
                 /** ------- BEGIN CRITICAL AREA ------- */
 
                 // get the next song in the queue (the one we should queue)
-                String song_id = getNextSong(P);
+                String song_id = getNextSong(P, prefetched);
                 // then actually queue this song 
                 boolean result = P.queueSong(song_id);
     
@@ -547,17 +554,28 @@ public class QueueController {
             }, duration, TimeUnit.MILLISECONDS);
     
         }
+
+        public boolean needRecommendation() {
+
+            Song next_song = this.sq.peekSecondElement();
+            if (next_song == null)  {
+
+                System.out.println("__SCHEDULER__: queue empty, need to get rec");
+                return true;
+
+            }
+            return false;
+
+        }
     
-        public String getNextSong(SpotifyPlaybackController P) {
+        public String getNextSong(SpotifyPlaybackController P, MessageResponse prefetched) {
     
             // peek at the next song in the queue
             Song next_song = this.sq.peekSecondElement();
             // if there are no songs next up in the queue, generate a dj rec from the prev
             if (next_song == null)  {
-                System.out.println("__SCHEDULER__: queue empty, generating rec");
-
-                Song curr_song = this.sq.peek();
-                return getEndlessQueueRecommendation(P, curr_song.getSongName(), curr_song.getSongArtist());
+                System.out.println("__SCHEDULER__: queue still empty, adding prefetched rec to queue");
+                return queueEndlessRecommendation(prefetched);
     
             }
             return next_song.getSongId();
@@ -574,7 +592,7 @@ public class QueueController {
     
         }
     
-        public String getEndlessQueueRecommendation(SpotifyPlaybackController P, String song_name, String artist_name) {
+        public MessageResponse getEndlessQueueRecommendation(SpotifyPlaybackController P, String song_name, String artist_name) {
     
             TrackObject track = P.getSong(song_name, artist_name);
             MessageResponse rec_response = null;
@@ -619,6 +637,11 @@ public class QueueController {
                 e.printStackTrace();
             }
     
+            return rec_response;
+        }
+
+        public String queueEndlessRecommendation(MessageResponse rec_response)  {
+
             String result_song_id = rec_response.getSongId(); // would set this to response from pi2
     
             System.out.println("### Adding to Song Queue ###");
@@ -634,12 +657,12 @@ public class QueueController {
             newSong.setRecComplete();
 
             sd.add(newSong);
-            ud.addSong(user_id, newSong);
             sq.push(newSong);
     
             System.out.println("Added to SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
 
             return result_song_id;
+
         }
         
     }
