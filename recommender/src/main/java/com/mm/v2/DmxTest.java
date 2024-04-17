@@ -3,6 +3,18 @@ package com.mm.v2;
 import com.fazecast.jSerialComm.SerialPort;
 import java.util.Random;
 
+// Channel Mapping for SlimPAR Pro Q USB Lighting Fixture
+// 13 - setup
+// 14 - red
+// 15 - green
+// 16 - blue
+// 17 - pink white
+// 18 - red 2
+// 19 - strobe
+// 20 - 
+// 21 - auto rotate colors
+// 22 - 
+
 public class DmxTest {
     public static void main(String[] args) {
 
@@ -23,37 +35,35 @@ public class DmxTest {
             System.out.println("Port opened successfully.");
 
             // Test Pattern 1
-            int chan = 12;
+            dmx.setChannel(13, 128);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("Channel: 13");
+
+            int chan = 14;
             int intens = 128;
             Random rand = new Random();
-            while (true) {
-                if (chan > 24) {
-                    chan = 12;
-
-                    for (int j = 12; j <= 24; j++) {
-                        dmx.setChannel(j, 0);
-                        dmxPacket = dmx.render();
-                        comPort.writeBytes(dmxPacket, dmxPacket.length);
-                    }
-                }
+            while (chan <= 22) {
 
                 dmx.setChannel(chan, intens);
                 dmxPacket = dmx.render();
                 comPort.writeBytes(dmxPacket, dmxPacket.length);
+                System.out.println("Channel: " + chan);
 
                 try {
-                    Thread.sleep(100); // delay
+                    Thread.sleep(7000); // delay
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
 
                 chan++;
-                intens = rand.nextInt(255) + 50;
+                // intens = rand.nextInt(255) + 50;
             }
 
             // System.out.println("Done.");
             // Close the port if done 
             // comPort.closePort();
+
         } else {
             System.out.println("Failed to open port.");
         }
