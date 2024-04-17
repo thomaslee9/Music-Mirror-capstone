@@ -9,9 +9,13 @@ import com.mm.v1.communication.MessageResponseDeserializer;
 import com.mm.v1.requests.RefreshAccessTokenRequest;
 import com.mm.v1.responses.AccessTokenResponse;
 import com.mm.v1.song.TrackObject;
-import com.mm.v1.scheduler.SongQueueProcessor;
+// import com.mm.v1.scheduler.SongQueueProcessor;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 import com.mm.v3.MessageRequest;
 import com.mm.v3.MessageResponse;
 
@@ -46,7 +50,7 @@ public class QueueController {
     private static UserDict ud = new UserDict();
     private static SongQueue sq = new SongQueue();
     private static SongDict sd = new SongDict();
-    private static SongQueueProcessor ps = new SongQueueProcessor(sq);
+    private static SongQueueProcessor ps = new SongQueueProcessor(sq, HOSTNAME, PORT);
     private static int curQueueId = 0;
     // Raspberry Pi
     // private static PiClient pi;
@@ -431,6 +435,9 @@ public class QueueController {
                 System.out.println("### Updating Song Queue ###");
 
                 TrackObject result_song = P.getSong(song_name, artist_name);
+
+                /** TODO: if the result song wasn't found, remove from queue */
+
                 result_song_id = result_song.getId();
                 int result_song_duration = result_song.getDuration();
                 result = true;
@@ -471,5 +478,171 @@ public class QueueController {
         ps.setAccessToken(access_token);
 
     }
+
+    /** nested song queue processing class - handles scheduling */
+
+    public static class SongQueueProcessor {
+
+        private SongQueue sq;
+        private String hostname;
+        private int port;
+        private ScheduledExecutorService executor;
+        private String access_token;
+        private boolean first_song;
+        
+        private int buffer = 5000;
+    
+        public SongQueueProcessor(SongQueue sq, String hostname, int port) {
+            this.sq = sq;
+            this.hostname = hostname;
+            this.port = port;
+            // can be single threaded to start
+            this.executor = Executors.newSingleThreadScheduledExecutor();
+            this.access_token = "";
+            this.first_song = true;
+        }
+    
+        public void setAccessToken(String access_token) {
+            this.access_token = access_token;
+        }
+    
+        public void startProcessing()   {
+            this.processNextSong();
+        }
+    
+        public void processNextSong()   {
+    
+            System.out.println("__SCHEDULER__: processing next song");
+            // get the duration of the currently playing song
+            long duration;
+            if (this.first_song)    {
+                System.out.println("__SCHEDULER__: first song, adding some buffer time");
+                duration = getCurrentSongDuration() - buffer;
+            }
+            else    {
+                duration = getCurrentSongDuration();
+            }
+            this.first_song = false;
+    
+            executor.schedule( () -> {
+    
+                System.out.println("__SCHEDULER__: timer reached, queueing song now");
+
+                SpotifyPlaybackController P = new SpotifyPlaybackController(this.access_token);
+
+                /** ------- BEGIN CRITICAL AREA ------- */
+
+                // get the next song in the queue (the one we should queue)
+                String song_id = getNextSong(P);
+                // then actually queue this song 
+                boolean result = P.queueSong(song_id);
+    
+                sq.pop();
+
+                /** ------- END CRITICAL AREA ------- */
+    
+                // process the next song recursively
+                processNextSong();
+    
+            }, duration, TimeUnit.MILLISECONDS);
+    
+        }
+    
+        public String getNextSong(SpotifyPlaybackController P) {
+    
+            // peek at the next song in the queue
+            Song next_song = this.sq.peekSecondElement();
+            // if there are no songs next up in the queue, generate a dj rec from the prev
+            if (next_song == null)  {
+                System.out.println("__SCHEDULER__: queue empty, generating rec");
+
+                Song curr_song = this.sq.peek();
+                return getEndlessQueueRecommendation(P, curr_song.getSongName(), curr_song.getSongArtist());
+    
+            }
+            return next_song.getSongId();
+    
+        } 
+    
+        public long getCurrentSongDuration()    {
+    
+            Song curr_song = this.sq.peek();
+            if (curr_song == null)  {
+                System.out.println("__SCHEDULER__: failed to get curr song duration from queue");
+            }
+            return curr_song.getDuration();
+    
+        }
+    
+        public String getEndlessQueueRecommendation(SpotifyPlaybackController P, String song_name, String artist_name) {
+    
+            TrackObject track = P.getSong(song_name, artist_name);
+            MessageResponse rec_response = null;
+    
+            // now that we have the track, get the id, artist_id, and genre
+            String song_id = track.getId();
+            String artist_id = track.getFirstArtistId();
+    
+            System.out.println("### Generating Endless Queue Rec for: ###");
+            System.out.println("# Song_ID = " + song_id + " #");
+            System.out.println("# Artist_ID = " + artist_id + " #");
+    
+            /* send this to the second pi - serialize and send */
+            MessageRequest rec_request = new MessageRequest(1, song_id, artist_id, null);
+            String serialized_request = "";
+            try {
+                serialized_request = MessageRequestSerializer.serialize(rec_request);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+    
+            try (Socket socket = new Socket(hostname, port);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+                    BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+    
+                // write the serialized request to the output
+                out.println(serialized_request);
+                System.out.println("Sent to server: " + serialized_request);
+    
+                System.out.println("Awaiting response from recommender");
+    
+                String response = in.readLine();
+                System.out.println("Recevied from server: " + response);
+    
+                // now deserialize the response
+                rec_response = MessageResponseDeserializer.deserialize(response);
+    
+                System.out.println("Deserialized from server!");
+    
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+                e.printStackTrace();
+            }
+    
+            String result_song_id = rec_response.getSongId(); // would set this to response from pi2
+    
+            System.out.println("### Adding to Song Queue ###");
+
+            String queue_id = String.valueOf(curQueueId);
+            curQueueId += 1;
+            String username = "MM";
+            String user_id = "18500";
+            boolean isRec = true;
+    
+            Song newSong = new Song(rec_response.getSongName(), rec_response.getArtistName(), queue_id, result_song_id,
+            username, user_id, isRec);
+            newSong.setRecComplete();
+
+            sd.add(newSong);
+            ud.addSong(user_id, newSong);
+            sq.push(newSong);
+    
+            System.out.println("Added to SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
+
+            return result_song_id;
+        }
+        
+    }
+    
 
 }
