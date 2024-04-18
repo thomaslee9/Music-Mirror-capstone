@@ -658,7 +658,7 @@ public class QueueController {
             String username = "MM";
             String user_id = "18500";
             boolean isRec = true;
-    
+
             Song newSong = new Song(rec_response.getSongName(), rec_response.getArtistName(), queue_id, result_song_id,
             username, user_id, isRec);
             newSong.setRecComplete();
@@ -666,7 +666,12 @@ public class QueueController {
 
             sd.add(newSong);
             sq.push(newSong);
-    
+            Gson gson = new Gson();
+            String updatedQueue = gson.toJson(sq);
+            QueueController qc = new QueueController();
+            qc.messagingTemplate.convertAndSend("/topic/public", updatedQueue);
+
+
             System.out.println("Added to SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
 
             return result_song_id;

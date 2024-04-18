@@ -329,7 +329,7 @@ function onMessageReceived(payload) {
 
             let currSongElement = document.createElement('li');
             let currSongCont = document.createElement('div');
-            currSongCont.className = 'scrolling-container';
+            currSongCont.id = 'scrolling-container';
             let currSongText = document.createElement('div');
             currSongText.className = 'message-content';
             currSongText.textContent = songDisplay + '    Queued by: ' + queuedBy;
