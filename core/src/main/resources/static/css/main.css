@@ -174,18 +174,18 @@ button.accent {
     display: flex;
     flex-direction: row;
     gap: 0px;
+    padding-left: 10px;
     justify-content: flex-end;
 }
 
 
 
 #queue-page ul li > *{
-    flex-grow: 1;
     flex-basis: 0;
     text-align: center;
 }
 
-.scrolling-container {
+#scrolling-container {
     flex-grow: 3;
     overflow-x: hidden;
     padding-right: 20px;
