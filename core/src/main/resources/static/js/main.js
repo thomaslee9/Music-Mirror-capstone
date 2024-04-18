@@ -33,6 +33,39 @@ var colors = [
 
 let timeoutId;
 
+
+function userInactive() {
+    console.log('User is inactive');
+    if (localStorage.getItem('active') === 'true') {
+        localStorage.setItem('active', 'false');
+        stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
+    }
+}
+
+function userActive() { 
+    console.log('User is active');
+    if (localStorage.getItem('active') === 'false') {
+        localStorage.setItem('active', 'true');
+        stompClient.send("/app/userActive", {}, JSON.stringify({ 'userId': userId }));
+    }
+}
+
+
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') {
+        // User has left the page
+        userInactive();
+        } else {
+        if (localStorage.getItem('active') === 'true') {
+            throw new Error('User is active');
+            
+        }
+        userActive();
+         // User has returned to the page
+        // Perform actions such as sending a request to the server to indicate that the user is active
+    }
+});
+
 //UNCOMMENT
 function resetTimeout() {
     // Clear the existing timeout
