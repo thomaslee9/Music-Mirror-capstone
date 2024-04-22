@@ -82,6 +82,8 @@ public class DmxTest2 {
             // Flash colors
             int chan = randColor();
             int intens = randIntens();
+            int bpm = 120;
+            int timeUnit = (60 / bpm) * 100;
             setColor(chan, intens, 80, dmx, comPort);
 
             while (true) {
