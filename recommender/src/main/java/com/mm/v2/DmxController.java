@@ -103,21 +103,27 @@ public class DmxController {
             // Setup dimmer
             setColor(13, 128, 50, dmx, comPort);
 
-            // Strobe Variables
-            int type = 0;
+            // Determine Song Type
+            double acousticness = 0.0;
+            double danceability = 0.0;
+            double valence = 0.0;
+            double energy = 0.0;
+            int type = getType(acousticness, danceability, valence, energy);
+
+            // Determine Song BPM
             int bpm = 122;
             int timeUnit = (60 / bpm) * 100;
 
             // Compute Channel & Intensity for Next DMX Frame
             int chan = randColor(type);
             int intens = randIntens();
-            setColor(chan, intens, 80, dmx, comPort);
+            setColor(chan, intens, timeUnit, dmx, comPort);
 
             while (true) {
                 // Compute Channel & Intensity for Next DMX Frame
                 chan = randColor(type);
                 intens = randIntens();
-                setColor(chan, intens, 80, dmx, comPort);
+                setColor(chan, intens, timeUnit, dmx, comPort);
             }
         
             // System.out.println("Finished sequence.");
