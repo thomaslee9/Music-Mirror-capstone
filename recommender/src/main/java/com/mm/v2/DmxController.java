@@ -40,14 +40,33 @@ public class DmxController {
         }
     }
 
+    public static int getType(double acousticness, double danceability, double valence, double energy) {
+
+        if (acousticness >= 0.5) {
+            return 3;
+        } else if (danceability >= 0.6 && energy >= 0.6 ) {
+            return 0;
+        } else if (valence >= 0.6) {
+            return 1;
+        } else {
+            return 2;
+        }
+    }
+
     public static int randColor(int type) {
         Random rand = new Random();
         // Generate color based on Song Type
         if (type == 0) {
+            // Full Range
             return rand.nextInt(5) + 14;
         } else if (type == 1) {
-            return rand.nextInt(3) + 14;
+            // RGB Low Range
+            return rand.nextInt(2) + 14;
+        } else if (type == 3) {
+            // Acoustic Range
+            return rand.nextInt(2) + 15;
         } else {
+            // Blue Pink/White Red 2 Strobe Hi Range
             return rand.nextInt(3) + 16;
         } 
     }
@@ -84,21 +103,27 @@ public class DmxController {
             // Setup dimmer
             setColor(13, 128, 50, dmx, comPort);
 
-            // Strobe Variables
-            int type = 0;
+            // Determine Song Type
+            double acousticness = 0.0;
+            double danceability = 0.0;
+            double valence = 0.0;
+            double energy = 0.0;
+            int type = getType(acousticness, danceability, valence, energy);
+
+            // Determine Song BPM
             int bpm = 122;
             int timeUnit = (60 / bpm) * 100;
 
             // Compute Channel & Intensity for Next DMX Frame
             int chan = randColor(type);
             int intens = randIntens();
-            setColor(chan, intens, 80, dmx, comPort);
+            setColor(chan, intens, timeUnit, dmx, comPort);
 
             while (true) {
                 // Compute Channel & Intensity for Next DMX Frame
                 chan = randColor(type);
                 intens = randIntens();
-                setColor(chan, intens, 80, dmx, comPort);
+                setColor(chan, intens, timeUnit, dmx, comPort);
             }
         
             // System.out.println("Finished sequence.");
