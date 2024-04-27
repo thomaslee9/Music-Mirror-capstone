@@ -45,7 +45,8 @@ public class QueueController {
     private static final int LIKE_TO_DISLIKE = 4;
     // Connection
     private static final int PORT = 5000;
-    private static final String HOSTNAME = "172.26.54.24";
+    //private static final String HOSTNAME = "192.168.1.185";
+    private static final String HOSTNAME = "172.26.70.90";
     // Song Queue
     private static UserDict ud = new UserDict();
     private static SongQueue sq = new SongQueue();
@@ -69,6 +70,8 @@ public class QueueController {
     // timing stuff
     private long current_time_millis;
     private long last_auth_time;
+   
+    private static boolean already = true;
 
 
     @MessageMapping("/queue.sendRequest")
@@ -134,7 +137,7 @@ public class QueueController {
         // =============================================================
         // Async SPOTIFY WEB API SECTION
 
-    
+   
         String song_name = userRequest.getSongName();
         String artist_name = userRequest.getSongArtist();
         CompletableFuture<Void> future = CompletableFuture
@@ -151,7 +154,7 @@ public class QueueController {
                         messagingTemplate.convertAndSend("/topic/public", updatedQueue);
                     }
                 });
-        
+       
         // =============================================================
 
         // Want like buttons to show
@@ -171,7 +174,7 @@ public class QueueController {
             @Payload Request userRequest,
             SimpMessageHeaderAccessor accessor) {
         // Accept a new user
-        accessor.getSessionAttributes().put("username", userRequest.getUser());
+        accessor.getSessionAttributes().put("userID", userRequest.getUserId());
         return userRequest;
     }
 
@@ -407,6 +410,23 @@ public class QueueController {
                     System.out.println("Error: " + e.getMessage());
                     e.printStackTrace();
                 }
+               
+            if (!already) {
+                already = true;
+            int port = 5001;
+            System.out.println("Trying to connect to port " + port);
+            try (Socket socket = new Socket(HOSTNAME, port);
+                PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                    // write the serialized request to the output
+                    out.println(serialized_request);
+                    System.out.println("Sent to server: " + serialized_request);
+           
+            } catch (UnknownHostException ex) {
+                System.out.println("Server not found: " + ex.getMessage());
+            } catch (IOException ex) {
+                System.out.println("I/O error: " + ex.getMessage());
+            }
+        }
 
                 result_song_id = rec_response.getSongId(); // would set this to response from pi2
 
@@ -465,7 +485,7 @@ public class QueueController {
     }
 
     public void update_access_token() {
-        
+       
         AccessTokenResponse resp = new RefreshAccessTokenRequest().requestAccessToken(refresh_token);
         String access_token = resp.getAccessToken();
 
@@ -486,9 +506,9 @@ public class QueueController {
         private String access_token;
         private boolean first_song;
         private MessageResponse prefetched = null;
-        
+       
         private int buffer = 5000;
-    
+   
         public SongQueueProcessor(SongQueue sq, String hostname, int port) {
             this.sq = sq;
             this.hostname = hostname;
@@ -498,17 +518,17 @@ public class QueueController {
             this.access_token = "";
             this.first_song = true;
         }
-    
+   
         public void setAccessToken(String access_token) {
             this.access_token = access_token;
         }
-    
+   
         public void startProcessing()   {
             this.processNextSong();
         }
-    
+   
         public void processNextSong()   {
-    
+   
             System.out.println("__SCHEDULER__: processing next song");
 
             SpotifyPlaybackController P = new SpotifyPlaybackController(this.access_token);
@@ -526,27 +546,27 @@ public class QueueController {
 
             // before scheduling, if the queue has no next up songs, prefetch a req
             CompletableFuture<Void> future = CompletableFuture.runAsync(() -> asyncPrefetch(P));
-    
+   
             executor.schedule( () -> {
-    
+   
                 System.out.println("__SCHEDULER__: timer reached, queueing song now");
 
                 /** ------- BEGIN CRITICAL AREA ------- */
 
                 // get the next song in the queue (the one we should queue)
                 String song_id = getNextSong(P, prefetched);
-                // then actually queue this song 
+                // then actually queue this song
                 boolean result = P.queueSong(song_id);
-    
+   
                 sq.pop();
 
                 /** ------- END CRITICAL AREA ------- */
-    
+   
                 // process the next song recursively
                 processNextSong();
-    
+   
             }, duration, TimeUnit.MILLISECONDS);
-    
+   
         }
 
         public void asyncPrefetch(SpotifyPlaybackController P)  {
@@ -574,44 +594,44 @@ public class QueueController {
             return false;
 
         }
-    
+   
         public String getNextSong(SpotifyPlaybackController P, MessageResponse prefetched) {
-    
+   
             // peek at the next song in the queue
             Song next_song = this.sq.peekSecondElement();
             // if there are no songs next up in the queue, generate a dj rec from the prev
             if (next_song == null)  {
                 System.out.println("__SCHEDULER__: queue still empty, adding prefetched rec to queue");
                 return queueEndlessRecommendation(prefetched);
-    
+   
             }
             return next_song.getSongId();
-    
-        } 
-    
+   
+        }
+   
         public long getCurrentSongDuration()    {
-    
+   
             Song curr_song = this.sq.peek();
             if (curr_song == null)  {
                 System.out.println("__SCHEDULER__: failed to get curr song duration from queue");
             }
             return curr_song.getDuration();
-    
+   
         }
-    
+   
         public MessageResponse getEndlessQueueRecommendation(SpotifyPlaybackController P, String song_name, String artist_name) {
-    
+   
             TrackObject track = P.getSong(song_name, artist_name);
             MessageResponse rec_response = null;
-    
+   
             // now that we have the track, get the id, artist_id, and genre
             String song_id = track.getId();
             String artist_id = track.getFirstArtistId();
-    
+   
             System.out.println("### Generating Endless Queue Rec for: ###");
             System.out.println("# Song_ID = " + song_id + " #");
             System.out.println("# Artist_ID = " + artist_id + " #");
-    
+   
             /* send this to the second pi - serialize and send */
             MessageRequest rec_request = new MessageRequest(1, song_id, artist_id, null);
             String serialized_request = "";
@@ -620,37 +640,37 @@ public class QueueController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-    
+   
             try (Socket socket = new Socket(hostname, port);
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
                     BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
-    
+   
                 // write the serialized request to the output
                 out.println(serialized_request);
                 System.out.println("Sent to server: " + serialized_request);
-    
+   
                 System.out.println("Awaiting response from recommender");
-    
+   
                 String response = in.readLine();
                 System.out.println("Recevied from server: " + response);
-    
+   
                 // now deserialize the response
                 rec_response = MessageResponseDeserializer.deserialize(response);
-    
+   
                 System.out.println("Deserialized from server!");
-    
+   
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
                 e.printStackTrace();
             }
-    
+   
             return rec_response;
         }
 
         public String queueEndlessRecommendation(MessageResponse rec_response)  {
 
             String result_song_id = rec_response.getSongId(); // would set this to response from pi2
-    
+   
             System.out.println("### Adding to Song Queue ###");
 
             String queue_id = String.valueOf(curQueueId);
@@ -658,7 +678,7 @@ public class QueueController {
             String username = "MM";
             String user_id = "18500";
             boolean isRec = true;
-
+   
             Song newSong = new Song(rec_response.getSongName(), rec_response.getArtistName(), queue_id, result_song_id,
             username, user_id, isRec);
             newSong.setRecComplete();
@@ -666,19 +686,20 @@ public class QueueController {
 
             sd.add(newSong);
             sq.push(newSong);
-            Gson gson = new Gson();
-            String updatedQueue = gson.toJson(sq);
-            QueueController qc = new QueueController();
-            qc.messagingTemplate.convertAndSend("/topic/public", updatedQueue);
-
-
+           
+            //Gson gson = new Gson();
+            //String updatedQueue = gson.toJson(sq);
+            //QueueController nqc = new QueueController();
+            //nqc.messagingTemplate.convertAndSend("/topic/public", updatedQueue);
+           
+   
             System.out.println("Added to SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
 
             return result_song_id;
 
         }
-        
+       
     }
-    
+   
 
 }

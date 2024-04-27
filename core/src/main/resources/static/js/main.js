@@ -25,46 +25,13 @@ var username = null;
 var userId = null;
 var DjColor = '#2196F3';
 var colors = [
-    '#32c787', '#00BCD4', '#ff5652', '#ffc107', 
+    '#32c787', '#00BCD4', '#ff5652', '#ffc107',
     '#ff85af', '#FF9800', '#39bbb0', '#f2274f',
     '#fa11a2', '#cc9a47', '#6ff126', '#cad502',
     '#f111f5', '#6ed00c', '#f602df'
 ];
 
 let timeoutId;
-
-
-function userInactive() {
-    console.log('User is inactive');
-    if (localStorage.getItem('active') === 'true') {
-        localStorage.setItem('active', 'false');
-        stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
-    }
-}
-
-function userActive() { 
-    console.log('User is active');
-    if (localStorage.getItem('active') === 'false') {
-        localStorage.setItem('active', 'true');
-        stompClient.send("/app/userActive", {}, JSON.stringify({ 'userId': userId }));
-    }
-}
-
-
-document.addEventListener('visibilitychange', function() {
-    if (document.visibilityState === 'hidden') {
-        // User has left the page
-        userInactive();
-        } else {
-        if (localStorage.getItem('active') === 'true') {
-            throw new Error('User is active');
-            
-        }
-        userActive();
-         // User has returned to the page
-        // Perform actions such as sending a request to the server to indicate that the user is active
-    }
-});
 
 //UNCOMMENT
 function resetTimeout() {
@@ -81,7 +48,7 @@ function resetTimeout() {
         stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
         localStorage.setItem('active', 'false');
         }
-    }, 30 * 1000);  // 5 seconds
+    }, 30000 * 1000);  // 5 seconds
     if (active === 'false' && stompClient && userId) {
         stompClient.send("/app/userActive", {}, JSON.stringify({ 'userId': userId }));
         localStorage.setItem('active', 'true');
@@ -112,7 +79,7 @@ resetTimeout();
 //         console.warn("User already stored");
 //         username = storedUsername;
 //         userId = storedUserId;
-//         stompClient = storedStompClient; 
+//         stompClient = storedStompClient;
 //         console.log("user stored");
 //         // Hide New User Page
 //         usernamePage.classList.add('hidden');
@@ -120,8 +87,8 @@ resetTimeout();
 //         queuePage.classList.remove('hidden');
 //         connectingElement.classList.add('hidden');
 
-//         // WebSocket 
-//         if (!stompClient || !stompClient.connected) { 
+//         // WebSocket
+//         if (!stompClient || !stompClient.connected) {
 //             console.log("StompClient not connected");
 //             var socket = new SockJS('/ws');
 //             stompClient = Stomp.over(socket);
@@ -157,7 +124,7 @@ function connect(event) {
         // Reveal Queue Page
         queuePage.classList.remove('hidden');
 
-        // WebSocket 
+        // WebSocket
         var socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
 
@@ -167,16 +134,66 @@ function connect(event) {
     event.preventDefault();
 }
 
+
+
+function reconnect() {
+        stompClient.subscribe('/topic/public', onMessageReceived);
+
+        stompClient.subscribe('/topic/remove', onVetoReceived);
+        // Send JOIN Request
+        // stompClient.send("/app/queue.addUser", {}, JSON.stringify({username: username, type: 'JOIN'}));
+        var userRequest = {
+            username: username,
+            songName: "NULL",
+            songArtist: "NULL",
+            type: 'CONNECT',
+            userId: userId
+        };
+        stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));  
+
+}
+
+//Today
+function reconnectUser() {
+    console.log('refreshing page');
+    var storedUsername = localStorage.getItem('username');
+    var storedUserId = localStorage.getItem('userId');
+    console.log("storedUsername: ", storedUsername);
+    console.log("storedUserId: ", storedUserId);
+    // If there is, use that information to log the user in
+    if (storedUsername && storedUserId) {
+        console.warn("User already stored");
+        username = storedUsername;
+        userId = storedUserId;
+        // Hide New User Page
+        usernamePage.classList.add('hidden');
+        // Reveal Queue Page
+        queuePage.classList.remove('hidden');
+        connectingElement.classList.add('hidden');
+
+         // WebSocket
+        console.log("StompClient not connected");
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, reconnect, onError);
+    }
+}
+
+
+
+
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        if (localStorage.getItem('userId')) {
+            reconnectUser();
+        }
+    }
+});
+
 function onConnected() {
     stompClient.subscribe('/topic/public', onMessageReceived);
 
     stompClient.subscribe('/topic/remove', onVetoReceived);
-
-    // Send JOIN Request
-    stompClient.send("/app/queue.addUser", 
-        {},
-        JSON.stringify({sender: username, type: 'JOIN'})
-    )
 
     //Generate cleint id
     var clientId = Math.floor(Math.random() * 1000000);
@@ -187,6 +204,13 @@ function onConnected() {
     localStorage.setItem('stompClient', stompClient);
     localStorage.setItem('active', 'true');
     console.log("User ID: ", userId);
+
+    // Send JOIN Request
+    stompClient.send("/app/queue.addUser",
+        {},
+        JSON.stringify({userId: userId, type: 'JOIN'})
+    )
+
 
     // Forward Current Queue to New User:
     var userRequest = {
@@ -211,6 +235,7 @@ function onError() {
 
 function sendRequest(event) {
     // Parse User Song Request
+    console.log("____________________CURRENT TIME: " + formatTimeWithMilliseconds());
     var hasName = requestName.value.trim();
     var hasArtist = requestArtist.value.trim();
 
@@ -257,13 +282,23 @@ function questionAsked(event) {
 
    event.preventDefault();
    alert("Press 'Queue' with the song name and artist filled in to queue the song. \n\n" +
-         "Press the 'Song rec' button with the song and artist filled in to queue a song like the one you inputted. \n\n" + 
+         "Press the 'Song rec' button with the song and artist filled in to queue a song like the one you inputted. \n\n" +
          "Press the 'Session rec' button to get a reccomendation based on all songs. \n\n" +
          "Once songs are added to the queue you can like and dislike them!" );
 }
 
+function formatTimeWithMilliseconds() {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const seconds = now.getSeconds().toString().padStart(2, '0');
+    const milliseconds = now.getMilliseconds().toString().padStart(3, '0');
+    return `${hours}:${minutes}:${seconds}.${milliseconds}`;
+}
+
 function sendSongRecRequest(event) {
     // Parse User Song Request
+    console.log("____________________CURRENT TIME: " + formatTimeWithMilliseconds());
     var hasName = requestName.value.trim();
     var hasArtist = requestArtist.value.trim();
 
@@ -288,11 +323,11 @@ function sendSongRecRequest(event) {
 
 
 function applyScrollingEffect(element) {
-    console.log("text: ", element.textContent);
-    console.log("scrollWidth: ", element.scrollWidth);
-    console.log("clientWidth: ", element.clientWidth);
+    //console.log("text: ", element.textContent);
+    //console.log("scrollWidth: ", element.scrollWidth);
+    //console.log("clientWidth: ", element.clientWidth);
     if (element.scrollWidth > element.clientWidth) {
-        console.log("scrollingggggggggggg");
+        //console.log("scrollingggggggggggg");
         const totalScroll = element.scrollWidth - element.clientWidth;
         element.style.animation = `scroll 10s linear infinite`;
         // Optionally, dynamically adjust the keyframes if static values do not work
@@ -340,9 +375,9 @@ function onMessageReceived(payload) {
         //messageElement.classList.add('chat-message');
 
         // Debugging Queue Readout
-        console.log("Queue: ")
-        console.log("NumSongs: ", String(message.queue.length))
-        console.log(message);
+        //console.log("Queue: ")
+        //console.log("NumSongs: ", String(message.queue.length))
+        //console.log(message);
 
         // Clear Old Queue
         queueArea.innerHTML = '';
@@ -379,7 +414,7 @@ function onMessageReceived(payload) {
             //currSongElement.appendChild(queueText);
             let likeButtonColor = 'white';
             let dislikeButtonColor = 'white';
-            console.log("color map: ", message.queue[i].colorMap);
+            //console.log("color map: ", message.queue[i].colorMap);
             //check if user has clicked the button
             if (message.queue[i].colorMap[userId] !== undefined) {
                 if (message.queue[i].colorMap[userId] === 'green') {
@@ -419,7 +454,9 @@ function onMessageReceived(payload) {
             setTimeout(function() {
                 applyScrollingEffect(currSongText);
             }, 0);
+           
         }
+        console.log("____________________DISPLAY TIME: " + formatTimeWithMilliseconds());
     }
 
     //queueArea.appendChild(messageElement);
@@ -441,8 +478,8 @@ function onVetoReceived(payload) {
     // If the element exists, remove it from its parent
     if (songElement) {
         songElement.parentNode.removeChild(songElement);
-    }   
-    
+    }  
+   
 }
 
 // songID is the spotify song id
@@ -538,7 +575,8 @@ requestForm.addEventListener('submit', sendRequest, true)
 // });
 
 window.addEventListener('beforeunload', function() {
-    stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
+   //stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
+   localStorage.removeItem('userId');
 });
 
 // // Store a timestamp in localStorage every second
@@ -562,7 +600,7 @@ window.addEventListener('beforeunload', function() {
 //         }
 //         this.localStorage.removeItem('active');
 //         console.log("User Logged Out");
-//     } 
+//     }
 //     refreshPage();
 // });
 
