@@ -112,6 +112,17 @@ public class RecommenderApp2 {
                         System.out.println(recommended_song.getName() + " by " + recommended_song.getArtistString());
 
                     }
+                    else if (message_id == 3)    {
+
+                        String song_id = rec_request.getSongId();
+                        String artist_id = rec_request.getArtistId();
+
+                        recommended_song = getRecommendationFromSongEndless(access_token, db, song_id, artist_id);
+    
+                        System.out.println("### Got Recommendation ###");
+                        System.out.println(recommended_song.getName() + " by " + recommended_song.getArtistString());
+
+                    }
                     else    {
                         System.out.println("Unknown message request type");
                     }
@@ -153,6 +164,20 @@ public class RecommenderApp2 {
 
         RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
         TrackObject recommended_song = RecommendationRanker.rank_euclidean(access_token, db, song_id, rec.getTracks());
+
+        return recommended_song;
+
+    }
+
+    public static TrackObject getRecommendationFromSongEndless(String access_token, SongAttributeDatabase db, String song_id, String artist_id) {
+
+        System.out.println("### Getting Recommendation (endless) for song_id: " + song_id + " ###");
+
+        String seed = SeedGenerator.generateSeed(access_token, db, song_id, artist_id);
+        System.out.println(seed);
+
+        RecommendationResponse rec = new RecommendationRequest().getSongRecommendation(access_token, seed);
+        TrackObject recommended_song = RecommendationRanker.rank_random(access_token, db, rec.getTracks());
 
         return recommended_song;
 

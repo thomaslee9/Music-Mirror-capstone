@@ -667,7 +667,7 @@ public class QueueController {
             System.out.println("# Artist_ID = " + artist_id + " #");
    
             /* send this to the second pi - serialize and send */
-            MessageRequest rec_request = new MessageRequest(1, song_id, artist_id, null);
+            MessageRequest rec_request = new MessageRequest(3, song_id, artist_id, null);
             String serialized_request = "";
             try {
                 serialized_request = MessageRequestSerializer.serialize(rec_request);
