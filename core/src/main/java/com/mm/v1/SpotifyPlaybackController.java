@@ -173,7 +173,7 @@ public class SpotifyPlaybackController {
         String input = song_name + " " + artist_name;
         String output = curr_name + " " + curr_artist;
 
-        Double similarity = SemanticMatch.computeCosineSimilarity(input, output);
+        Double similarity = SemanticMatch.computeCosineSimilarityOld(input, output);
 
         System.out.println("Similarity: " + similarity);
 

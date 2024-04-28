@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.io.*;
 import java.net.*;
+import java.lang.runtime.*;
 
 import org.javatuples.Pair;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -78,6 +79,14 @@ public class QueueController {
     @SendTo("/topic/public")
     public String sendRequest(@Payload Request userRequest) {
 
+        Runtime rt = java.lang.Runtime.getRuntime();
+        rt.gc();
+
+        long MEGABYTE = 1024L * 1024L;
+        long memory = rt.totalMemory() - rt.freeMemory();
+        System.out.println("##### CHECKING MEM #####");
+        System.out.println("Used memory in megabytes: " + (memory / MEGABYTE));
+
         // mark the current time
         this.current_time_millis = System.currentTimeMillis();
 
@@ -97,6 +106,7 @@ public class QueueController {
             // Add User to UserDict
             System.out.println("### Adding User ###   " + userRequest.getUserId());
             ud.addUser(userRequest.getUserId());
+
             Gson gson = new Gson();
             return gson.toJson(sq);
         }
@@ -474,6 +484,13 @@ public class QueueController {
         } catch (Exception e) {
             System.err.println("Async Spotify Queue Song FAILED");
         }
+
+        long MEGABYTE = 1024L * 1024L;
+        Runtime rt = java.lang.Runtime.getRuntime();
+        long memory = rt.totalMemory() - rt.freeMemory();
+        System.out.println("##### CHECKING MEM - After Async Spotify #####");
+        System.out.println("Used memory in bytes: " + memory);
+        System.out.println("Used memory in megabytes: " + (memory / MEGABYTE));
 
         // now we want to update the song dict to reflect the spotify resources
         if (result) {

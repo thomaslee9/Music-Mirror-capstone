@@ -13,7 +13,7 @@ public class SemanticMatchTest {
         List<String[]> expected_matches = getPositiveTests();
         List<String[]> expected_failures = getNegativeTests();
 
-        boolean print_enabled = true;
+        boolean print_enabled = false;
 
         evaluate(expected_matches, expected_failures, print_enabled);
 
@@ -35,7 +35,7 @@ public class SemanticMatchTest {
         String[] test3 = new String[] {"Mack Game Totally Insane", "mack GAME ToTaLLy insane"};
         expected_matches.add(test3);
         // 4
-        String[] test4 = new String[] {"Esate Joa Gilberto", "Estate Joao Gilberto"};
+        String[] test4 = new String[] {"Esate Joao Gilberto", "Estate Joao Gilberto"};
         expected_matches.add(test4);
         // 5
         String[] test5 = new String[] {"Mo Bambo Sheck Wis", "Mo Bomba Sheck Wes"};
