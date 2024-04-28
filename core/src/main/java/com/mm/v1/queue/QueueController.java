@@ -423,23 +423,6 @@ public class QueueController {
                     e.printStackTrace();
                 }
                
-            if (!already) {
-                already = true;
-            int port = 5001;
-            System.out.println("Trying to connect to port " + port);
-            try (Socket socket = new Socket(HOSTNAME, port);
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
-                    // write the serialized request to the output
-                    out.println(serialized_request);
-                    System.out.println("Sent to server: " + serialized_request);
-           
-            } catch (UnknownHostException ex) {
-                System.out.println("Server not found: " + ex.getMessage());
-            } catch (IOException ex) {
-                System.out.println("I/O error: " + ex.getMessage());
-            }
-        }
-
                 result_song_id = rec_response.getSongId(); // would set this to response from pi2
 
                 System.out.println("### Updating Song Queue ###");
@@ -601,15 +584,16 @@ public class QueueController {
 
                 /** ------ SEND CURRENT SONG TO OTHER PI --------- */
 
-                MessageRequest song_request = new MessageRequest(song_id, access_token);
-                String serialized_request = MessageRequestSerializer.serialize(song_request);
-
                 already = true;
                 int port = 5001;
                 System.out.println("Trying to connect to port " + port);
                 try (Socket socket = new Socket(HOSTNAME, port);
                     PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
                     // write the serialized request to the output
+
+                    MessageRequest song_request = new MessageRequest(song_id, access_token);
+                    String serialized_request = MessageRequestSerializer.serialize(song_request);
+
                     out.println(serialized_request);
                     System.out.println("Sent to server: " + serialized_request);
            
@@ -617,6 +601,8 @@ public class QueueController {
                     System.out.println("Server not found: " + ex.getMessage());
                 } catch (IOException ex) {
                     System.out.println("I/O error: " + ex.getMessage());
+                } catch (Exception e) {
+                    System.out.println("error: " + e.getMessage());
                 }
 
 

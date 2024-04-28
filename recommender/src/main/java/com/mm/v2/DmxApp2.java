@@ -83,8 +83,6 @@ public class DmxApp2 {
             
             while (true) {
                 
-                if (already) continue;
-
                 // accept message from client
                 try (Socket socket = serverSocket.accept();
                      BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -99,7 +97,7 @@ public class DmxApp2 {
                     String song_id = request.getSongId();
 
 
-                    already = true;
+                
 
                     // now separate control flow based on message_id
 
@@ -122,11 +120,11 @@ public class DmxApp2 {
                     SongAudioFeatures features = new TrackAudioFeaturesRequest().getSongAudioFeatures(access_token, song_id);
 
                     lightsActive = true;
-                    float acousticness = features.getAcousticness();
-                    float danceability = features.getDanceability();
-                    float valence = features.getValence();
-                    float energy = features.getEnergy();
-                    float tempo = features.getTempo();
+                    float acousticness = Float.parseFloat(features.getAcousticness());
+                    float danceability = Float.parseFloat(features.getDanceability());
+                    float valence = Float.parseFloat(features.getValence());
+                    float energy = Float.parseFloat(features.getEnergy());
+                    float tempo = Float.parseFloat(features.getTempo());
 
                     CompletableFuture.runAsync(() ->runLightsTest(acousticness, danceability, valence, energy, tempo));
                
