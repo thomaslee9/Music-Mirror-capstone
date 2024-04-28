@@ -11,6 +11,12 @@ import java.util.Random;
 import java.lang.Thread;
 import java.util.concurrent.CompletableFuture;
 
+import com.mm.v2.requests.GetTrackRequest;
+import com.mm.v2.requests.TrackAudioFeaturesRequest;
+import com.mm.v2.song.SongAudioFeatures;
+import com.mm.v2.song.TrackObject;
+
+
 import org.javatuples.Pair;
 
 import com.mm.v3.MessageRequest;
@@ -66,10 +72,7 @@ public class DmxApp2 {
         setColor(13, 128, 50, dmx, comPort);
         
         
-        if (comPort.openPort()) {
-            ;
-            } 
-        else {
+        if (!comPort.openPort()) {
             System.out.println("Failed to open port.");
         }
         
@@ -91,7 +94,11 @@ public class DmxApp2 {
                     // read the message from the first pi
                     String message = in.readLine();
                     System.out.println("Received from client: " + message);
-                    
+                    MessageRequest request = MessageRequestDeserializer.deserialize(message);
+                    String access_token = request.getAccessToken();
+                    String song_id = request.getSongId();
+
+
                     already = true;
 
                     // now separate control flow based on message_id
@@ -109,14 +116,19 @@ public class DmxApp2 {
                      
                                          // Run Lights
                                          
-                    if (type > 3) {
-                        type = 0;
-                    }
                     lightsActive = false;
-                    Thread.sleep(5);
+
+                    /** -----------GET SPOTIFY SONG ATTRIBUTES------ */
+                    SongAudioFeatures features = new TrackAudioFeaturesRequest().getSongAudioFeatures(access_token, song_id);
+
                     lightsActive = true;
-                    CompletableFuture.runAsync(() ->runLightsTest());
-                    type++;
+                    float acousticness = features.getAcousticness();
+                    float danceability = features.getDanceability();
+                    float valence = features.getValence();
+                    float energy = features.getEnergy();
+                    float tempo = features.getTempo();
+
+                    CompletableFuture.runAsync(() ->runLightsTest(acousticness, danceability, valence, energy, tempo));
                
                     
                 } catch (Exception e) {
@@ -129,14 +141,18 @@ public class DmxApp2 {
         }
     }
 
-    public static void runLightsTest() {
+    public static void runLightsTest(float acousticness, float danceability, float valence, float energy, float tempo) {
         // Local variables
         byte[] dmxPacket;
 
+        type = getType(acousticness, danceability, valence, energy);
+
+        timeDelay = Math.round(60 / tempo);
 
         while (lightsActive) {
             // Attempt to open the port
             chan = randColor(type);
+            intens = randIntens();
             setColor(chan, intens, timeDelay, dmx, comPort);
 
         }
@@ -166,7 +182,7 @@ public class DmxApp2 {
         }
     }
 
-    public static int getType(double acousticness, double danceability, double valence, double energy) {
+    public static int getType(float acousticness, float danceability, float valence, float energy) {
 
         if (acousticness >= 0.5) {
             return 3;

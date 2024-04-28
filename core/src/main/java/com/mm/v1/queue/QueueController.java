@@ -578,11 +578,13 @@ public class QueueController {
 
                 lock.lock();
 
+                String song_id;
+
                 try {
 
                     System.out.println("__SCHEDULER__: entering critical section");
                     // get the next song in the queue (the one we should queue)
-                    String song_id = getNextSong(P, prefetched);
+                    song_id = getNextSong(P, prefetched);
                     // then actually queue this song
                     boolean result = P.queueSong(song_id, this.first_song);
     
@@ -595,7 +597,29 @@ public class QueueController {
                 }
 
                 /** ------- END CRITICAL AREA ------- */
-   
+
+
+                /** ------ SEND CURRENT SONG TO OTHER PI --------- */
+
+                MessageRequest song_request = new MessageRequest(song_id, access_token);
+                String serialized_request = MessageRequestSerializer.serialize(song_request);
+
+                already = true;
+                int port = 5001;
+                System.out.println("Trying to connect to port " + port);
+                try (Socket socket = new Socket(HOSTNAME, port);
+                    PrintWriter out = new PrintWriter(socket.getOutputStream(), true)) {
+                    // write the serialized request to the output
+                    out.println(serialized_request);
+                    System.out.println("Sent to server: " + serialized_request);
+           
+                } catch (UnknownHostException ex) {
+                    System.out.println("Server not found: " + ex.getMessage());
+                } catch (IOException ex) {
+                    System.out.println("I/O error: " + ex.getMessage());
+                }
+
+
                 // process the next song recursively
                 processNextSong();
    

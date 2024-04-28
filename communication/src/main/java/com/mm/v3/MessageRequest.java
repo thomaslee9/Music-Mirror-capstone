@@ -33,6 +33,17 @@ public class MessageRequest implements Serializable {
 
     }
 
+    public MessageRequest(String song_id, String access_token)  {
+
+        this.message_id = 1;
+        this.access_token = access_token;
+        this.song_id = song_id;
+        this.artist_id = "";
+        this.session = null;
+
+    }
+
+
     public int getMessageId()   {
         return this.message_id;
     }
