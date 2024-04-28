@@ -68,7 +68,7 @@ public class SongQueueProcessor {
             String song_id = getNextSong();
             // then actually queue this song 
             SpotifyPlaybackController P = new SpotifyPlaybackController(this.access_token);
-            boolean result = P.queueSong(song_id);
+            boolean result = P.queueSong(song_id, true);
 
             sq.pop();
 

@@ -47,7 +47,7 @@ public class QueueController {
     private static final int DISLIKE_TO_LIKE = 3;
     private static final int LIKE_TO_DISLIKE = 4;
     // Connection
-    private static final int PORT = 5000;
+    private static final int PORT = 8000;
     //private static final String HOSTNAME = "192.168.1.185";
     private static final String HOSTNAME = "172.26.70.90";
     // Song Queue
@@ -374,7 +374,7 @@ public class QueueController {
 
                 if (this.first_song)    {
                     System.out.println("FIRST SONG: Queueing, and starting Scheduler");
-                    result = P.queueSong(result_song_id);
+                    result = P.queueSong(result_song_id, this.first_song);
                     this.first_song = false;
                     // and so now also initiate the queue scheduler
                     ps.processNextSong();
@@ -450,7 +450,7 @@ public class QueueController {
 
                 if (this.first_song)    {
                     System.out.println("FIRST SONG: Queueing, and starting Scheduler");
-                    result = P.queueSong(result_song_id);
+                    result = P.queueSong(result_song_id, this.first_song);
                     this.first_song = false;
                     // and so now also initiate the queue scheduler
                     ps.processNextSong();
@@ -485,7 +485,7 @@ public class QueueController {
 
                 if (this.first_song)    {
                     System.out.println("FIRST SONG: Queueing, and starting Scheduler");
-                    result = P.queueSong(result_song_id);
+                    result = P.queueSong(result_song_id, this.first_song);
                     this.first_song = false;
                     // and so now also initiate the queue scheduler
                     ps.processNextSong();
@@ -584,7 +584,7 @@ public class QueueController {
                     // get the next song in the queue (the one we should queue)
                     String song_id = getNextSong(P, prefetched);
                     // then actually queue this song
-                    boolean result = P.queueSong(song_id);
+                    boolean result = P.queueSong(song_id, this.first_song);
     
                     sq.pop();
 
