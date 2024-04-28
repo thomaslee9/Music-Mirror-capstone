@@ -17,9 +17,11 @@ public class SpotifyPlaybackController {
     private static Double search_threshold = 0.85;
     private static String device_id = "83e2221a51a366dbca4e16114644ef9a6ad165e9";
     private String access_token;
+    private boolean first_play;
 
     public SpotifyPlaybackController(String access_token)   {
         this.access_token = access_token;
+        this.first_play = true;
     }
 
     public String queueSong(String song_name, String artist_name) {
@@ -51,8 +53,12 @@ public class SpotifyPlaybackController {
         System.out.println("### Starting Playback ###");
 
         StartPlaybackRequest playback = new StartPlaybackRequest();
-        // playback.skipToNext(access_token);
+        if (this.first_play) {
+            playback.skipToNext(access_token);
+        }
         playback.startPlayback(access_token);
+        
+        this.first_play = false;
 
         return song_id;
 
@@ -68,8 +74,12 @@ public class SpotifyPlaybackController {
         System.out.println("### Starting Playback ###");
 
         StartPlaybackRequest playback = new StartPlaybackRequest();
-        // playback.skipToNext(access_token);
+        if (this.first_play)    {
+            playback.skipToNext(access_token);
+        }
         playback.startPlayback(access_token);
+
+        this.first_play = false;
 
         return true;
 
