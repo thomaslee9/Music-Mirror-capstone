@@ -11,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 
 public class SemanticMatch {
 
+    public static TransformersEmbeddingClient embeddingClient = new TransformersEmbeddingClient();
+
     public static void main(String[] args) {
 
         String input = "Come Together (Remastered) The Beatles Abbey Road";
@@ -58,8 +60,6 @@ public class SemanticMatch {
     }
 
     private static List<List<Double>> tokenizeByTransformer(String[] texts)  {
-
-        TransformersEmbeddingClient embeddingClient = new TransformersEmbeddingClient();
 
         embeddingClient.setResourceCacheDirectory("core/bin/transformer");
         // (optional) Set the tokenizer padding if you see an errors like:

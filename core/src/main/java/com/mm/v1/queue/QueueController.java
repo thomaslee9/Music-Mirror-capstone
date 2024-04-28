@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.mm.v3.MessageRequest;
 import com.mm.v3.MessageResponse;
@@ -151,7 +153,7 @@ public class QueueController {
         String song_name = userRequest.getSongName();
         String artist_name = userRequest.getSongArtist();
         CompletableFuture<Void> future = CompletableFuture
-                .runAsync(() -> asyncSpotify(this.access_token, song_name, artist_name, queue_id, messageType))
+                .runAsync(() -> asyncSpotify(this.access_token, song_name, artist_name, queue_id, userRequest.getUserId(), messageType))
                 .thenAccept(result -> {
                     Gson gson = new Gson();
                     String updatedQueue = gson.toJson(sq);
@@ -309,7 +311,7 @@ public class QueueController {
 
     // Async SPOTIFY WEB API BLOCK
     // Circumvents Spotify Web API round-trip time
-    public void asyncSpotify(String token, String song_name, String artist_name, String queue_id,
+    public void asyncSpotify(String token, String song_name, String artist_name, String queue_id, String user_id,
             MessageType messageType) {
 
         boolean result = false;
@@ -462,7 +464,17 @@ public class QueueController {
 
                 TrackObject result_song = P.getSong(song_name, artist_name);
 
-                /** TODO: if the result song wasn't found, remove from queue */
+                if (result_song == null)    {
+
+                    Song song = sd.getSongByQueueId(queue_id);
+
+                    sq.remove(song);
+                    sd.removeById(queue_id);
+                    ud.removeSong(user_id, song);
+
+                    return;
+
+                }
 
                 result_song_id = result_song.getId();
                 int result_song_duration = result_song.getDuration();
@@ -484,13 +496,6 @@ public class QueueController {
         } catch (Exception e) {
             System.err.println("Async Spotify Queue Song FAILED");
         }
-
-        long MEGABYTE = 1024L * 1024L;
-        Runtime rt = java.lang.Runtime.getRuntime();
-        long memory = rt.totalMemory() - rt.freeMemory();
-        System.out.println("##### CHECKING MEM - After Async Spotify #####");
-        System.out.println("Used memory in bytes: " + memory);
-        System.out.println("Used memory in megabytes: " + (memory / MEGABYTE));
 
         // now we want to update the song dict to reflect the spotify resources
         if (result) {
@@ -523,6 +528,7 @@ public class QueueController {
         private String access_token;
         private boolean first_song;
         private MessageResponse prefetched = null;
+        private final Lock lock = new ReentrantLock();
        
         private int buffer = 5000;
    
@@ -570,12 +576,23 @@ public class QueueController {
 
                 /** ------- BEGIN CRITICAL AREA ------- */
 
-                // get the next song in the queue (the one we should queue)
-                String song_id = getNextSong(P, prefetched);
-                // then actually queue this song
-                boolean result = P.queueSong(song_id);
-   
-                sq.pop();
+                lock.lock();
+
+                try {
+
+                    System.out.println("__SCHEDULER__: entering critical section");
+                    // get the next song in the queue (the one we should queue)
+                    String song_id = getNextSong(P, prefetched);
+                    // then actually queue this song
+                    boolean result = P.queueSong(song_id);
+    
+                    sq.pop();
+
+                }
+                finally {
+                    lock.unlock();
+                    System.out.println("__SCHEDULER__: leaving critical section");
+                }
 
                 /** ------- END CRITICAL AREA ------- */
    
@@ -703,13 +720,7 @@ public class QueueController {
 
             sd.add(newSong);
             sq.push(newSong);
-           
-            //Gson gson = new Gson();
-            //String updatedQueue = gson.toJson(sq);
-            //QueueController nqc = new QueueController();
-            //nqc.messagingTemplate.convertAndSend("/topic/public", updatedQueue);
-           
-   
+
             System.out.println("Added to SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
 
             return result_song_id;
