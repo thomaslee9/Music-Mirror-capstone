@@ -22,6 +22,7 @@ import com.mm.v3.MessageRequest;
 import com.mm.v3.MessageResponse;
 
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.io.*;
 import java.net.*;
@@ -53,8 +54,10 @@ public class QueueController {
     // Song Queue
     private static UserDict ud = new UserDict();
     private static SongQueue sq = new SongQueue();
+    //this is the song queue we remove from to keep the queue
+    private static SongQueue sq_remove = new SongQueue();
     private static SongDict sd = new SongDict();
-    private static SongQueueProcessor ps = new SongQueueProcessor(sq, HOSTNAME, PORT);
+    private static SongQueueProcessor ps = new SongQueueProcessor(sq_remove, HOSTNAME, PORT);
     private static int curQueueId = 0;
     // Raspberry Pi
     // private static PiClient pi;
@@ -75,6 +78,12 @@ public class QueueController {
     private long last_auth_time;
    
     private static boolean already = true;
+
+    // Inactive Users. All of them go on every 30 min originoally set to false since we have not removed their likes yet
+    // Set to true when their likes have been removed
+    private static ConcurrentHashMap<String, Boolean> inactiveUsers = new ConcurrentHashMap<String, Boolean>();
+    //Epoch time when the server was loaded
+    private static long serverStartTime = System.currentTimeMillis();
 
 
     @MessageMapping("/queue.sendRequest")
@@ -105,9 +114,13 @@ public class QueueController {
                 this.first_user = false;
             }
 
-            // Add User to UserDict
-            System.out.println("### Adding User ###   " + userRequest.getUserId());
-            ud.addUser(userRequest.getUserId());
+            if (!ud.containsUser(userRequest.getUserId())) {
+                // Add User to UserDict
+                System.out.println("### Adding User ###   " + userRequest.getUserId());
+                ud.addUser(userRequest.getUserId());
+            } else {
+                System.out.println("### Reconnecting User ###   " + userRequest.getUserId());
+            }
 
             Gson gson = new Gson();
             return gson.toJson(sq);
@@ -131,6 +144,7 @@ public class QueueController {
         sd.add(newSong);
         ud.addSong(userRequest.getUserId(), newSong);
         sq.push(newSong);
+        sq_remove.push(newSong);
         sq.printQueue();
         ud.printDict();
 
@@ -187,14 +201,17 @@ public class QueueController {
             SimpMessageHeaderAccessor accessor) {
         // Accept a new user
         accessor.getSessionAttributes().put("userID", userRequest.getUserId());
-        return userRequest;
+        Request newUser = new Request();
+        newUser.setType(MessageType.JOIN);
+        newUser.setSongName(serverStartTime + "");  // Send the server start time to the user
+        return newUser;
     }
 
     //UNCOMMENT THIS
-    @MessageMapping("/userInactive")
-    private void removeInactiveLikes(@Payload UserId userId) {
-        String userId2 = userId.getUserId();
-        System.out.println("User " + userId2 + " has been inactive for 15 minutes");
+    //@MessageMapping("/userInactive")
+    private void removeInactiveLikes(String userId2) {
+       // String userId2 = userId.getUserId();
+        System.out.println("User " + userId2 + " has been inactive for 30 minutes");
         // Remove inactive likes
         ConcurrentLinkedDeque<Song> userSongs = ud.getUserSongs(userId2);
         //System.out.println("here are the user songs: " + ud.getUserSongs(userId2).size());
@@ -205,6 +222,7 @@ public class QueueController {
                 if (numLikes < 0) {
                     String queueId = song.getQueueId();
                     sq.remove(song);
+                    sq_remove.remove(song);
                     sd.removeById(queueId);
                     ud.removeSong(userId2, song);
                     messagingTemplate.convertAndSend("/topic/remove", queueId);
@@ -214,12 +232,25 @@ public class QueueController {
                 sd.like(song.getQueueId(), 1);
             }
         }
+        //Show that likes have been removed
+        inactiveUsers.put(userId2, true);
     }
 
         //UNCOMMENT THIS
         @MessageMapping("/userActive")
         private void addInactiveLikes(@Payload UserId userId) {
         String userId2 = userId.getUserId();
+
+        //Check if user is inactive and if we have to add their likes back
+        if (!inactiveUsers.containsKey(userId2)) {
+            return;
+        }
+        //If user is active, remove them from the inactive list
+        //But thier likes have not been removed so we do not have to add back
+        if (!inactiveUsers.get(userId2)) {
+            inactiveUsers.remove(userId2);
+            return;
+        }
         System.out.println("User " + userId2 + " is reactivated");
         // Remove inactive likes
         for (Song song : ud.getUserSongs(userId2)) {
@@ -230,6 +261,7 @@ public class QueueController {
                 int numLikes = sd.dislike(queueId, 1);
                 if (numLikes < 0) {
                     sq.remove(song);
+                    sq_remove.remove(song);
                     sd.removeById(queueId);
                     ud.removeSong(userId2, song);
                     messagingTemplate.convertAndSend("/topic/remove", queueId);
@@ -239,6 +271,8 @@ public class QueueController {
                 sd.like(queueId, 1);
             }
         }
+        //remove from inactive list
+        inactiveUsers.remove(userId2);
     }
 
 
@@ -268,6 +302,7 @@ public class QueueController {
             // Check if Song has been vetoed
             if (numLikes < 0) {
                 sq.remove(song);
+                sq_remove.remove(song);
                 sd.removeById(queueId);
                 ud.removeSong(userId, song);
                 // Return vetoed Song ID
@@ -282,6 +317,7 @@ public class QueueController {
             // Check if Song has been vetoed
             if (numLikes < 0) {
                 sq.remove(song);
+                sq_remove.remove(song);
                 sd.removeById(queueId);
                 ud.removeSong(userId, song);
                 // Return vetoed Song ID
@@ -452,6 +488,7 @@ public class QueueController {
                     Song song = sd.getSongByQueueId(queue_id);
 
                     sq.remove(song);
+                    sq_remove.remove(song);
                     sd.removeById(queue_id);
                     ud.removeSong(user_id, song);
 
@@ -498,13 +535,29 @@ public class QueueController {
         this.access_token = access_token;
         ps.setAccessToken(access_token);
 
+        if (!this.first_authorization) {
+
+            //Set inactive users likes off
+            for (String userId : inactiveUsers.keySet()) {
+                //If their value is false then we have not removed their likes yet
+                if (!inactiveUsers.get(userId)) {
+                    removeInactiveLikes(userId);
+                }
+            }
+
+            //Add all users to inactive list
+            for (String userId : ud.getKeys()) {
+                inactiveUsers.put(userId, false);
+            }
+        }
+
     }
 
     /** nested song queue processing class - handles scheduling */
 
     public static class SongQueueProcessor {
 
-        private SongQueue sq;
+        private SongQueue sq_remove;
         private String hostname;
         private int port;
         private ScheduledExecutorService executor;
@@ -515,8 +568,8 @@ public class QueueController {
        
         private int buffer = 5000;
    
-        public SongQueueProcessor(SongQueue sq, String hostname, int port) {
-            this.sq = sq;
+        public SongQueueProcessor(SongQueue sq_remove, String hostname, int port) {
+            this.sq_remove = sq_remove;
             this.hostname = hostname;
             this.port = port;
             // can be single threaded to start
@@ -571,7 +624,7 @@ public class QueueController {
                     // then actually queue this song
                     boolean result = P.queueSong(song_id, this.first_song);
     
-                    sq.pop();
+                    sq_remove.pop();
 
                 }
                 finally {
@@ -619,7 +672,7 @@ public class QueueController {
             if (needRecommendation())   {
 
                 System.out.println("__SCHEDULER__: prefetching rec");
-                Song curr_song = this.sq.peek();
+                Song curr_song = this.sq_remove.peek();
                 prefetched = getEndlessQueueRecommendation(P, curr_song.getSongName(), curr_song.getSongArtist());
 
             }
@@ -628,7 +681,7 @@ public class QueueController {
 
         public boolean needRecommendation() {
 
-            Song next_song = this.sq.peekSecondElement();
+            Song next_song = this.sq_remove.peekSecondElement();
             if (next_song == null)  {
 
                 System.out.println("__SCHEDULER__: queue empty, need to get rec");
@@ -642,7 +695,7 @@ public class QueueController {
         public String getNextSong(SpotifyPlaybackController P, MessageResponse prefetched) {
    
             // peek at the next song in the queue
-            Song next_song = this.sq.peekSecondElement();
+            Song next_song = this.sq_remove.peekSecondElement();
             // if there are no songs next up in the queue, generate a dj rec from the prev
             if (next_song == null)  {
                 System.out.println("__SCHEDULER__: queue still empty, adding prefetched rec to queue");
@@ -655,7 +708,7 @@ public class QueueController {
    
         public long getCurrentSongDuration()    {
    
-            Song curr_song = this.sq.peek();
+            Song curr_song = this.sq_remove.peek();
             if (curr_song == null)  {
                 System.out.println("__SCHEDULER__: failed to get curr song duration from queue");
             }
@@ -730,6 +783,7 @@ public class QueueController {
 
             sd.add(newSong);
             sq.push(newSong);
+            sq_remove.push(newSong);
 
             System.out.println("Added to SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
 

@@ -34,35 +34,45 @@ var colors = [
 let timeoutId;
 
 //UNCOMMENT
-function resetTimeout() {
-    // Clear the existing timeout
-    if (timeoutId) {
-        clearTimeout(timeoutId);
+function sendActive() {
+    //Get the last user action
+    let lastAction = localStorage.getItem('lastAction');
+    //Get the last time the server set inactives as a number
+    let nextInactive = Number(localStorage.getItem('nextInactive'));
+    //Get the current time
+    let currentTime = new Date().getTime();
+
+    if (lastAction === null || nextInactive === null) {
+        console.warn("Last action or last inactive is null");
+        return;
     }
-    let active = localStorage.getItem('active');
-    // Set a new timeout
-    timeoutId = setTimeout(function() {
-        // The user has been inactive for 15 minutes
-        // Send a message to the server
-        if (active && stompClient && userId) {
-        stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
-        localStorage.setItem('active', 'false');
-        }
-    }, 30000 * 1000);  // 5 seconds
-    if (active === 'false' && stompClient && userId) {
+
+    //If currentTime is greater than the last time the server set inactives then make the new inactive 30 min later
+    while (currentTime > nextInactive) {
+        localStorage.setItem('nextInactive', nextInactive + 1800000);
+        nextInactive = nextInactive + 1800000;
+    }
+
+    let lastInactive = nextInactive - 1800000;
+
+    //if last action is less than last time server checked then send an active signal to the server
+    if (lastInactive > lastAction) {
+        //Send active signal to server
         stompClient.send("/app/userActive", {}, JSON.stringify({ 'userId': userId }));
-        localStorage.setItem('active', 'true');
     }
+
+    //Set last action to now
+    localStorage.setItem('lastAction', currentTime);
 }
 
 // Reset the timeout whenever the user interacts with the page
-window.addEventListener('mousemove', resetTimeout, true);
-window.addEventListener('mousedown', resetTimeout, true);
-window.addEventListener('keypress', resetTimeout, true);
-window.addEventListener('touchmove', resetTimeout, true);
+window.addEventListener('mousemove', sendActive, true);
+window.addEventListener('mousedown', sendActive, true);
+window.addEventListener('keydown', sendActive, true);
+window.addEventListener('touchmove', sendActive, true);
+window.addEventListener('touchstart', sendActive, true);
+window.addEventListener('scroll', sendActive, true);
 
-// Set the initial timeout
-resetTimeout();
 
 //Today
 // function refreshPage(event) {
@@ -239,6 +249,14 @@ function sendRequest(event) {
     var hasName = requestName.value.trim();
     var hasArtist = requestArtist.value.trim();
 
+    //Check if hasName and hasArtist have bad words in them
+    if (isBad(hasName) || isBad(hasArtist)) {
+        alert("User input contains bad words. Please try again");
+        requestName.value = '';
+        requestArtist.value = '';
+        return;
+    }
+
     if (hasName && hasArtist && stompClient) {
         var userRequest = {
             username: username,
@@ -302,6 +320,14 @@ function sendSongRecRequest(event) {
     var hasName = requestName.value.trim();
     var hasArtist = requestArtist.value.trim();
 
+    //Check if hasName and hasArtist have bad words in them
+    if (isBad(hasName) || isBad(hasArtist)) {
+        alert("User input contains bad words. Please try again");
+        requestName.value = '';
+        requestArtist.value = '';
+        return;
+    }
+
     if (hasName && hasArtist && stompClient) {
         var userRequest = {
             username: username,
@@ -319,6 +345,11 @@ function sendSongRecRequest(event) {
     }
 
     event.preventDefault();
+}
+
+function isBad(input) {
+    const badWordRegex = /badword/i;  // Simple pattern to match "badword" anywhere in the string
+    return badWordRegex.test(input);
 }
 
 
@@ -339,33 +370,21 @@ function applyScrollingEffect(element) {
 }
 
 
-// function applyScrollingEffect(element) {
-//     console.log("text: ", element.textContent);
-//     console.log("scrollWidth: ", element.scrollWidth);
-//     console.log("clientWidth: ", element.clientWidth);
-//     if (element.scrollWidth > element.clientWidth) {
-//         console.log("scrollingggggggggggg");
-//         const totalScroll = element.scrollWidth - element.clientWidth;
-//         // Duplicate the text
-//         element.textContent = element.textContent + ' ' + element.textContent;
-//         element.style.animation = `scroll ${totalScroll / 50}s linear infinite`;
-//         // Adjust the keyframes to scroll to 50% (because the text is now twice as long)
-//         document.styleSheets[0].insertRule(`@keyframes scroll { from { transform: translateX(0%); } to { transform: translateX(-50%); } }`, document.styleSheets[0].cssRules.length);
-//     } else {
-//         console.log("ELSEEE");
-//         element.style.animation = 'none';
-//     }
-// }
-
-
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
 
     //var messageElement = document.createElement('li');
 
     if (message.type === 'JOIN') {
-        // messageElement.classList.add('event-message');
-        // message.content = '-->' + message.username + ' joined the party';
+        let firstTime = Number(message.songName);
+        console.log("First Time: ", firstTime);
+        while (firstTime < Date.now()) {
+            firstTime += 1800000;
+        }
+        console.log("Next inactive: ", firstTime, " Current Time: ", Date.now());
+
+        localStorage.setItem('nextInactive', firstTime);
+        localStorage.setItem('lastAction', Date.now());
 
     } else if (message.type === 'LEAVE') {
         // messageElement.classList.add('event-message');
@@ -551,63 +570,8 @@ songRecButton.addEventListener('click', sendSongRecRequest, true)
 usernameForm.addEventListener('submit', connect, true)
 requestForm.addEventListener('submit', sendRequest, true)
 
-//UNCOMMENT
-//Today
-//document.addEventListener('DOMContentLoaded', refreshPage, true);
-
-
-//TODAY
-// window.addEventListener('unload', function() {
-//     console.log('refresh value: ', isRefresh);
-//     if (!isRefresh) {
-//         // This is a tab close, not a refresh
-//         localStorage.removeItem('username');
-//         localStorage.removeItem('userId');
-//         localStorage.removeItem('stompClient');
-//         let active = localStorage.getItem('active');
-//         if (active) {
-//             console.log("Sending user inactive");
-//             stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
-//         }
-//         this.localStorage.removeItem('active');
-//         console.log("User Logged Out");
-//     }
-// });
-
 window.addEventListener('beforeunload', function() {
    //stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
    localStorage.removeItem('userId');
 });
 
-// // Store a timestamp in localStorage every second
-// setInterval(function() {
-//     localStorage.setItem('lastTimestamp', Date.now());
-// }, 1000);
-
-// // When the page loads, check if the last timestamp is recent
-// window.addEventListener('load', function() {
-//     var lastTimestamp = localStorage.getItem('lastTimestamp');
-//     var currentTime = Date.now();
-
-//     // If the last timestamp is more than 5 seconds ago, it was probably a tab/window close
-//     if (currentTime - lastTimestamp > 5000) {
-//         localStorage.removeItem('username');
-//         localStorage.removeItem('userId');
-//         localStorage.removeItem('stompClient');
-//         let active = localStorage.getItem('active');
-//         if (active) {
-//             stompClient.send("/app/userInactive", {}, JSON.stringify({ 'userId': userId }));
-//         }
-//         this.localStorage.removeItem('active');
-//         console.log("User Logged Out");
-//     }
-//     refreshPage();
-// });
-
-//Today
-// window.addEventListener('beforeunload', function() {
-//     isRefresh = true;
-//     setTimeout(function() {
-//         isRefresh = false;
-//     }, 100);
-// });

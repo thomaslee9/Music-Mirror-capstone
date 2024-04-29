@@ -2,6 +2,7 @@ package com.mm.v1.queue;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,5 +44,13 @@ public class UserDict {
                 System.out.println("Song: " + song.getSongName());
             }
         }
+    }
+
+    public boolean containsUser(String userId) {
+        return map.containsKey(userId);
+    }
+
+    public Set<String> getKeys() {
+        return map.keySet();
     }
 }
