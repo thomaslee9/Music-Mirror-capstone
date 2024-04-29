@@ -244,6 +244,7 @@ function onError() {
 }
 
 function sendRequest(event) {
+    event.preventDefault();
     // Parse User Song Request
     console.log("____________________CURRENT TIME: " + formatTimeWithMilliseconds());
     var hasName = requestName.value.trim();
@@ -273,7 +274,6 @@ function sendRequest(event) {
         alert("Please enter both a song and artist name to add to the queue.");
     }
 
-    event.preventDefault();
 }
 
 
@@ -316,6 +316,7 @@ function formatTimeWithMilliseconds() {
 
 function sendSongRecRequest(event) {
     // Parse User Song Request
+    event.preventDefault();
     console.log("____________________CURRENT TIME: " + formatTimeWithMilliseconds());
     var hasName = requestName.value.trim();
     var hasArtist = requestArtist.value.trim();
@@ -343,8 +344,6 @@ function sendSongRecRequest(event) {
     } else {
         alert("Please enter both a song and artist name to get a song recommendation.");
     }
-
-    event.preventDefault();
 }
 
 function isBad(input) {

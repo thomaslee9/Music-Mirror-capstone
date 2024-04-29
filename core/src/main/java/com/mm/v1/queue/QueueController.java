@@ -21,6 +21,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.mm.v3.MessageRequest;
 import com.mm.v3.MessageResponse;
@@ -61,11 +62,9 @@ public class QueueController {
     //this is the song queue we remove from to keep the queue
     private static SongQueue sq_remove = new SongQueue();
     private static SongDict sd = new SongDict();
-    private static SongQueueProcessor ps = new SongQueueProcessor(sq_remove, HOSTNAME, PORT);
-    private static int curQueueId = 0;
+    private SongQueueProcessor ps = new SongQueueProcessor(sq_remove, HOSTNAME, PORT);
+    private static AtomicInteger curQueueId = new AtomicInteger(0);
     
-    private static final Logger logger = Logger.getLogger("Controller");
-
     // Raspberry Pi
     // private static PiClient pi;
     private static boolean pi_active = true;
@@ -100,29 +99,6 @@ public class QueueController {
         Runtime rt = java.lang.Runtime.getRuntime();
         rt.gc();
 
-        FileHandler fh;
-
-        try {
-            // This block configures the logger with handler and formatter
-            fh = new FileHandler("memory_usage.log");
-            logger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter();
-            fh.setFormatter(formatter);
-
-            long MEGABYTE = 1024L * 1024L;
-            long memory = rt.totalMemory() - rt.freeMemory();
-
-            // Set the logging level (optional, by default it logs INFO level and above)
-            logger.setLevel(java.util.logging.Level.INFO);
-
-            // Log some messages
-            logger.info(String.valueOf(memory / MEGABYTE));
-            logger.info(String.valueOf(ud.getKeys().size()));
-
-        } catch (SecurityException | IOException e) {
-            e.printStackTrace();
-        }
-
         // mark the current time
         this.current_time_millis = System.currentTimeMillis();
 
@@ -155,8 +131,8 @@ public class QueueController {
         // QUEUE MANAGER SECTION
 
         // Set queue ID
-        String queue_id = String.valueOf(curQueueId);
-        curQueueId += 1;
+        String queue_id = String.valueOf(curQueueId.get());
+        curQueueId.incrementAndGet();
 
         // for now, the song_id will be "" until the async spotify returns w resources
         String song_id = "";
@@ -172,6 +148,13 @@ public class QueueController {
         sq_remove.push(newSong);
         sq.printQueue();
         ud.printDict();
+        
+        if (messageType == MessageType.REQUEST) {
+            newSong.setRecComplete();
+        }
+        Gson gson1 = new Gson();
+        String updatedQueue1 = gson1.toJson(sq);
+        messagingTemplate.convertAndSend("/topic/public", updatedQueue1);
 
         // =============================================================
 
@@ -510,12 +493,17 @@ public class QueueController {
 
                 if (result_song == null)    {
 
+
                     Song song = sd.getSongByQueueId(queue_id);
 
                     sq.remove(song);
                     sq_remove.remove(song);
                     sd.removeById(queue_id);
                     ud.removeSong(user_id, song);
+                    
+                    Gson gson1 = new Gson();
+                    String updatedQueue1 = gson1.toJson(sq);
+                    messagingTemplate.convertAndSend("/topic/public", updatedQueue1);
 
                     return;
 
@@ -580,7 +568,7 @@ public class QueueController {
 
     /** nested song queue processing class - handles scheduling */
 
-    public static class SongQueueProcessor {
+    public class SongQueueProcessor {
 
         private SongQueue sq_remove;
         private String hostname;
@@ -663,6 +651,7 @@ public class QueueController {
                 /** ------ SEND CURRENT SONG TO OTHER PI --------- */
 
                 already = true;
+                /**
                 int port = 5001;
                 System.out.println("Trying to connect to port " + port);
                 try (Socket socket = new Socket(HOSTNAME, port);
@@ -682,8 +671,11 @@ public class QueueController {
                 } catch (Exception e) {
                     System.out.println("error: " + e.getMessage());
                 }
-
-
+                **/
+                
+                Gson gson1 = new Gson();
+                String updatedQueue1 = gson1.toJson(sq);
+                messagingTemplate.convertAndSend("/topic/public", updatedQueue1);
                 // process the next song recursively
                 processNextSong();
    
@@ -795,8 +787,8 @@ public class QueueController {
    
             System.out.println("### Adding to Song Queue ###");
 
-            String queue_id = String.valueOf(curQueueId);
-            curQueueId += 1;
+            String queue_id = String.valueOf(curQueueId.get());
+            curQueueId.incrementAndGet();
             String username = "MM";
             String user_id = "18500";
             boolean isRec = true;
@@ -809,6 +801,7 @@ public class QueueController {
             sd.add(newSong);
             sq.push(newSong);
             sq_remove.push(newSong);
+            
 
             System.out.println("Added to SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
 
