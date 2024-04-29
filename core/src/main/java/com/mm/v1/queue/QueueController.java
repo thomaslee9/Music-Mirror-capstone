@@ -3,6 +3,10 @@ package com.mm.v1.queue;
 import org.springframework.stereotype.Controller;
 import com.google.gson.Gson;
 
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
+
 import com.mm.v1.SpotifyPlaybackController;
 import com.mm.v1.communication.MessageRequestSerializer;
 import com.mm.v1.communication.MessageResponseDeserializer;
@@ -59,6 +63,9 @@ public class QueueController {
     private static SongDict sd = new SongDict();
     private static SongQueueProcessor ps = new SongQueueProcessor(sq_remove, HOSTNAME, PORT);
     private static int curQueueId = 0;
+    
+    private static final Logger logger = Logger.getLogger("Controller");
+
     // Raspberry Pi
     // private static PiClient pi;
     private static boolean pi_active = true;
@@ -93,10 +100,28 @@ public class QueueController {
         Runtime rt = java.lang.Runtime.getRuntime();
         rt.gc();
 
-        long MEGABYTE = 1024L * 1024L;
-        long memory = rt.totalMemory() - rt.freeMemory();
-        System.out.println("##### CHECKING MEM #####");
-        System.out.println("Used memory in megabytes: " + (memory / MEGABYTE));
+        FileHandler fh;
+
+        try {
+            // This block configures the logger with handler and formatter
+            fh = new FileHandler("memory_usage.log");
+            logger.addHandler(fh);
+            SimpleFormatter formatter = new SimpleFormatter();
+            fh.setFormatter(formatter);
+
+            long MEGABYTE = 1024L * 1024L;
+            long memory = rt.totalMemory() - rt.freeMemory();
+
+            // Set the logging level (optional, by default it logs INFO level and above)
+            logger.setLevel(java.util.logging.Level.INFO);
+
+            // Log some messages
+            logger.info(String.valueOf(memory / MEGABYTE));
+            logger.info(String.valueOf(ud.getKeys().size()));
+
+        } catch (SecurityException | IOException e) {
+            e.printStackTrace();
+        }
 
         // mark the current time
         this.current_time_millis = System.currentTimeMillis();
@@ -566,7 +591,7 @@ public class QueueController {
         private MessageResponse prefetched = null;
         private final Lock lock = new ReentrantLock();
        
-        private int buffer = 5000;
+        private int buffer = 12000;
    
         public SongQueueProcessor(SongQueue sq_remove, String hostname, int port) {
             this.sq_remove = sq_remove;

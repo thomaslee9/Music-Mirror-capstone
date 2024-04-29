@@ -196,7 +196,7 @@ public class SemanticMatchTest {
 
     private static double testMatch(String input, String output, boolean print_enabled)   {
 
-        double similarity = SemanticMatch.computeCosineSimilarity(input, output);
+        double similarity = SemanticMatch.computeCosineSimilarityOld(input, output);
 
         if (print_enabled)  {
 
