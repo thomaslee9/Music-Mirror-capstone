@@ -33,9 +33,11 @@ import java.util.Random;
 
 public class DmxTest {
 
+    public static int colorID = 0;
+
     public static void clearAll(DmxJava dmx, SerialPort comPort) {
         byte[] dmxPacket;
-        for (int i = 14; i <= 22; i++) {
+        for (int i = 14; i <= 17; i++) {
             dmx.setChannel(i, 0);
             dmxPacket = dmx.render();
             comPort.writeBytes(dmxPacket, dmxPacket.length);
@@ -64,9 +66,9 @@ public class DmxTest {
         clearAll(dmx, comPort);
     }
 
-    public static void setColorTime(int colorID, int intens, int time, DmxJava dmx, SerialPort comPort) {
-        // Reset all DMX channels
-        clearAll(dmx, comPort);
+    public static void setColorTime(int intens, int time, DmxJava dmx, SerialPort comPort) {
+
+        System.out.println("colorID: " + colorID);
 
         // Set Color based on colorID
         if (colorID == 0) {
@@ -122,6 +124,12 @@ public class DmxTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        // Reset all DMX channels
+        // clearAll(dmx, comPort);
+
+        System.out.println("Set the color");
+
     }
 
     public static int getType(float acousticness, float danceability, float valence, float energy) {
@@ -193,7 +201,7 @@ public class DmxTest {
             int chan = 14;
             int intens = 128;
             int type = 0;
-            int timeDelay = Math.round(60 / tempo) * 1000;
+            int timeDelay = Math.round((60 / tempo) * 1000);
             timeDelay = 1000;
             
             boolean lightsActive = true;
@@ -201,21 +209,17 @@ public class DmxTest {
             // Setup dimmer
             setChanTime(13, 128, 50, dmx, comPort);
 
-            int colorID = 0;
+            clearAll(dmx, comPort);
 
             while (lightsActive) {
+                colorID = 10;
 
-                if (colorID > 11) {
-                    colorID = 0;
-                }
-
-                setColorTime(colorID, intens, timeDelay, dmx, comPort);
-
-                colorID++;
+                setColorTime(intens, timeDelay, dmx, comPort);
 
                 // chan = randColor(type);
                 // intens = randIntens();
                 // setColor(chan, intens, timeDelay, dmx, comPort);
+
             }
 
         } else {
