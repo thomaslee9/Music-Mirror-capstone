@@ -43,4 +43,26 @@ public class Request {
     public String getUserId() {
         return userId;
     }
+
+
+    public void setUser(String username) {
+    this.username = username;
+    }
+
+    public void setSongName(String songName) {
+        this.songName = songName;
+    }
+
+    public void setSongArtist(String songArtist) {
+        this.songArtist = songArtist;
+    }
+
+    public void setMessageType(MessageType type) {
+        this.type = type;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
 }
