@@ -655,8 +655,7 @@ public class QueueController {
 
                 /** ------ SEND CURRENT SONG TO OTHER PI --------- */
 
-                already = true;
-                /**
+                //already = true;
                 int port = 5001;
                 System.out.println("Trying to connect to port " + port);
                 try (Socket socket = new Socket(HOSTNAME, port);
@@ -676,7 +675,6 @@ public class QueueController {
                 } catch (Exception e) {
                     System.out.println("error: " + e.getMessage());
                 }
-                **/
                 
                 Gson gson1 = new Gson();
                 String updatedQueue1 = gson1.toJson(sq);
