@@ -360,6 +360,7 @@ function onMessageReceived(payload) {
             let currSongCont = document.createElement('div');
             currSongCont.id = 'scrolling-container';
 
+            let curSongNameArtist = document.createElement('div');
             let currSongName = document.createElement('div');
             let currSongArtist = document.createElement('div');
             let currSongQueue = document.createElement('div');
@@ -374,8 +375,9 @@ function onMessageReceived(payload) {
             currSongQueue.id = 'queuedBy';
             currSongQueue.textContent = 'Queued by: ' + queuedBy;
 
-            currSongCont.appendChild(currSongName);
-            currSongCont.appendChild(currSongArtist);
+            curSongNameArtist.appendChild(currSongName);
+            curSongNameArtist.appendChild(currSongArtist);
+            currSongCont.appendChild(curSongNameArtist);
             currSongCont.appendChild(currSongQueue);
 
             currSongElement.id = "song_div_" + currQueueId;
