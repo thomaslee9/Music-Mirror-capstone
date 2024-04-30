@@ -41,13 +41,15 @@
     <div id="queue-page" class="hidden">
         <div class="queue-container">
             <div class="queue-header">
-                <button id="sessionRecButton" type="button"class="primary">Session Rec</button>
+                <img src="mm-pic1.png" alt="Music Mirror Logo" id="mm-pic"/>
                 <h2>MUSIC MIRROR</h2>
-                <button id="questionButton" type="button"class="primary">?</button>
             </div>
-
             <div class="connecting">
                 Connecting...
+            </div>
+            <div class="sessRec-question">
+                <button id="sessionRecButton" type="button"class="primary">Session Rec</button>
+                <button id="questionButton" type="button"class="fa-solid fa-question"></button>
             </div>
 
             <!-- Server Msg & Queue-->
@@ -60,11 +62,14 @@
             <!-- User Request Form -->
             <form id="requestForm" name="requestForm">
                 <div class="form-group">
-                    <div class="input-group clearfix">
+                    <div class="input-group clearfix" id="input-box">
+                        <div id="inputSong">Input Song</div>
                         <input type="text" id="reqName" placeholder="Input Song Name here..." autocomplete="off" class="form-control"/>
-                        <button id="songRecButton" type="button"class="primary">Song Rec</button>
                         <input type="text" id="reqArtist" placeholder="Input Song Artist here..." autocomplete="off" class="form-control"/>
-                        <button type="submit" class="primary">Queue</button>
+                        <div id="queueBtn-div">
+                            <button id="songRecButton" type="button"class="primary">Song Rec</button>
+                            <button type="submit" class="primary">Queue</button>
+                        </div>
                     </div>
                 </div>
             </form>

@@ -74,55 +74,6 @@ window.addEventListener('touchstart', sendActive, true);
 window.addEventListener('scroll', sendActive, true);
 
 
-//Today
-// function refreshPage(event) {
-//     console.log('refreshing page');
-//     event.preventDefault();
-//     var storedUsername = localStorage.getItem('username');
-//     var storedUserId = localStorage.getItem('userId');
-//     var storedStompClient = localStorage.getItem('stompClient');
-//     console.log("storedUsername: ", storedUsername);
-//     console.log("storedUserId: ", storedUserId);
-//     console.log("storedStompClient: ", storedStompClient);
-//     // If there is, use that information to log the user in
-//     if (storedUsername && storedUserId && storedStompClient) {
-//         console.warn("User already stored");
-//         username = storedUsername;
-//         userId = storedUserId;
-//         stompClient = storedStompClient;
-//         console.log("user stored");
-//         // Hide New User Page
-//         usernamePage.classList.add('hidden');
-//         // Reveal Queue Page
-//         queuePage.classList.remove('hidden');
-//         connectingElement.classList.add('hidden');
-
-//         // WebSocket
-//         if (!stompClient || !stompClient.connected) {
-//             console.log("StompClient not connected");
-//             var socket = new SockJS('/ws');
-//             stompClient = Stomp.over(socket);
-//             stompClient.subscribe('/topic/public', onMessageReceived);
-
-//             stompClient.subscribe('/topic/remove', onVetoReceived);
-//             // Send JOIN Request
-//             stompClient.send("/app/queue.addUser", {}, JSON.stringify({sender: username, type: 'JOIN'}));
-//             var userRequest = {
-//                 username: username,
-//                 songName: "NULL",
-//                 songArtist: "NULL",
-//                 type: 'CONNECT',
-//                 userId: userId
-//             };
-//             stompClient.send("/app/queue.sendRequest", {}, JSON.stringify(userRequest));  
-
-//         } else {
-//             console.log("StompClient already connected");
-//         }
-//     }
-// }
-
-
 function connect(event) {
     // Set username for New User
     username = document.querySelector('#name').value.trim();
@@ -353,9 +304,6 @@ function isBad(input) {
 
 
 function applyScrollingEffect(element) {
-    //console.log("text: ", element.textContent);
-    //console.log("scrollWidth: ", element.scrollWidth);
-    //console.log("clientWidth: ", element.clientWidth);
     if (element.scrollWidth > element.clientWidth) {
         //console.log("scrollingggggggggggg");
         const totalScroll = element.scrollWidth - element.clientWidth;
@@ -390,12 +338,6 @@ function onMessageReceived(payload) {
         // message.content = '-->' + message.username + ' left the party';
 
     } else {
-        //messageElement.classList.add('chat-message');
-
-        // Debugging Queue Readout
-        //console.log("Queue: ")
-        //console.log("NumSongs: ", String(message.queue.length))
-        //console.log(message);
 
         // Clear Old Queue
         queueArea.innerHTML = '';
@@ -405,31 +347,41 @@ function onMessageReceived(payload) {
             // Basic Queue Song View:
             let currQueueId = message.queue[i].queueId;
             let queuedBy = message.queue[i].isRec ? 'DJ Music Mirror' : message.queue[i].username;
-            let voteStr = message.queue[i].recComplete ? 'Vote: ' : '';
             //Song that is shown. SongDisplay is what is shown. Strings before make it
-            let regularSong = "'" + message.queue[i].songName + "' by " + message.queue[i].songArtist;
+            let regularSong =message.queue[i].songName;
+            let regularArtist = message.queue[i].songArtist;
             let sessionRec = "Session Recommendation based on your listening history";
             let songRec = "Song similar to " + regularSong;
             let sessionOrSongRec = message.queue[i].songName === "!SESSION_REC" ? sessionRec : songRec;
             let songDisplay = message.queue[i].recComplete ? regularSong : sessionOrSongRec;
+            let artistDisplay = message.queue[i].recComplete ? regularArtist : "";
 
             let currSongElement = document.createElement('li');
             let currSongCont = document.createElement('div');
             currSongCont.id = 'scrolling-container';
-            let currSongText = document.createElement('div');
-            currSongText.className = 'message-content';
-            currSongText.textContent = songDisplay + '    Queued by: ' + queuedBy;
-            currSongCont.appendChild(currSongText);
-            // var queueText = document.createElement('span');
-            // queueText.className = 'message-queuedBy';
-            // setTimeout(function() {
-            //     applyScrollingEffect(queueText);
-            // }, 0);
-            //queueText.textContent = 'Queued by: ' + queuedBy;
+
+            let currSongName = document.createElement('div');
+            let currSongArtist = document.createElement('div');
+            let currSongQueue = document.createElement('div');
+
+            currSongName.className = 'message-content';
+            currSongName.id = 'songName';
+            currSongName.textContent = songDisplay;
+            currSongArtist.className = 'message-content';
+            currSongArtist.id = 'songArtist';
+            currSongArtist.textContent = artistDisplay;
+            currSongQueue.className = 'message-content';
+            currSongQueue.id = 'queuedBy';
+            currSongQueue.textContent = 'Queued by: ' + queuedBy;
+
+            currSongCont.appendChild(currSongName);
+            currSongCont.appendChild(currSongArtist);
+            currSongCont.appendChild(currSongQueue);
+
             currSongElement.id = "song_div_" + currQueueId;
             currSongElement.style['background-color'] = message.queue[i].isRec ? DjColor : getAvatarColor(message.queue[i].userId);
             currSongElement.appendChild(currSongCont);
-            //currSongElement.appendChild(queueText);
+
             let likeButtonColor = 'white';
             let dislikeButtonColor = 'white';
             //console.log("color map: ", message.queue[i].colorMap);
@@ -449,7 +401,7 @@ function onMessageReceived(payload) {
                 var likeButton = document.createElement('button');
                 likeButton.id = "like_button_" + currQueueId;
                 likeButton.style['background-color'] = likeButtonColor;
-                likeButton.className= "fa-solid fa-heart";
+                likeButton.className= "fa-solid fa-thumbs-up";
                 likeButton.onclick = function() {
                     sendLike(currQueueId, 1); // Update backend with new Like
                 };
@@ -470,7 +422,9 @@ function onMessageReceived(payload) {
             currSongElement.appendChild(btnGroup);
             queueArea.appendChild(currSongElement);
             setTimeout(function() {
-                applyScrollingEffect(currSongText);
+                applyScrollingEffect(currSongName);
+                applyScrollingEffect(currSongArtist);
+                applyScrollingEffect(currSongQueue);
             }, 0);
            
         }
