@@ -33,15 +33,17 @@ import java.util.Random;
 
 public class DmxTest {
 
-    public static int colorID = 0;
+    public static int colorID = 2;
 
     public static void clearAll(DmxJava dmx, SerialPort comPort) {
         byte[] dmxPacket;
         for (int i = 14; i <= 17; i++) {
             dmx.setChannel(i, 0);
-            dmxPacket = dmx.render();
-            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            // dmxPacket = dmx.render();
+            // comPort.writeBytes(dmxPacket, dmxPacket.length);
         }
+        dmxPacket = dmx.render();
+        comPort.writeBytes(dmxPacket, dmxPacket.length);
     }
 
     public static void setChan(int chan, int intens, DmxJava dmx, SerialPort comPort) {
@@ -68,7 +70,7 @@ public class DmxTest {
 
     public static void setColorTime(int intens, int time, DmxJava dmx, SerialPort comPort) {
 
-        System.out.println("colorID: " + colorID);
+        byte[] dmxPacket;
 
         // Set Color based on colorID
         if (colorID == 0) {
@@ -76,46 +78,79 @@ public class DmxTest {
             clearAll(dmx, comPort);
         } else if (colorID == 1) {
             // White
-            setChan(14, intens, dmx, comPort);
-            setChan(15, intens, dmx, comPort);
-            setChan(16, intens, dmx, comPort);
-            setChan(17, intens, dmx, comPort);
+            dmx.setChannel(14, intens);
+            dmx.setChannel(15, intens);
+            dmx.setChannel(16, intens);
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("WHITE: " + colorID);
         } else if (colorID == 2) {
             // Red
-            setChan(14, intens, dmx, comPort);
+            dmx.setChannel(14, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("RED: " + colorID);
         } else if (colorID == 3) {
             // Orange
-            setChan(14, intens, dmx, comPort);
-            setChan(17, intens, dmx, comPort);
+            dmx.setChannel(14, intens);
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("ORANGE: " + colorID);
         } else if (colorID == 4) {
             // Amber
-            setChan(17, intens, dmx, comPort);
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("AMBER: " + colorID);
         } else if (colorID == 5) {
             // Yellow
-            setChan(14, intens, dmx, comPort);
-            setChan(15, intens, dmx, comPort);
+            dmx.setChannel(14, intens);
+            dmx.setChannel(15, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("YELLOW: " + colorID);
         } else if (colorID == 6) {
             // Lime
-            setChan(15, intens, dmx, comPort);
-            setChan(17, intens, dmx, comPort);
+            dmx.setChannel(15, intens);
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("LIME: " + colorID);
         } else if (colorID == 7) {
             // Green
-            setChan(15, intens, dmx, comPort);
+            dmx.setChannel(15, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("GREEN: " + colorID);
         } else if (colorID == 8) {
             // Cyan
-            setChan(15, intens, dmx, comPort);
-            setChan(16, intens, dmx, comPort);
+            dmx.setChannel(15, intens);
+            dmx.setChannel(16, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("CYAN: " + colorID);
         } else if (colorID == 9) {
             // Blue
-            setChan(16, intens, dmx, comPort);
+            dmx.setChannel(16, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("BLUE: " + colorID);
         } else if (colorID == 10) {
             // Purple
-            setChan(14, intens, dmx, comPort);
-            setChan(16, intens, dmx, comPort);
+            dmx.setChannel(14, intens);
+            dmx.setChannel(16, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("PURPLE: " + colorID);
         } else if (colorID == 11) {
             // Blue in Red
-            setChan(16, intens, dmx, comPort);
-            setChan(17, intens, dmx, comPort);
+            dmx.setChannel(16, intens);
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("BLUinRED: " + colorID);
         }
 
         // Add Song BPM Delay
@@ -127,9 +162,6 @@ public class DmxTest {
 
         // Reset all DMX channels
         // clearAll(dmx, comPort);
-
-        System.out.println("Set the color");
-
     }
 
     public static int getType(float acousticness, float danceability, float valence, float energy) {
@@ -199,10 +231,11 @@ public class DmxTest {
             float tempo = 122;
 
             int chan = 14;
-            int intens = 128;
+            int intens = 255;
             int type = 0;
-            int timeDelay = Math.round((60 / tempo) * 1000);
-            timeDelay = 1000;
+            // timeDelay with 10ms clear channels offset
+            int timeDelay = Math.round((60 / tempo) * 1000) - 10;
+            timeDelay = 500;
             
             boolean lightsActive = true;
 
@@ -212,14 +245,16 @@ public class DmxTest {
             clearAll(dmx, comPort);
 
             while (lightsActive) {
-                colorID = 10;
 
-                setColorTime(intens, timeDelay, dmx, comPort);
+                for (int j = 1; j <= 11; j++) {
+                    // Set Color
+                    colorID = j;
+                    setColorTime(intens, timeDelay, dmx, comPort);
 
-                // chan = randColor(type);
-                // intens = randIntens();
-                // setColor(chan, intens, timeDelay, dmx, comPort);
-
+                    // Clear Color
+                    colorID = 0;
+                    setColorTime(intens, 10, dmx, comPort);
+                }
             }
 
         } else {
