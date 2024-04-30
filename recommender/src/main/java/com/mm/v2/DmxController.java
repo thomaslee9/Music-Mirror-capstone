@@ -1,29 +1,59 @@
 package com.mm.v2;
 
+import com.fazecast.jSerialComm.SerialPort;
 import java.util.Random;
 
-import com.fazecast.jSerialComm.SerialPort;
+// 10-CH @ d 13
 
 // Channel Mapping for SlimPAR Pro Q USB Lighting Fixture
-// 13 - setup
+// 13 - dimmer setup
 // 14 - red
 // 15 - green
 // 16 - blue
-// 17 - pink white
-// 18 - red 2
+// 17 - amber
+// 18 - color macros
 // 19 - strobe
-// 20 - 
+// 20 - sound-active
 // 21 - auto rotate colors
-// 22 - 
+// 22 - dimmer speed mode
+
+// Color Mapping                    ID:
+// Off - NONE                       0
+// White - 14 & 15 & 16 & 17        1
+// Red - 14                         2
+// Orange - 14 & 17                 3
+// Amber - 17                       4
+// Yellow - 14 & 15                 5
+// Lime - 15 & 17                   6
+// Green - 15                       7
+// Cyan - 15 & 16                   8
+// Blue - 16                        9
+// Purple - 14 & 16                 10
+// Blue in Red - 16 & 17            11
 
 public class DmxController {
 
-    public static void setColor(int chan, int intens, int time, DmxJava dmx, SerialPort comPort) {
-        // Transmit serialized DMX frame to lighting fixture
-        dmx.setChannel(chan, intens);
+    // public static int colorID = 2;
+
+    public static void clearAll(DmxJava dmx, SerialPort comPort) {
         byte[] dmxPacket;
+        for (int i = 14; i <= 17; i++) {
+            dmx.setChannel(i, 0);
+        }
         dmxPacket = dmx.render();
         comPort.writeBytes(dmxPacket, dmxPacket.length);
+    }
+
+    public static void setChan(int chan, int intens, DmxJava dmx, SerialPort comPort) {
+        byte[] dmxPacket;
+        dmx.setChannel(chan, intens);
+        dmxPacket = dmx.render();
+        comPort.writeBytes(dmxPacket, dmxPacket.length);
+    }
+
+    public static void setChanTime(int chan, int intens, int time, DmxJava dmx, SerialPort comPort) {
+        // Transmit serialized DMX frame to lighting fixture
+        setChan(chan, intens, dmx, comPort);
 
         // Song BPM Delay
         try {
@@ -33,48 +63,176 @@ public class DmxController {
         }
 
         // Clear DMX channels
-        for (int i = 14; i <= 22; i++) {
-            dmx.setChannel(i, 0);
+        clearAll(dmx, comPort);
+    }
+
+    public static void setColorTime(int colorID, int intens, int time, DmxJava dmx, SerialPort comPort) {
+
+        byte[] dmxPacket;
+
+        // Set Color based on colorID
+        if (colorID == 0) {
+            // Off
+            clearAll(dmx, comPort);
+        } else if (colorID == 1) {
+            // White
+            dmx.setChannel(14, intens);
+            dmx.setChannel(15, intens);
+            dmx.setChannel(16, intens);
+            dmx.setChannel(17, intens);
             dmxPacket = dmx.render();
             comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("WHITE: " + colorID);
+        } else if (colorID == 2) {
+            // Red
+            dmx.setChannel(14, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("RED: " + colorID);
+        } else if (colorID == 3) {
+            // Orange
+            dmx.setChannel(14, intens);
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("ORANGE: " + colorID);
+        } else if (colorID == 4) {
+            // Amber
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("AMBER: " + colorID);
+        } else if (colorID == 5) {
+            // Yellow
+            dmx.setChannel(14, intens);
+            dmx.setChannel(15, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("YELLOW: " + colorID);
+        } else if (colorID == 6) {
+            // Lime
+            dmx.setChannel(15, intens);
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("LIME: " + colorID);
+        } else if (colorID == 7) {
+            // Green
+            dmx.setChannel(15, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("GREEN: " + colorID);
+        } else if (colorID == 8) {
+            // Cyan
+            dmx.setChannel(15, intens);
+            dmx.setChannel(16, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("CYAN: " + colorID);
+        } else if (colorID == 9) {
+            // Blue
+            dmx.setChannel(16, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("BLUE: " + colorID);
+        } else if (colorID == 10) {
+            // Purple
+            dmx.setChannel(14, intens);
+            dmx.setChannel(16, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("PURPLE: " + colorID);
+        } else if (colorID == 11) {
+            // Blue in Red
+            dmx.setChannel(16, intens);
+            dmx.setChannel(17, intens);
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
+            System.out.println("BLUinRED: " + colorID);
         }
+
+        // Add Song BPM Delay
+        try {
+            Thread.sleep(time); // delay
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // Reset all DMX channels
+        // clearAll(dmx, comPort);
     }
 
-    public static int getType(double acousticness, double danceability, double valence, double energy) {
+    public static int getType(float acousticness, float danceability, float valence, float energy) {
+        // Types:
+        //      0 - Full Range
+        //      1 - Acoustic / Warm
+        //      2 - Dance / Disco
+        //      3 - Positive / Upbeat
+        //      4 - Sad / Moody
+        //      5 - Energetic
 
-        if (acousticness >= 0.5) {
-            return 3;
-        } else if (danceability >= 0.6 && energy >= 0.6 ) {
-            return 0;
-        } else if (valence >= 0.6) {
+        if (acousticness >= 0.6 || (acousticness > danceability && acousticness > valence && acousticness > energy)) {
             return 1;
-        } else {
+        } else if (danceability >= 0.7 || (danceability > acousticness && danceability > valence && danceability > energy)) {
             return 2;
+        } else if (valence >= 0.7 && energy > 0.5) {
+            return 3;
+        } else if (valence <= 0.3 && energy < 0.5) {
+            return 4;
+        } else if (energy >= 0.7) {
+            return 5;
+        } else {
+            return 0;
         }
     }
 
-    public static int randColor(int type) {
+    public static int randColorID(int type) {
+        // Types:
+        //      0 - Full Range
+        //      1 - Acoustic / Warm
+        //      2 - Dance / Disco
+        //      3 - Positive / Upbeat
+        //      4 - Sad / Moody
+        //      5 - Energetic
+
         Random rand = new Random();
+
         // Generate color based on Song Type
         if (type == 0) {
             // Full Range
-            return rand.nextInt(5) + 14;
+            return rand.nextInt(10) + 1;
         } else if (type == 1) {
-            // RGB Low Range
-            return rand.nextInt(2) + 14;
+            // Acoustic / Warm
+            int[] colors = new int[]{ 1, 2, 3, 4, 5 };
+            int index = rand.nextInt(4);
+            return colors[index];
+        } else if (type == 2) {
+            // Dance / Disco
+            int[] colors = new int[]{ 1, 2, 5, 7, 8, 10 };
+            int index = rand.nextInt(5);
+            return colors[index];
         } else if (type == 3) {
-            // Acoustic Range
-            return rand.nextInt(2) + 15;
+            // Positive / Upbeat
+            int[] colors = new int[]{ 3, 5, 6, 8, 10 };
+            int index = rand.nextInt(4);
+            return colors[index];
+        } else if (type == 4) {
+            // Sad / Moody
+            int[] colors = new int[]{ 1, 7, 8, 9, 10, 11 };
+            int index = rand.nextInt(5);
+            return colors[index];
         } else {
-            // Blue Pink/White Red 2 Strobe Hi Range
-            return rand.nextInt(3) + 16;
+            // Energetic
+            int[] colors = new int[]{ 2, 3, 4, 7, 8, 9 };
+            int index = rand.nextInt(5);
+            return colors[index];
         } 
     }
 
     public static int randIntens() {
         Random rand = new Random();
         // Generate random intensity within safe range
-        return rand.nextInt(225) + 50;
+        return rand.nextInt(225) + 80;
     }
 
     public static void main(String[] args) {
@@ -84,7 +242,7 @@ public class DmxController {
         byte[] dmxPacket;
 
         // Specify your COM port name
-        String portName = "/dev/cu.usbserial-EN379386"; // Adjust this to match your actual port name
+        String portName = "/dev/cu.usbserial-EN437965"; // Adjust this to match your actual port name
 
         // Get the serial port
         SerialPort comPort = SerialPort.getCommPort(portName);
@@ -95,38 +253,44 @@ public class DmxController {
         if (comPort.openPort()) {
             System.out.println("Port opened successfully.");
 
-            // ======== DMX Controller ======== 
+            // Test Pattern 
+            dmxPacket = dmx.render();
+            comPort.writeBytes(dmxPacket, dmxPacket.length);
 
-            // Initialize randomizer
-            Random rand = new Random();
+            // Spotify Song Attributes
+            float acousticness = 0;
+            float danceability = 0;
+            float valence = 0;
+            float energy = 0;
+            float tempo = 122;
+
+            int colorID = 1;
+            int intens = 255;
+            int type = 0;
+
+            // timeDelay with 10ms clear channels offset
+            int timeDelay = Math.round((60 / tempo) * 1000) - 10;
+
+            // Manually set timeDelay
+            timeDelay = 490;
+            
+            boolean lightsActive = true;
 
             // Setup dimmer
-            setColor(13, 128, 50, dmx, comPort);
+            setChanTime(13, 128, 50, dmx, comPort);
+            clearAll(dmx, comPort);
 
-            // Determine Song Type
-            double acousticness = 0.0;
-            double danceability = 0.0;
-            double valence = 0.0;
-            double energy = 0.0;
-            int type = getType(acousticness, danceability, valence, energy);
+            // Set type based on Song Attributes
+            type = getType(acousticness, danceability, valence, energy);
 
-            // Determine Song BPM
-            int bpm = 122;
-            int timeUnit = (60 / bpm) * 100;
+            while (lightsActive) {
+                // Set colorID based on Song type
+                colorID = randColorID(type);
+                setColorTime(colorID, intens, timeDelay, dmx, comPort);
 
-            // Compute Channel & Intensity for Next DMX Frame
-            int chan = randColor(type);
-            int intens = randIntens();
-            setColor(chan, intens, timeUnit, dmx, comPort);
-
-            while (true) {
-                // Compute Channel & Intensity for Next DMX Frame
-                chan = randColor(type);
-                intens = randIntens();
-                setColor(chan, intens, timeUnit, dmx, comPort);
+                // Clear color
+                setColorTime(0, intens, 10, dmx, comPort);
             }
-        
-            // System.out.println("Finished sequence.");
 
         } else {
             System.out.println("Failed to open port.");
