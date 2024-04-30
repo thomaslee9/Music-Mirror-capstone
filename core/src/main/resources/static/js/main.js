@@ -348,7 +348,7 @@ function onMessageReceived(payload) {
             let currQueueId = message.queue[i].queueId;
             let queuedBy = message.queue[i].isRec ? 'DJ Music Mirror' : message.queue[i].username;
             //Song that is shown. SongDisplay is what is shown. Strings before make it
-            let regularSong =message.queue[i].songName;
+            let regularSong = message.queue[i].songName;
             let regularArtist = message.queue[i].songArtist;
             let sessionRec = "Session Recommendation based on your listening history";
             let songRec = "Song similar to " + regularSong;
@@ -419,6 +419,19 @@ function onMessageReceived(payload) {
 
             }
             // Add Song Element to Queue Area
+            if (message.queue[i].isPlaying) {
+                let flexContainer = document.createElement('div');
+                flexContainer.style.display = 'flex';
+                flexContainer.style.flexDirection = 'row';
+                flexContainer.style.alignItems = 'center';
+                let songPlaying = document.createElement('i');
+                songPlaying.className = 'fa-solid fa-music';
+                songPlaying.id = 'color-changing-div';
+                songPlaying.style.marginRight = '10px';
+                songPlaying.style.fontSize = '35px';
+                flexContainer.appendChild(songPlaying);
+                currSongElement.appendChild(flexContainer);
+            }
             currSongElement.appendChild(btnGroup);
             queueArea.appendChild(currSongElement);
             setTimeout(function() {
@@ -435,7 +448,25 @@ function onMessageReceived(payload) {
     queueArea.scrollTop = queueArea.scrollHeight;
 }
 
+function changeColor() {
+  const colors = ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet']; // Define an array of colors
+  let currentColorIndex = 0; // Start with the first color
 
+  // Function to update the color
+  const updateColor = () => {
+    const div = document.getElementById('color-changing-div'); // Get the div element
+    if (div === null) {
+        return;
+    }
+    div.style.color = colors[currentColorIndex]; // Update the background color
+    currentColorIndex = (currentColorIndex + 1) % colors.length; // Move to the next color, loop back after the last
+  };
+
+  setInterval(updateColor, 500); // Change color every 2000 milliseconds (.5 seconds)
+}
+
+// Start the color change once the window loads
+window.onload = changeColor;
 
 function onVetoReceived(payload) {
     // var queueId = JSON.parse(payload.body);

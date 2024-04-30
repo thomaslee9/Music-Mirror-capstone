@@ -11,6 +11,7 @@ public class Song {
     private String userId;
     private boolean isRec;
     private boolean recComplete;
+    private boolean isPlaying;
     private ConcurrentHashMap<String, String> colorMap;
     private int likeScore;
     private int duration_ms;
@@ -28,10 +29,19 @@ public class Song {
         this.likeScore = 1;
         this.isRec = isRec;
         this.recComplete = false;
+        this.isPlaying = false;
     }
 
     public void setRecComplete() {
         this.recComplete = true;
+    }
+
+    public void setPlaying() {
+        this.isPlaying = true;
+    }
+
+    public void setNotPlaying() {
+        this.isPlaying = false;
     }
 
     public void setDuration(int duration_ms)    {
@@ -80,7 +90,7 @@ public class Song {
     @Override
     public String toString() {
         return "Song { Title: '" + songName + "' queueId: '" + queueId + "' songId: '" + songId + "' username: '"
-                + username + "' colorMap: '" + colorMap + "' isRec: '" + isRec + "' recComplete: '" + recComplete + "' }";
+                + username + "' colorMap: '" + colorMap + "' isRec: '" + isRec + "' recComplete: '" + recComplete + "' isPlaying: '" + isPlaying + "'}";
     }
 
     public void updateSongId(String songId) {

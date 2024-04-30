@@ -180,13 +180,11 @@ public class QueueController {
                     Gson gson = new Gson();
                     String updatedQueue = gson.toJson(sq);
                     // SEND updated queue
-                    if (messageType != MessageType.REQUEST) {
-                        System.out.println("FINISHED ASYNC FUNCTION");
-                        newSong.setRecComplete();
-                        gson = new Gson();
-                        updatedQueue = gson.toJson(sq);
-                        messagingTemplate.convertAndSend("/topic/public", updatedQueue);
-                    }
+                    System.out.println("FINISHED ASYNC FUNCTION");
+                    newSong.setRecComplete();
+                    gson = new Gson();
+                    updatedQueue = gson.toJson(sq);
+                    messagingTemplate.convertAndSend("/topic/public", updatedQueue);
                 });
        
         // =============================================================
@@ -418,6 +416,8 @@ public class QueueController {
 
                 if (this.first_song)    {
                     System.out.println("FIRST SONG: Queueing, and starting Scheduler");
+                    Song curSong = sd.getSongByQueueId(queue_id);
+                    curSong.setPlaying();
                     result = P.queueSong(result_song_id, this.first_song);
                     this.first_song = false;
                     // and so now also initiate the queue scheduler
@@ -476,6 +476,8 @@ public class QueueController {
                 System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
 
                 if (this.first_song)    {
+                    Song curSong = sd.getSongByQueueId(queue_id);
+                    curSong.setPlaying();
                     System.out.println("FIRST SONG: Queueing, and starting Scheduler");
                     result = P.queueSong(result_song_id, this.first_song);
                     this.first_song = false;
@@ -518,6 +520,8 @@ public class QueueController {
 
                 if (this.first_song)    {
                     System.out.println("FIRST SONG: Queueing, and starting Scheduler");
+                    Song curSong = sd.getSongByQueueId(queue_id);
+                    curSong.setPlaying();
                     result = P.queueSong(result_song_id, this.first_song);
                     this.first_song = false;
                     // and so now also initiate the queue scheduler
@@ -636,9 +640,10 @@ public class QueueController {
                     song_id = getNextSong(P, prefetched);
                     // then actually queue this song
                     boolean result = P.queueSong(song_id, this.first_song);
-    
-                    sq_remove.pop();
 
+                    sq_remove.peek().setNotPlaying();
+                    sq_remove.pop();
+                    sq_remove.peek().setPlaying();
                 }
                 finally {
                     lock.unlock();
