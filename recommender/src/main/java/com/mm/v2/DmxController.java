@@ -3,6 +3,10 @@ package com.mm.v2;
 import com.fazecast.jSerialComm.SerialPort;
 import java.util.Random;
 
+import org.apache.commons.lang3.ArrayUtils;
+
+import java.util.*;
+
 // 10-CH @ d 13
 
 // Channel Mapping for SlimPAR Pro Q USB Lighting Fixture
@@ -66,7 +70,7 @@ public class DmxController {
         clearAll(dmx, comPort);
     }
 
-    public static void setColorTime(int colorID, int intens, int time, DmxJava dmx, SerialPort comPort) {
+    public static void setColorTime(int colorID, int intens, int timeDelay, DmxJava dmx, SerialPort comPort) {
 
         byte[] dmxPacket;
 
@@ -153,7 +157,7 @@ public class DmxController {
 
         // Add Song BPM Delay
         try {
-            Thread.sleep(time); // delay
+            Thread.sleep(timeDelay); // delay
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -186,7 +190,17 @@ public class DmxController {
         }
     }
 
-    public static int randColorID(int type) {
+    public static boolean checkList(int[] array, int target) {
+        boolean result = false;
+        for (int curr: array) {
+            if (curr == target) {
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    public static int randColorID(int type, int prevColorID) {
         // Types:
         //      0 - Full Range
         //      1 - Acoustic / Warm
@@ -200,30 +214,62 @@ public class DmxController {
         // Generate color based on Song Type
         if (type == 0) {
             // Full Range
-            return rand.nextInt(10) + 1;
+            int[] colors = new int[]{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 } ;
+            if (checkList(colors, prevColorID)) {
+                colors = ArrayUtils.removeElement(colors, prevColorID);
+                int index = rand.nextInt(9);
+                return colors[index];
+            }
+            int index = rand.nextInt(10);
+            return colors[index];
         } else if (type == 1) {
             // Acoustic / Warm
             int[] colors = new int[]{ 1, 2, 3, 4, 5 };
+            if (checkList(colors, prevColorID)) {
+                colors = ArrayUtils.removeElement(colors, prevColorID);
+                int index = rand.nextInt(3);
+                return colors[index];
+            }
             int index = rand.nextInt(4);
             return colors[index];
         } else if (type == 2) {
             // Dance / Disco
             int[] colors = new int[]{ 1, 2, 5, 7, 8, 10 };
+            if (checkList(colors, prevColorID)) {
+                colors = ArrayUtils.removeElement(colors, prevColorID);
+                int index = rand.nextInt(4);
+                return colors[index];
+            }
             int index = rand.nextInt(5);
             return colors[index];
         } else if (type == 3) {
             // Positive / Upbeat
             int[] colors = new int[]{ 3, 5, 6, 8, 10 };
+            if (checkList(colors, prevColorID)) {
+                colors = ArrayUtils.removeElement(colors, prevColorID);
+                int index = rand.nextInt(3);
+                return colors[index];
+            }
             int index = rand.nextInt(4);
             return colors[index];
         } else if (type == 4) {
             // Sad / Moody
             int[] colors = new int[]{ 1, 7, 8, 9, 10, 11 };
+            if (checkList(colors, prevColorID)) {
+                colors = ArrayUtils.removeElement(colors, prevColorID);
+                int index = rand.nextInt(4);
+                return colors[index];
+            }
             int index = rand.nextInt(5);
             return colors[index];
         } else {
             // Energetic
             int[] colors = new int[]{ 2, 3, 4, 7, 8, 9 };
+            if (checkList(colors, prevColorID)) {
+                colors = ArrayUtils.removeElement(colors, prevColorID);
+                int index = rand.nextInt(4);
+                return colors[index];
+            }
             int index = rand.nextInt(5);
             return colors[index];
         } 
@@ -264,6 +310,7 @@ public class DmxController {
             float energy = 0;
             float tempo = 122;
 
+            int prevColorID = -1;
             int colorID = 1;
             int intens = 255;
             int type = 0;
@@ -283,10 +330,14 @@ public class DmxController {
             // Set type based on Song Attributes
             type = getType(acousticness, danceability, valence, energy);
 
+            // Manual Type
+            type = 0;
+
             while (lightsActive) {
                 // Set colorID based on Song type
-                colorID = randColorID(type);
+                colorID = randColorID(type, prevColorID);
                 setColorTime(colorID, intens, timeDelay, dmx, comPort);
+                prevColorID = colorID;
 
                 // Clear color
                 setColorTime(0, intens, 10, dmx, comPort);
