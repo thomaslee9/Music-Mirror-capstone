@@ -37,7 +37,7 @@ public class RecommenderApp2 {
         // create the song attribute database
         SongAttributeDatabase db = new SongAttributeDatabase();
 
-        int port = 5000; // The server will listen on this port
+        int port = 8000; // The server will listen on this port
 
         try (ServerSocket serverSocket = new ServerSocket(port)) {
 
