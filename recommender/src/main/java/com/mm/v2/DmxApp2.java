@@ -149,7 +149,7 @@ public class DmxApp2 {
         timeDelay = Math.round((60 / tempo) * 1000) - 10;
 
         // manually set timeDelay
-        timeDelay = 490;
+        // timeDelay = 490;
 
         while (lightsActive) {
             // Set colorID based on Song Type
