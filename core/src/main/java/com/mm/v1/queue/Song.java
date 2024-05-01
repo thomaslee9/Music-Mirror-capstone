@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Song {
     private String songName;
     private String songArtist;
+    //private String commaSeparatedArtists;
     private String queueId;
     private String songId;
     private String username;
@@ -20,6 +21,7 @@ public class Song {
             boolean isRec) {
         this.songName = songName;
         this.songArtist = songArtist;
+        //this.commaSeparatedArtists = songArtist;
         this.queueId = queueId;
         this.songId = songId;
         this.username = username;
@@ -67,6 +69,10 @@ public class Song {
         return songArtist;
     }
 
+    // public String getCommaSeparatedArtists() {
+    //     return commaSeparatedArtists;
+    // }
+
     public String getQueueId() {
         return queueId;
     }
@@ -104,6 +110,10 @@ public class Song {
     public void updateArtistName(String artist_name) {
         this.songArtist = artist_name;
     }
+
+    // public void updateCommaSeparatedArtists(String artist_name) {
+    //     this.commaSeparatedArtists = artist_name;
+    // }
 
     public void like(int count) {
         likeScore += count;

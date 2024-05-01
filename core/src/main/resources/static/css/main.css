@@ -188,7 +188,6 @@ button.accent {
     font-size: 20px;
     padding-top: 4px;
     font-weight: bold;
-    transform: scaleX(1.2);
     transform-origin: left;
 }
 
@@ -286,12 +285,12 @@ button.accent {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    margin-left: 15px;
 }
 
 .message-content {
     white-space: nowrap;
     text-align: left;
-    margin-left: 15px; 
 } 
 
 @keyframes scroll {
@@ -384,17 +383,17 @@ button.accent {
 
 .connecting {
     padding-top: 5px;
-    text-align: center;
+    text-align: left;
     color: #777;
     position: absolute;
-    top: 65px;
+    top: 75px;
+    left: 10px;
     width: 100%;
 }
 
 #inputSong {    
     font-weight: bold;
     text-align: center;
-    transform: scaleX(1.2);
     font-size: 20px;
 }
 

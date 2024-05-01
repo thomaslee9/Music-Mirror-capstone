@@ -303,19 +303,77 @@ function isBad(input) {
 }
 
 
-function applyScrollingEffect(element) {
+// function applyScrollingEffect(element) {
+//     if (element.scrollWidth > element.clientWidth) {
+//         //console.log("scrollingggggggggggg");
+//         const totalScroll = element.scrollWidth - element.clientWidth;
+//         element.style.animation = `scroll 3s linear infinite`;
+//         // Optionally, dynamically adjust the keyframes if static values do not work
+//         document.styleSheets[0].insertRule(`@keyframes scroll { from { transform: translateX(0%); } to { transform: translateX(-${totalScroll}px); } }`, document.styleSheets[0].cssRules.length);
+//     } else {
+//         console.log("ELSEEE");
+//         element.style.animation = 'none';
+//     }
+// }
+
+
+// function applyScrollingEffect(element, queueId, elmNum) {
+//     if (element.scrollWidth > element.clientWidth) {
+//         const totalScroll = element.scrollWidth - element.clientWidth;
+//         console.log("Total Scroll: ", totalScroll, " Element: ", element.textContent);
+//         const animationName = `scroll-${queueId}-${elmNum}`; // Create a unique animation name
+//         const speed = 50;
+//         const time = totalScroll / speed;
+//         const delay = 3;
+//         element.style.animation = `${animationName} ${time}s linear ${delay}s infinite`;
+
+//         // Remove old animation if it exists
+//         for (let i = 0; i < document.styleSheets[0].cssRules.length; i++) {
+//             let rule = document.styleSheets[0].cssRules[i];
+//             if (rule.name === animationName) {
+//                 document.styleSheets[0].deleteRule(i);
+//                 break;
+//             }
+//         }
+
+//         // Insert new animation
+//         document.styleSheets[0].insertRule(`@keyframes ${animationName} { from { transform: translateX(0%); } to { transform: translateX(-${totalScroll}px); } }`, document.styleSheets[0].cssRules.length);
+//         element.textContent = '     ' + element.textContent;
+//     } else {
+//         element.style.animation = 'none';
+//     }
+// }
+
+function applyScrollingEffect(element, queueId, elmNum) {
     if (element.scrollWidth > element.clientWidth) {
-        //console.log("scrollingggggggggggg");
         const totalScroll = element.scrollWidth - element.clientWidth;
-        element.style.animation = `scroll 10s linear infinite`;
-        // Optionally, dynamically adjust the keyframes if static values do not work
-        document.styleSheets[0].insertRule(`@keyframes scroll { from { transform: translateX(0%); } to { transform: translateX(-${totalScroll}px); } }`, document.styleSheets[0].cssRules.length);
+        const animationName = `scroll-${queueId}-${elmNum}`; // Create a unique animation name
+        const speed = 50;
+        const time = totalScroll / speed;
+        const delay = 1; // Delay in seconds
+
+        // Calculate the total duration
+        const totalDuration = time + delay;
+        element.style.animation = `${animationName} ${totalDuration}s linear infinite`;
+
+        // Remove old animation if it exists
+        for (let i = 0; i < document.styleSheets[0].cssRules.length; i++) {
+            let rule = document.styleSheets[0].cssRules[i];
+            if (rule.name === animationName) {
+                document.styleSheets[0].deleteRule(i);
+                break;
+            }
+        }
+
+        // Calculate the delay as a percentage of the total duration
+        const delayPercentage = (delay / totalDuration) * 100;
+
+        // Insert new animation with adjusted keyframes
+        document.styleSheets[0].insertRule(`@keyframes ${animationName} { 0% { transform: translateX(0%); } ${delayPercentage}% { transform: translateX(0%); } 100% { transform: translateX(-${totalScroll}px); } }`, document.styleSheets[0].cssRules.length);
     } else {
-        console.log("ELSEEE");
         element.style.animation = 'none';
     }
 }
-
 
 function onMessageReceived(payload) {
     var message = JSON.parse(payload.body);
@@ -373,7 +431,7 @@ function onMessageReceived(payload) {
             currSongArtist.textContent = artistDisplay;
             currSongQueue.className = 'message-content';
             currSongQueue.id = 'queuedBy';
-            currSongQueue.textContent = 'Queued by: ' + queuedBy;
+            currSongQueue.textContent = 'Queued by ' + queuedBy;
 
             curSongNameArtist.appendChild(currSongName);
             curSongNameArtist.appendChild(currSongArtist);
@@ -437,9 +495,9 @@ function onMessageReceived(payload) {
             currSongElement.appendChild(btnGroup);
             queueArea.appendChild(currSongElement);
             setTimeout(function() {
-                applyScrollingEffect(currSongName);
-                applyScrollingEffect(currSongArtist);
-                applyScrollingEffect(currSongQueue);
+                applyScrollingEffect(currSongName, currQueueId, 1);
+                applyScrollingEffect(currSongArtist, currQueueId, 2);
+                applyScrollingEffect(currSongQueue, currQueueId, 3);
             }, 0);
            
         }
