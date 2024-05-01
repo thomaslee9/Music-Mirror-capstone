@@ -61,6 +61,28 @@ public class TrackObject {
 
     }
 
+
+    public String getArtistStringComma() {
+
+        List<String> artist_names = new ArrayList<String>();
+
+        for (ArtistObject artist : this.getArtists()) {
+            artist_names.add(artist.getName());
+        }
+        String artist_string = "";
+        for (String curr_artist : artist_names) {
+            artist_string += curr_artist + ", ";
+        }
+
+        if (artist_string.length() > 2) {
+            artist_string = artist_string.substring(0, artist_string.length() - 2);
+        }
+
+        return artist_string;
+
+    }
+
+
     // naively get the first genre of the first artist
     public String[] getGenres()    {
 

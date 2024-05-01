@@ -495,6 +495,7 @@ public class QueueController {
 
                 if (result_song == null)    {
 
+                    System.out.println("____________________________________________ Song not found in Spotify, removing from queue");
 
                     Song song = sd.getSongByQueueId(queue_id);
 
@@ -513,9 +514,11 @@ public class QueueController {
 
                 result_song_id = result_song.getId();
                 int result_song_duration = result_song.getDuration();
+
                 result = true;
 
-                sd.updateSongId(queue_id, result_song_id, result_song_duration);
+
+                sd.updateSong(queue_id, result_song_id, result_song.getName(), result_song.getArtistString(), result_song_duration);
                 System.out.println("Updated SongDict: Queue_ID - " + queue_id + " with Song_ID - " + result_song_id);
 
                 if (this.first_song)    {

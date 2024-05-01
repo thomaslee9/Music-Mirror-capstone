@@ -27,6 +27,7 @@ public class SongDict {
         song.updateSongId(song_id);
         song.updateSongName(song_name);
         song.updateArtistName(artist_name);
+        //song.updateCommaSeparatedArtists(artist_name);
         song.setDuration(duration_ms);
     }
 
@@ -35,6 +36,7 @@ public class SongDict {
         song.updateSongId(song_id);
         song.setDuration(duration_ms);
     }
+    
 
     public void removeById(String songId) {
         map.remove(songId);
