@@ -49,7 +49,7 @@ public class DmxApp3 {
     private static DmxJava dmx = new DmxJava();
 
     // Specify your COM port name
-    private static final String portName = "/dev/cu.usbserial-EN437965"; // Adjust this to match your actual port name
+    private static final String portName = "/dev/ttyUSB0"; // Adjust this to match your actual port name
 
     // Get the serial port
     private static SerialPort comPort;
