@@ -345,7 +345,7 @@ function isBad(input) {
 // }
 
 function applyScrollingEffect(element, queueId, elmNum) {
-    if (element.scrollWidth > element.clientWidth) {
+    if (element.scrollWidth > element.parentElement.clientWidth) {
         const totalScroll = element.scrollWidth - element.clientWidth;
         const animationName = `scroll-${queueId}-${elmNum}`; // Create a unique animation name
         const speed = 50;
