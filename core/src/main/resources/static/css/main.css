@@ -330,6 +330,16 @@ button.accent {
     position: relative;
 }
 
+.username-submit {
+    font-size: larger;
+    border-radius: 10px;
+}
+
+#name {
+    border-radius: 10px;
+
+}
+
 #queue-page .chat-message i {
     position: absolute;
     width: 42px;
