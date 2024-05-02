@@ -17,7 +17,6 @@ import com.mm.v2.song.SongAudioFeatures;
 import com.mm.v2.song.TrackObject;
 
 import com.mm.v2.requests.TrackAudioAnalysisRequest;
-import com.mm.v2.song.SongAudioAnalysis;
 
 import com.google.gson.JsonObject;
 
