@@ -33,7 +33,7 @@ public class SearchRequest {
         // first create the URL and open a connection
         try {
             url = new URL("https://api.spotify.com/v1/search?" + q +
-                          "&type=track&limit=3");
+                          "&type=track&limit=5");
             con = (HttpURLConnection) url.openConnection();
         } catch (MalformedURLException e) {
             e.printStackTrace();

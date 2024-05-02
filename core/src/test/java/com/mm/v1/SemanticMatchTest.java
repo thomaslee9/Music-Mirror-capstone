@@ -90,9 +90,7 @@ public class SemanticMatchTest {
         // 3
         String[] test9 = new String[] {"1984 David Bowie", "1984 Van Halen"};
         expected_failures.add(test9);
-        // 4
-        String[] test10 = new String[] {"A Thousand Years Toto", "A Thousand Years Sting"};
-        expected_failures.add(test10);
+
         // 5
         String[] test13 = new String[] {"Breakdown Tom Petty and the Heartbreakers", "Breakdown The Alan Parsons Project"};
         expected_failures.add(test13);

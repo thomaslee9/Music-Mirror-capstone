@@ -14,7 +14,7 @@ import com.mm.v1.song.Tracks;
 
 public class SpotifyPlaybackController {
 
-    private static Double search_threshold = 0.85;
+    private static Double search_threshold = 0.75;
     private static String device_id = "83e2221a51a366dbca4e16114644ef9a6ad165e9";
     private String access_token;
 
